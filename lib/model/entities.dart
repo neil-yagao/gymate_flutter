@@ -207,7 +207,7 @@ class Session {
 
   Exercise matchingExercise;
 
-  List<AccomplishedMovement> accomplishedSets;
+  List<CompletedExerciseSet> accomplishedSets;
 
   DateTime accomplishedTime;
 
@@ -217,21 +217,37 @@ class Session {
   }
 }
 
-///单次训练中，完成的动作
-class AccomplishedMovement {
-  String id;
-
-  Movement accomplishedMovement;
-
-  List<ExerciseSet> accomplishedSets;
-}
-
 ///单个动作完成的组数
 class CompletedExerciseSet {
+
+  String id;
+
+  ExerciseSet accomplishedSet;
+
   int repeats;
 
   ///default using KG
   double weight;
 
   int restAfterAccomplished;
+
+  DateTime completedTime;
+
 }
+
+class SessionMaterial {
+
+  String id;
+
+  String filePath;
+
+  bool isVideo;
+
+  String sessionId;
+
+  SessionMaterial(){
+    id = uuid.v4().toString();
+  }
+
+}
+

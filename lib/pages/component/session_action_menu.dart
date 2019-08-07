@@ -29,7 +29,7 @@ class SessionActionMenu extends StatelessWidget {
     // TODO: implement build
     return PopupMenuButton<SessionOption>(
         offset: Offset(0, 20),
-        icon: Icon(Icons.add),
+        icon: Icon(Icons.menu),
         onSelected: (SessionOption option) {
           this.onSelected(option);
         },

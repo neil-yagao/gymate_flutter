@@ -14,6 +14,7 @@ environment:
 
 dependencies:
   uuid: 2.0.1
+  moor_flutter: ^1.6.0
   flutter_slidable: ^0.5.3
   flutter_calendar_carousel: ^1.3.18
   share: ^0.6.2
@@ -21,6 +22,9 @@ dependencies:
   path_provider: ^0.5.0
   video_player: ^0.10.0
   flutter_speed_dial: ^1.2.1
+  build_runner: ^1.6.5
+  badges: ^1.1.0
+  charts_flutter: ^0.6.0
   flutter:
     sdk: flutter
   # The following adds the Cupertino Icons font to your application.
@@ -30,6 +34,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  moor_generator: ^1.6.0
+  json_serializable: ^2.0.0
+
 
 
 # For information on the generic Dart part of this file, see the

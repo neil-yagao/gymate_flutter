@@ -6,10 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 
+import 'component/show_clip_result.dart';
+
+
 class CameraExampleHome extends StatefulWidget {
+  final String currentSessionId;
+
+  CameraExampleHome(this.currentSessionId);
+
   @override
   _CameraExampleHomeState createState() {
-    return _CameraExampleHomeState();
+    return _CameraExampleHomeState(this.currentSessionId);
   }
 }
 
@@ -40,6 +47,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   bool _isRecording = false;
 
+  final String currentSessionId;
+
+  _CameraExampleHomeState(this.currentSessionId);
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +79,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    videoController?.dispose();
+    controller?.dispose();
     super.dispose();
   }
 
@@ -100,8 +113,18 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                     children: <Widget>[
                       _cameraPreviewWidget(),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
+                          IconButton(
+                            icon: Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).maybePop();
+                            },
+                            color: Colors.transparent,
+                          ),
                           Padding(
                             padding: EdgeInsets.only(right: 20),
                             child: _cameraTogglesRowWidget(),
@@ -185,12 +208,11 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     );
   }
 
-  /// Display a row of toggle to select the camera (or a message if no camera is available).
   Widget _cameraTogglesRowWidget() {
     if (cameras == null || cameras.isEmpty) {
       return const Text('未能检测到摄像头，请检测您的权限是否打开。');
     }
-    Widget returnWidget = IconButton(
+    Widget switchCamera = IconButton(
         icon: Icon(
           Icons.switch_camera,
           color: Colors.white,
@@ -203,7 +225,11 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             onNewCameraSelected(this.cameras[index + 1]);
           }
         });
-    return _isRecording ? Row() : Row(children: [returnWidget]);
+    return _isRecording
+        ? Row()
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [switchCamera]);
   }
 
   String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
@@ -249,7 +275,14 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
           videoController?.dispose();
           videoController = null;
         });
-        if (filePath != null) showInSnackBar('Picture saved to $filePath');
+        if (filePath != null) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => ShowClipResult(
+                    isVideo: false,
+                    filePath: filePath,
+                    currentSessionId: currentSessionId,
+                  )));
+        }
       }
     });
   }
@@ -260,14 +293,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         setState(() {
           _isRecording = true;
         });
-      if (filePath != null) showInSnackBar('Saving video to $filePath');
+      if (filePath != null) showInSnackBar('开始录制');
     });
   }
 
   void onStopButtonPressed() {
     stopVideoRecording().then((_) {
       if (mounted) setState(() {});
-      showInSnackBar('Video recorded to: $videoPath');
+      showInSnackBar('录制完成');
+      //showInSnackBar('Video recorded to: $videoPath');
     });
   }
 
@@ -278,7 +312,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     }
 
     final Directory extDir = await getApplicationDocumentsDirectory();
-    final String dirPath = '${extDir.path}/Movies/flutter_test';
+    final String dirPath = '${extDir.path}/TrainingRecord/Movies/';
     await Directory(dirPath).create(recursive: true);
     final String filePath = '$dirPath/${timestamp()}.mp4';
 
@@ -330,9 +364,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       setState(() {
         imagePath = null;
         videoController = vcontroller;
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ShowClipResult(
+                  currentSessionId: currentSessionId,
+                  isVideo: true,
+                  videoController: vcontroller,
+                  filePath: videoPath,
+                )));
       });
     }
-    await vcontroller.play();
   }
 
   Future<String> takePicture() async {
@@ -341,7 +381,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       return null;
     }
     final Directory extDir = await getApplicationDocumentsDirectory();
-    final String dirPath = '${extDir.path}/Pictures/flutter_test';
+    final String dirPath = '${extDir.path}/TrainingRecord/Pictures';
     await Directory(dirPath).create(recursive: true);
     final String filePath = '$dirPath/${timestamp()}.jpg';
 
@@ -364,3 +404,4 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     showInSnackBar('Error: ${e.code}\n${e.description}');
   }
 }
+

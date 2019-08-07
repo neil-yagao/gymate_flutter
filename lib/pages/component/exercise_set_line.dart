@@ -36,6 +36,7 @@ class ExerciseSetLineState extends State<ExerciseSetLine> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Slidable(
+      enabled: !completed,
       actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
       child: Container(

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:workout_helper/pages/camera_page.dart';
 import 'package:workout_helper/pages/home_page.dart';
 import 'package:workout_helper/pages/login.dart';
+import 'package:workout_helper/pages/profile_page.dart';
 import 'package:workout_helper/pages/session.dart';
 
 void main() => runApp(MyApp());
 
-final List<Widget> pages = [HomePage(), Text("饮食"), Text("我的")];
+final List<Widget> pages = [HomePage(), Text("饮食"), ProfilePage()];
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
         '/': (BuildContext content) => LoginPage(),
         '/home': (BuildContext context) => MyHomePage(title: "GYMate"),
         '/quickExercise': (BuildContext context) => UserSession("randomId"),
-        '/camera':(context) => CameraExampleHome()
+        '/camera':(context) => CameraExampleHome('none')
       },
       initialRoute: '/',
     );
@@ -51,9 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
           title: Text(widget.title),
+            automaticallyImplyLeading:false
         ),
         body: SafeArea(child: pages.elementAt(_selectedIndex)),
         bottomNavigationBar: BottomNavigationBar(

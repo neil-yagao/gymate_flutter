@@ -286,7 +286,9 @@ class FlipClock extends StatelessWidget {
         time = oldTime;
         if (onDone != null) onDone();
       }
-      if (timeLeft.compareTo(Duration()) == 0 && onCountDownEnd != null) {
+      if ((timeLeft.compareTo(Duration()) == 0 ||
+              time.difference(startTime).compareTo(timeLeft) == 0) &&
+          onCountDownEnd != null) {
         onCountDownEnd();
       }
 

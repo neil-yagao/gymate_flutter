@@ -52,41 +52,7 @@ class HomePageNoPlanState extends State<HomePage> {
     return ListView(padding: const EdgeInsets.all(8.0), children: [
       HomeCalendar(),
       Divider(),
-      Card(
-          child: Column(children: <Widget>[
-        Row(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("训练进度", style: Typography.dense2018.title),
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: LinearProgressIndicator(
-            semanticsLabel: '现有计划进展',
-            value: 0.2,
-          ),
-        ),
-        ListTile(
-          title: Text(_todaySession.matchingExercise.name,
-              style: Typography.dense2018.subtitle),
-          subtitle: Text(_todaySession.matchingExercise.description),
-          trailing: FloatingActionButton(
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.grey,
-            onPressed: () {
-              goToTodaySession(context);
-            },
-            child: Icon(Icons.chevron_right),
-          ),
-          onTap: () {
-            goToTodaySession(context);
-          },
-        )
-      ])),
+      buildSessionPart(_todaySession),
       Divider(),
       TrainingDivisionSelection(
           title: "快速开始训练",
@@ -97,6 +63,103 @@ class HomePageNoPlanState extends State<HomePage> {
           }),
       Divider()
     ]);
+  }
+
+  Card buildSessionPart(Session todaySession) {
+    if (todaySession == null || todaySession.id == null) {
+      //user do not involved in any plan
+      return Card(
+        child: Column(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              textBaseline: TextBaseline.alphabetic,
+              children: <Widget>[
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8, left: 12, bottom: 8),
+                    child: Text("添加计划", style: Typography.dense2018.title),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, right: 14.0),
+                  child: InkWell(
+                    onTap: () {},
+                    child: SizedBox(
+                      height: 40,
+                      width: 40,
+                      child: Icon(
+                        Icons.person_add,
+                        size: 21,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            Divider(),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.1,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: RaisedButton(
+                          color: Colors.transparent,
+                          elevation: 0,
+                          child: Icon(
+                            Icons.add,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {}),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Card(
+        child: Column(children: <Widget>[
+      Row(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text("训练进度", style: Typography.dense2018.title),
+          ),
+        ],
+      ),
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: LinearProgressIndicator(
+          semanticsLabel: '现有计划进展',
+          value: 0.2,
+        ),
+      ),
+      ListTile(
+        title: Text(todaySession.matchingExercise.name,
+            style: Typography.dense2018.subtitle),
+        subtitle: Text(todaySession.matchingExercise.description),
+        trailing: FloatingActionButton(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.grey,
+          onPressed: () {
+            goToTodaySession(context);
+          },
+          child: Icon(Icons.chevron_right),
+        ),
+        onTap: () {
+          goToTodaySession(context);
+        },
+      )
+    ]));
   }
 
   void goToTodaySession(BuildContext context) {
