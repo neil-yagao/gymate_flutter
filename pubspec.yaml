@@ -25,6 +25,7 @@ dependencies:
   build_runner: ^1.6.5
   badges: ^1.1.0
   charts_flutter: ^0.6.0
+  fluwx: ^1.0.4
   flutter:
     sdk: flutter
   # The following adds the Cupertino Icons font to your application.

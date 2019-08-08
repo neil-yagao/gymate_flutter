@@ -1,47 +1,39 @@
 import 'package:flutter/material.dart';
-//import 'package:sqflite/sqflite.dart';
+import 'package:fluwx/fluwx.dart' as fluwx;
+import 'package:workout_helper/pages/component/logo.dart';
+
+import 'component/rounded_input.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
   var db;
+  bool isReady = false;
+
   initDB() async {
     // this.db = await openDatabase('training.db');
   }
+
+  @override
+  void initState() {
+    super.initState();
+    fluwx.responseFromAuth.listen((resp) {
+      print("resp = $resp");
+    });
+
+  }
+
   @override
   Widget build(BuildContext context) {
-    final logo = Hero(
-      tag: 'hero',
-      child: CircleAvatar(
-        backgroundColor: Colors.transparent,
-        radius: 48.0,
-        child: Image.asset('assets/logo.png'),
-      ),
-    );
 
-    final email = TextFormField(
-      keyboardType: TextInputType.phone,
-      autofocus: false,
-      decoration: InputDecoration(
-        hintText: '手机号',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
+    TextEditingController email = TextEditingController();
 
-    final password = TextFormField(
-      autofocus: false,
-      obscureText: true,
-      decoration: InputDecoration(
-        hintText: '密码',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
+    TextEditingController password =  TextEditingController();
 
     final loginButton = Padding(
       padding: EdgeInsets.only(top: 16.0),
@@ -51,11 +43,31 @@ class _LoginPageState extends State<LoginPage> {
         ),
         onPressed: () async {
           await initDB();
-          Navigator.of(context).pushReplacementNamed("/home");
+          Navigator.of(context).pushNamedAndRemoveUntil("/home",(_)=>false);
         },
         padding: EdgeInsets.all(12),
         color: Colors.lightBlueAccent,
         child: Text('登录', style: TextStyle(color: Colors.white)),
+      ),
+    );
+
+    final wechatLoginButton = Padding(
+      padding: EdgeInsets.only(top: 16.0),
+      child: RaisedButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        onPressed: () async {
+          var value = await fluwx.register(appId: "wxc3a4e5bd4e1a502f");
+          print('value' + value.toString());
+          var data = await fluwx.sendAuth(
+              scope: "snsapi_userinfo", state: '${DateTime.now().millisecondsSinceEpoch}');
+          print('data' + data.toString());
+          //Navigator.of(context).pushReplacementNamed("/home");
+        },
+        padding: EdgeInsets.all(12),
+        color: Colors.green[700],
+        child: Text('微信登录', style: TextStyle(color: Colors.white)),
       ),
     );
 
@@ -64,11 +76,11 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(24),
       ),
       onPressed: () {
-        Navigator.of(context).pushNamed('/camera');
+        Navigator.of(context).pushNamed('/register');
       },
       padding: EdgeInsets.all(12),
       color: Colors.redAccent[200],
-      child: Text('手机号体验', style: TextStyle(color: Colors.white)),
+      child: Text('注册', style: TextStyle(color: Colors.white)),
     );
 
     return Scaffold(
@@ -78,16 +90,17 @@ class _LoginPageState extends State<LoginPage> {
           shrinkWrap: true,
           padding: EdgeInsets.only(left: 24.0, right: 24.0),
           children: <Widget>[
-            logo,
+            Logo(),
             SizedBox(height: 48.0),
-            email,
+            RoundedInput(controller: email,hint: "手机/用户名",inputType: TextInputType.phone,),
             SizedBox(height: 8.0),
-            password,
+            RoundedInput(controller: password,hint: "密码",inputType: TextInputType.url,),
             SizedBox(height: 16.0),
             loginButton,
             SizedBox(height: 8.0),
             registerButton,
-            Divider()
+            Divider(),
+            //fwechatLoginButton
           ],
         ),
       ),
