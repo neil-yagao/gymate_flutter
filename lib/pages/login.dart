@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
 import 'package:workout_helper/pages/component/logo.dart';
+import 'package:workout_helper/service/user_persistence_service.dart';
 
 import 'component/rounded_input.dart';
 
@@ -14,6 +15,13 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   var db;
   bool isReady = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  UserPersistenceService userPersistenceService ;
+
+  TextEditingController email = TextEditingController();
+
+  TextEditingController password =  TextEditingController();
 
   initDB() async {
     // this.db = await openDatabase('training.db');
@@ -22,18 +30,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    fluwx.responseFromAuth.listen((resp) {
-      print("resp = $resp");
-    });
-
+    userPersistenceService = UserPersistenceService(_scaffoldKey);
   }
 
   @override
   Widget build(BuildContext context) {
-
-    TextEditingController email = TextEditingController();
-
-    TextEditingController password =  TextEditingController();
 
     final loginButton = Padding(
       padding: EdgeInsets.only(top: 16.0),
@@ -43,7 +44,8 @@ class _LoginPageState extends State<LoginPage> {
         ),
         onPressed: () async {
           await initDB();
-          Navigator.of(context).pushNamedAndRemoveUntil("/home",(_)=>false);
+          userPersistenceService.doLogin(email.text, password.text);
+//          Navigator.of(context).pushNamedAndRemoveUntil("/home",(_)=>false);
         },
         padding: EdgeInsets.all(12),
         color: Colors.lightBlueAccent,
@@ -58,12 +60,8 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () async {
-          var value = await fluwx.register(appId: "wxc3a4e5bd4e1a502f");
-          print('value' + value.toString());
-          var data = await fluwx.sendAuth(
-              scope: "snsapi_userinfo", state: '${DateTime.now().millisecondsSinceEpoch}');
-          print('data' + data.toString());
           //Navigator.of(context).pushReplacementNamed("/home");
+          userPersistenceService.doLogin(email.text, password.text);
         },
         padding: EdgeInsets.all(12),
         color: Colors.green[700],
@@ -84,6 +82,7 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
       body: Center(
         child: ListView(

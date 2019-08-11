@@ -12,6 +12,8 @@ class LocalUsers extends Table {
   TextColumn get name => text().withLength(max: 32)();
 
   TextColumn get token => text().named('token').withLength(min: 32, max: 64)();
+
+  TextColumn get avatar => text()();
 }
 
 class LocalUserTrainings extends Table {

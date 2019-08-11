@@ -142,6 +142,12 @@ class ProfilePageState extends State<ProfilePage> {
         profileHeader(),
         followColumn(MediaQuery.of(context).size),
         postCard(),
+        RaisedButton(
+          child: Text("logout"),
+          onPressed: (){
+            Navigator.of(context).pushReplacementNamed("/");
+          },
+        )
       ],
     ),
   );

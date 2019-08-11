@@ -1287,7 +1287,12 @@ class LocalUser extends DataClass implements Insertable<LocalUser> {
   final String id;
   final String name;
   final String token;
-  LocalUser({@required this.id, @required this.name, @required this.token});
+  final String avatar;
+  LocalUser(
+      {@required this.id,
+      @required this.name,
+      @required this.token,
+      @required this.avatar});
   factory LocalUser.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -1297,6 +1302,8 @@ class LocalUser extends DataClass implements Insertable<LocalUser> {
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       token:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}token']),
+      avatar:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}avatar']),
     );
   }
   factory LocalUser.fromJson(Map<String, dynamic> json,
@@ -1305,6 +1312,7 @@ class LocalUser extends DataClass implements Insertable<LocalUser> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       token: serializer.fromJson<String>(json['token']),
+      avatar: serializer.fromJson<String>(json['avatar']),
     );
   }
   @override
@@ -1314,6 +1322,7 @@ class LocalUser extends DataClass implements Insertable<LocalUser> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'token': serializer.toJson<String>(token),
+      'avatar': serializer.toJson<String>(avatar),
     };
   }
 
@@ -1324,44 +1333,53 @@ class LocalUser extends DataClass implements Insertable<LocalUser> {
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
       token:
           token == null && nullToAbsent ? const Value.absent() : Value(token),
+      avatar:
+          avatar == null && nullToAbsent ? const Value.absent() : Value(avatar),
     ) as T;
   }
 
-  LocalUser copyWith({String id, String name, String token}) => LocalUser(
+  LocalUser copyWith({String id, String name, String token, String avatar}) =>
+      LocalUser(
         id: id ?? this.id,
         name: name ?? this.name,
         token: token ?? this.token,
+        avatar: avatar ?? this.avatar,
       );
   @override
   String toString() {
     return (StringBuffer('LocalUser(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('token: $token')
+          ..write('token: $token, ')
+          ..write('avatar: $avatar')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      $mrjf($mrjc($mrjc($mrjc(0, id.hashCode), name.hashCode), token.hashCode));
+  int get hashCode => $mrjf($mrjc(
+      $mrjc($mrjc($mrjc(0, id.hashCode), name.hashCode), token.hashCode),
+      avatar.hashCode));
   @override
   bool operator ==(other) =>
       identical(this, other) ||
       (other is LocalUser &&
           other.id == id &&
           other.name == name &&
-          other.token == token);
+          other.token == token &&
+          other.avatar == avatar);
 }
 
 class LocalUsersCompanion extends UpdateCompanion<LocalUser> {
   final Value<String> id;
   final Value<String> name;
   final Value<String> token;
+  final Value<String> avatar;
   const LocalUsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.token = const Value.absent(),
+    this.avatar = const Value.absent(),
   });
 }
 
@@ -1396,8 +1414,20 @@ class $LocalUsersTable extends LocalUsers
         minTextLength: 32, maxTextLength: 64);
   }
 
+  final VerificationMeta _avatarMeta = const VerificationMeta('avatar');
+  GeneratedTextColumn _avatar;
   @override
-  List<GeneratedColumn> get $columns => [id, name, token];
+  GeneratedTextColumn get avatar => _avatar ??= _constructAvatar();
+  GeneratedTextColumn _constructAvatar() {
+    return GeneratedTextColumn(
+      'avatar',
+      $tableName,
+      false,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [id, name, token, avatar];
   @override
   $LocalUsersTable get asDslTable => this;
   @override
@@ -1425,6 +1455,12 @@ class $LocalUsersTable extends LocalUsers
     } else if (token.isRequired && isInserting) {
       context.missing(_tokenMeta);
     }
+    if (d.avatar.present) {
+      context.handle(
+          _avatarMeta, avatar.isAcceptableValue(d.avatar.value, _avatarMeta));
+    } else if (avatar.isRequired && isInserting) {
+      context.missing(_avatarMeta);
+    }
     return context;
   }
 
@@ -1447,6 +1483,9 @@ class $LocalUsersTable extends LocalUsers
     }
     if (d.token.present) {
       map['token'] = Variable<String, StringType>(d.token.value);
+    }
+    if (d.avatar.present) {
+      map['avatar'] = Variable<String, StringType>(d.avatar.value);
     }
     return map;
   }

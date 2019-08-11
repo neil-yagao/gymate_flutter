@@ -12,6 +12,14 @@ class Question {
   Question(this.question, this.options, this.mark);
 }
 
+class User {
+  String id;
+  String name;
+  String alias;
+  String token;
+  String avatar;
+
+}
 var uuid = Uuid();
 
 enum SupportedTrainingType { BODYBUILDING, POWERLIFTING, CROSSFIT }
