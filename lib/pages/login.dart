@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fluwx/fluwx.dart' as fluwx;
+import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/component/logo.dart';
-import 'package:workout_helper/service/user_persistence_service.dart';
+import 'package:workout_helper/service/current_user_store.dart';
 
 import 'component/rounded_input.dart';
 
@@ -17,11 +17,11 @@ class _LoginPageState extends State<LoginPage> {
   bool isReady = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  UserPersistenceService userPersistenceService ;
+  CurrentUserStore userPersistenceService;
 
   TextEditingController email = TextEditingController();
 
-  TextEditingController password =  TextEditingController();
+  TextEditingController password = TextEditingController();
 
   initDB() async {
     // this.db = await openDatabase('training.db');
@@ -30,12 +30,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    userPersistenceService = UserPersistenceService(_scaffoldKey);
+    userPersistenceService = CurrentUserStore(_scaffoldKey);
   }
 
   @override
   Widget build(BuildContext context) {
-
     final loginButton = Padding(
       padding: EdgeInsets.only(top: 16.0),
       child: RaisedButton(
@@ -44,8 +43,12 @@ class _LoginPageState extends State<LoginPage> {
         ),
         onPressed: () async {
           await initDB();
-          userPersistenceService.doLogin(email.text, password.text);
-//          Navigator.of(context).pushNamedAndRemoveUntil("/home",(_)=>false);
+          User currentUser =
+              await userPersistenceService.doLogin(email.text, password.text);
+          if (currentUser != null) {
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil("/home", (_) => false);
+          }
         },
         padding: EdgeInsets.all(12),
         color: Colors.lightBlueAccent,
@@ -60,7 +63,6 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () async {
-          //Navigator.of(context).pushReplacementNamed("/home");
           userPersistenceService.doLogin(email.text, password.text);
         },
         padding: EdgeInsets.all(12),
@@ -91,9 +93,17 @@ class _LoginPageState extends State<LoginPage> {
           children: <Widget>[
             Logo(),
             SizedBox(height: 48.0),
-            RoundedInput(controller: email,hint: "手机/用户名",inputType: TextInputType.phone,),
+            RoundedInput(
+              controller: email,
+              hint: "手机/用户名",
+              inputType: TextInputType.phone,
+            ),
             SizedBox(height: 8.0),
-            RoundedInput(controller: password,hint: "密码",inputType: TextInputType.url,),
+            RoundedInput(
+              controller: password,
+              hint: "密码",
+              inputType: TextInputType.url,
+            ),
             SizedBox(height: 16.0),
             loginButton,
             SizedBox(height: 8.0),

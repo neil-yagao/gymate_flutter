@@ -1,5 +1,12 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/component/rounded_input.dart';
+import 'package:workout_helper/service/basic_dio.dart';
+import 'package:workout_helper/service/current_user_store.dart';
 
 import 'component/logo.dart';
 
@@ -21,11 +28,25 @@ class RegisterPageState extends State<RegisterPage> {
 
   TextEditingController name = TextEditingController();
 
+  CurrentUserStore userPersistenceService;
+
   String verifyButton = "发送验证码";
+
+  Dio dio;
+
+  @override
+  void initState() {
+    super.initState();
+    dio = DioInstance.getInstance(_globalKey);
+    userPersistenceService = CurrentUserStore(null);
+  }
+
+  GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: _globalKey,
         backgroundColor: Colors.white,
         body: Center(
             child: ListView(
@@ -38,7 +59,8 @@ class RegisterPageState extends State<RegisterPage> {
                 controller: cell,
                 hint: "手机号",
                 inputType: TextInputType.phone,
-              ), SizedBox(height: 48.0),
+              ),
+              SizedBox(height: 8.0),
               RoundedInput(
                 controller: name,
                 hint: "昵称",
@@ -65,7 +87,7 @@ class RegisterPageState extends State<RegisterPage> {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: RoundedInput(
-                          controller: confirmPassword,
+                          controller: verifyCode,
                           hint: "验证码",
                           inputType: TextInputType.number,
                         ),
@@ -74,7 +96,35 @@ class RegisterPageState extends State<RegisterPage> {
                       child: RaisedButton(
                     color: Theme.of(context).primaryColor,
                     textColor: Colors.white,
-                    onPressed: () {},
+                    onPressed: cell.text.length == 11 && verifyButton == '发送验证码'
+                        ? () async {
+                            dio
+                                .get('/user/verify-code/' + cell.text)
+                                .then((value) {
+                              setState(() {
+                                verifyButton = 60.toString();
+                                Timer t =
+                                    Timer.periodic(Duration(seconds: 1), (t) {
+                                  if (int.parse(verifyButton) <= 0) {
+                                    setState(() {
+                                      verifyButton = '发送验证码';
+                                    });
+                                    t.cancel();
+                                  }
+                                  if (verifyButton.contains(RegExp("\\d"))) {
+                                    setState(() {
+                                      verifyButton =
+                                          (int.parse(verifyButton) - 1)
+                                              .toString();
+                                    });
+                                  }
+                                });
+                              });
+                              _globalKey.currentState.showSnackBar(
+                                  SnackBar(content: Text("验证码发送成功")));
+                            });
+                          }
+                        : null,
                     child: Text(verifyButton),
                   )),
                 ],
@@ -87,12 +137,35 @@ class RegisterPageState extends State<RegisterPage> {
                   borderRadius: BorderRadius.circular(24),
                 ),
                 onPressed: () async {
-                  Navigator.of(context).pushNamedAndRemoveUntil("/home",(_)=>false);
+                  if (name.text == null) {
+                    showSnackBar("昵称未填写");
+                    return;
+                  }
+                  if (password.text != confirmPassword.text) {
+                    showSnackBar("密码不一致");
+                    return;
+                  }
+                  if (verifyCode.text ==
+                      null /*|| verifyCode.text.length != 4*/) {
+                    showSnackBar("验证码未填写");
+                    return;
+                  }
+                  Provider.of<CurrentUserStore>(context)
+                      .register(
+                          name.text, password.text, cell.text, verifyCode.text)
+                      .then((User _) {
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil("/home", (_) => false);
+                  });
                 },
                 padding: EdgeInsets.all(12),
                 color: Colors.redAccent[200],
                 child: Text('注册', style: TextStyle(color: Colors.white)),
               )
             ])));
+  }
+
+  void showSnackBar(String content) {
+    _globalKey.currentState.showSnackBar(SnackBar(content: Text(content)));
   }
 }

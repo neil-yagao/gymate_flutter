@@ -12,17 +12,10 @@ class RoundedInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    controller.addListener(() {
-      final text = controller.text.toLowerCase();
-      controller.value = controller.value.copyWith(
-        text: text,
-        selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
-        composing: TextRange.empty,
-      );
-    });
+
     // TODO: implement build1
     return TextFormField(
-      keyboardType: inputType,
+      keyboardType: TextInputType.url == inputType? TextInputType.text:inputType,
       controller: controller,
       autofocus: false,
       obscureText: inputType == TextInputType.url,

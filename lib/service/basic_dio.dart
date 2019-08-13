@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 BaseOptions _options = new BaseOptions(
   baseUrl: "http://localhost:8080/api",
@@ -8,6 +9,7 @@ BaseOptions _options = new BaseOptions(
 
 class DioInstance {
   static Dio _dio;
+  static GlobalKey<ScaffoldState> _scaffoldKey;
 
   static void _init() {
     if (_dio == null) {
@@ -19,13 +21,18 @@ class DioInstance {
         print(response);
         return response; // continue
       }, onError: (DioError e) {
-        print("error" + e.toString());
-        return e; //continue
+        Map<String, dynamic> errorMap = e.response.data as Map;
+        if (_scaffoldKey == null) {
+          return null;
+        }
+        _scaffoldKey.currentState
+            .showSnackBar(SnackBar(content: Text(errorMap["message"])));
       }));
     }
   }
 
-  static Dio getInstance() {
+  static Dio getInstance(GlobalKey<ScaffoldState> defaultState) {
+    _scaffoldKey = defaultState;
     _init();
     return _dio;
   }

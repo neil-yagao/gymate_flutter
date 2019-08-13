@@ -1,5 +1,10 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+part 'entities.g.dart';
+
+/// An annotation for the code generator to know that this class needs the
+/// JSON serialization logic to be generated.
 class Question {
   final String question;
   final List<String> options;
@@ -12,14 +17,22 @@ class Question {
   Question(this.question, this.options, this.mark);
 }
 
+@JsonSerializable()
 class User {
-  String id;
+  int id;
   String name;
   String alias;
   String token;
   String avatar;
+  String groupName;
 
+  User(this.id, this.name, this.alias, this.token, this.avatar, this.groupName);
+
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserToJson(this);
 }
+
 var uuid = Uuid();
 
 enum SupportedTrainingType { BODYBUILDING, POWERLIFTING, CROSSFIT }
@@ -27,25 +40,70 @@ enum MovementType { SINGLE, REDUCE, GIANT }
 enum MuscleGroup {
   SHOULDER,
   TRAP,
-
   CHEST,
   ARM,
   BICEPS,
   TRICEPS,
   FOREARM,
-
   BACK,
   LATS,
   MIDDLE_BACK,
   LOWER_BACK,
-
   ABS,
-
   LEG,
   QUADS,
   GLUTES,
   HAMSTRING,
   CALVES
+}
+enum BodyIndex {
+  /**
+   * 体脂
+   * 单位：Percentage
+   */
+  BODY_FAT,
+
+  /**
+      体重
+      单位：KG
+   */
+  WEIGHT,
+
+  /**
+      身高
+      单位：cm
+   */
+  HEIGHT,
+
+  /**
+      臂围
+      单位：cm
+   */
+  ARM_RADIUS,
+
+  /**
+      大腿围
+      单位：cm
+   */
+  LEG_RADIUS,
+
+  /**
+      腰围
+      单位：cm
+   */
+  ABS_RADIUS,
+
+  /**
+      臀围
+      单位：cm
+   */
+  GLUTES_RADIUS,
+
+  /**
+      胸围
+      单位：cm
+   */
+  CHEST_RADIUS
 }
 
 class ExerciseSet {
@@ -227,7 +285,6 @@ class Session {
 
 ///单个动作完成的组数
 class CompletedExerciseSet {
-
   String id;
 
   ExerciseSet accomplishedSet;
@@ -240,11 +297,9 @@ class CompletedExerciseSet {
   int restAfterAccomplished;
 
   DateTime completedTime;
-
 }
 
 class SessionMaterial {
-
   String id;
 
   String filePath;
@@ -253,9 +308,7 @@ class SessionMaterial {
 
   String sessionId;
 
-  SessionMaterial(){
+  SessionMaterial() {
     id = uuid.v4().toString();
   }
-
 }
-
