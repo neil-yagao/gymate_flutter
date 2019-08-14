@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/component/logo.dart';
 import 'package:workout_helper/service/current_user_store.dart';
@@ -17,8 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   bool isReady = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  CurrentUserStore userPersistenceService;
-
   TextEditingController email = TextEditingController();
 
   TextEditingController password = TextEditingController();
@@ -30,7 +29,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    userPersistenceService = CurrentUserStore(_scaffoldKey);
+    email.text = '13951928868';
+    password.text = '12345678';
   }
 
   @override
@@ -43,8 +43,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         onPressed: () async {
           await initDB();
-          User currentUser =
-              await userPersistenceService.doLogin(email.text, password.text);
+          User currentUser = await Provider.of<CurrentUserStore>(context).doLogin(email.text, password.text);
           if (currentUser != null) {
             Navigator.of(context)
                 .pushNamedAndRemoveUntil("/home", (_) => false);
@@ -63,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () async {
-          userPersistenceService.doLogin(email.text, password.text);
+          //userPersistenceService.doLogin(email.text, password.text);
         },
         padding: EdgeInsets.all(12),
         color: Colors.green[700],

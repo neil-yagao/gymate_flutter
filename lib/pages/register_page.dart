@@ -28,17 +28,15 @@ class RegisterPageState extends State<RegisterPage> {
 
   TextEditingController name = TextEditingController();
 
-  CurrentUserStore userPersistenceService;
-
   String verifyButton = "发送验证码";
 
   Dio dio;
 
+  String cellPhone = "";
   @override
   void initState() {
     super.initState();
     dio = DioInstance.getInstance(_globalKey);
-    userPersistenceService = CurrentUserStore(null);
   }
 
   GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
@@ -59,6 +57,11 @@ class RegisterPageState extends State<RegisterPage> {
                 controller: cell,
                 hint: "手机号",
                 inputType: TextInputType.phone,
+                onChanged: (String cell){
+                    setState(() {
+                    this.cellPhone = cell;
+                  });
+                },
               ),
               SizedBox(height: 8.0),
               RoundedInput(
@@ -96,7 +99,7 @@ class RegisterPageState extends State<RegisterPage> {
                       child: RaisedButton(
                     color: Theme.of(context).primaryColor,
                     textColor: Colors.white,
-                    onPressed: cell.text.length == 11 && verifyButton == '发送验证码'
+                    onPressed: cellPhone.trim().length == 11 && verifyButton == '发送验证码'
                         ? () async {
                             dio
                                 .get('/user/verify-code/' + cell.text)

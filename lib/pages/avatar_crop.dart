@@ -6,10 +6,10 @@ import 'package:image_crop/image_crop.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AvatarCrop extends StatefulWidget {
-
   final Function(File) onCompleted;
 
   const AvatarCrop({Key key, @required this.onCompleted}) : super(key: key);
+
   @override
   AvatarCropState createState() => new AvatarCropState(onCompleted);
 }
@@ -22,6 +22,12 @@ class AvatarCropState extends State<AvatarCrop> {
   final Function(File) onCompleted;
 
   AvatarCropState(this.onCompleted);
+
+  @override
+  void initState() {
+    super.initState();
+    _openImage();
+  }
 
   @override
   void dispose() {
@@ -91,18 +97,23 @@ class AvatarCropState extends State<AvatarCrop> {
 
   Future<void> _openImage() async {
     final file = await ImagePicker.pickImage(source: ImageSource.gallery);
-    final sample = await ImageCrop.sampleImage(
-      file: file,
-      preferredSize: context.size.longestSide.ceil(),
-    );
+    try {
+      final sample = await ImageCrop.sampleImage(
+        file: file,
+        preferredSize: context.size.longestSide.ceil(),
+      );
+      _sample?.delete();
+      _file?.delete();
 
-    _sample?.delete();
-    _file?.delete();
+      setState(() {
+        _sample = sample;
+        _file = file;
+      });
+    } catch (error) {
+      Navigator.of(context).maybePop();
+    }
 
-    setState(() {
-      _sample = sample;
-      _file = file;
-    });
+
   }
 
   Future<void> _cropImage() async {

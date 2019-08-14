@@ -1,13 +1,15 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/component/profile_tile.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 
 import 'avatar_crop.dart';
+import 'component/body_index_detail.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -19,6 +21,10 @@ class ProfilePage extends StatefulWidget {
 class ProfilePageState extends State<ProfilePage> {
   File _tempImage;
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
+
+  List<UserBodyIndex> userBodyIndexes = List();
+
+  Map<BodyIndex, BodyIndexSpecification> bodyIndexMap;
 
   Widget profileHeader() => Container(
       height: MediaQuery.of(context).size.height / 4,
@@ -46,7 +52,9 @@ class ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(color: Colors.black, fontSize: 20.0),
                   ),
                   Text(
-                    value.currentUser.groupName,
+                    value.currentUser.groupName == null
+                        ? "尚未加入任何小组"
+                        : value.currentUser.groupName,
                     style: TextStyle(color: Colors.black),
                   )
                 ],
@@ -68,29 +76,26 @@ class ProfilePageState extends State<ProfilePage> {
           ));
     }
     if (currentUser.avatar != null) {
-      return Observer(builder: (BuildContext context) {
-        return InkWell(
-            onTap: () {
-              switchHeaderAvatar();
-            },
-            child: CircleAvatar(
-              radius: 40.0,
-              backgroundImage: NetworkImage(currentUser.avatar),
-            ));
-      });
+      return InkWell(
+          onTap: () {
+            switchHeaderAvatar();
+          },
+          child: CircleAvatar(
+            radius: 40.0,
+            backgroundImage: NetworkImage(currentUser.avatar),
+          ));
     } else {
-      return Observer(builder: (BuildContext context) {
-        return InkWell(
-            onTap: () {
-              switchHeaderAvatar();
-            },
-            child: CircleAvatar(
-              radius: 40,
-              child: Text(currentUser.alias),
-              backgroundColor: Theme.of(context).primaryColor,
-            ));
-      });
+      return InkWell(
+          onTap: () {
+            switchHeaderAvatar();
+          },
+          child: CircleAvatar(
+            radius: 40,
+            child: Text(currentUser.alias),
+            backgroundColor: Theme.of(context).primaryColor,
+          ));
     }
+    ;
   }
 
   Widget profileColumn() => Padding(
@@ -125,35 +130,7 @@ class ProfilePageState extends State<ProfilePage> {
         ),
       );
 
-  Widget bodyIndexes() => Container(
-        width: double.infinity,
-        height: MediaQuery.of(context).size.height / 3,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 5.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Post",
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18.0),
-                ),
-              ),
-              profileColumn(),
-              Expanded(
-                child: Card(
-                  elevation: 2.0,
-                  child: Image.network(
-                    "https://cdn.pixabay.com/photo/2018/06/12/01/04/road-3469810_960_720.jpg",
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+  List<Widget> bodyIndexes() => buildBodyIndex();
 
   Widget followColumn(Size deviceSize) => Container(
         height: deviceSize.height * 0.13,
@@ -176,25 +153,20 @@ class ProfilePageState extends State<ProfilePage> {
         ),
       );
 
-  Widget bodyData() => SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            profileHeader(),
-            followColumn(MediaQuery.of(context).size),
-            bodyIndexes(),
-            RaisedButton(
-              child: Text("logout"),
-              onPressed: () {
-                Navigator.of(context).pushReplacementNamed("/");
-              },
-            )
-          ],
-        ),
-      );
+  Widget bodyData() {
+    return ListView(
+      children: <Widget>[
+        profileHeader(),
+        followColumn(MediaQuery.of(context).size),
+        ...bodyIndexes()
+      ],
+    );
+  }
 
   @override
   void initState() {
     super.initState();
+    bodyIndexMap = mapBodyIndexInfo();
   }
 
   @override
@@ -208,9 +180,91 @@ class ProfilePageState extends State<ProfilePage> {
         onCompleted: (File file) {
           setState(() {
             _tempImage = file;
+            Provider.of<CurrentUserStore>(context).updateUserAvatar(file);
           });
         },
       );
     }));
+  }
+
+  List<Widget> buildBodyIndex() {
+    if (userBodyIndexes.isEmpty) {
+      return [
+        Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: InkWell(
+              onTap: () {
+                addNewBodyIndex();
+              },
+              child: SizedBox(
+                height: 200,
+                child: Center(child: Text("尚未添加任何身体指标。")),
+              ),
+            ))
+      ];
+    } else {
+      return [
+        ...userBodyIndexes.map((UserBodyIndex userBodyIndex) {
+          return ListTile(
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: <Widget>[
+                Expanded(
+                  flex: 2,
+                  child: Text(bodyIndexMap[userBodyIndex.index].name),
+                ),
+                Expanded(
+                    child: Row(
+                  children: <Widget>[
+                    Text(userBodyIndex.value.toString()),
+                    Padding(
+                      padding: const EdgeInsets.only(left:8.0),
+                      child: Text(userBodyIndex.unit),
+                    )
+                  ],
+                )),
+              ],
+            ),
+            subtitle: Text(DateFormat('yyyy-MM-dd HH:MM')
+                .format(userBodyIndex.recordTime)),
+          );
+        }).toList(),
+        Divider(),
+        RaisedButton(
+          elevation: 0,
+          splashColor: Colors.transparent,
+          onPressed: () {
+            addNewBodyIndex();
+          },
+          child: Icon(Icons.add),
+          color: Colors.transparent,
+          textColor: Colors.grey,
+        ),
+      ];
+    }
+  }
+
+  void addNewBodyIndex() {
+    showCupertinoModalPopup<UserBodyIndex>(
+        context: context,
+        builder: (BuildContext context) {
+          return BodyIndexDetail(appendIndex: (UserBodyIndex ubi) {
+            setState(() {
+              UserBodyIndex hasAdded;
+              this.userBodyIndexes.forEach((UserBodyIndex index) {
+                if (ubi.index == index.index) {
+                  hasAdded = index;
+                }
+              });
+              if (hasAdded != null) {
+                this.userBodyIndexes.remove(hasAdded);
+              }
+              this.userBodyIndexes.add(ubi);
+            });
+            Navigator.of(context).maybePop();
+          });
+        });
   }
 }

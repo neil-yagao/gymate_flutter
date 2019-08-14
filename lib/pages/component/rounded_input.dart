@@ -8,13 +8,15 @@ class RoundedInput extends StatelessWidget {
 
   final TextInputType inputType;
 
-  const RoundedInput({Key key, this.controller, this.hint, this.inputType}) : super(key: key);
+  final ValueChanged<String> onChanged;
+
+  const RoundedInput({Key key, this.controller, this.hint, this.inputType, this.onChanged}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
 
     // TODO: implement build1
-    return TextFormField(
+    return TextField(
       keyboardType: TextInputType.url == inputType? TextInputType.text:inputType,
       controller: controller,
       autofocus: false,
@@ -24,6 +26,7 @@ class RoundedInput extends StatelessWidget {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      onChanged: onChanged ,
     );;
   }
 }

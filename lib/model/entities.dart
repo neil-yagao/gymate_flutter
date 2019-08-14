@@ -57,11 +57,14 @@ enum MuscleGroup {
   CALVES
 }
 enum BodyIndex {
+
   /**
    * 体脂
    * 单位：Percentage
    */
   BODY_FAT,
+
+
 
   /**
       体重
@@ -106,6 +109,19 @@ enum BodyIndex {
   CHEST_RADIUS
 }
 
+@JsonSerializable()
+
+class UserBodyIndex {
+  BodyIndex index;
+  double value;
+  String unit;
+  DateTime recordTime;
+
+  UserBodyIndex(this.index, this.value, this.unit, this.recordTime);
+
+}
+
+@JsonSerializable()
 class ExerciseSet {
   String id;
   int sequence;
@@ -311,4 +327,46 @@ class SessionMaterial {
   SessionMaterial() {
     id = uuid.v4().toString();
   }
+}
+
+Map<BodyIndex, BodyIndexSpecification> mapBodyIndexInfo() {
+  Map<BodyIndex, BodyIndexSpecification> bodyIndexMap = {};
+
+  BodyIndex.values.forEach((BodyIndex bi) {
+    switch (bi) {
+      case BodyIndex.BODY_FAT:
+        bodyIndexMap[bi] = BodyIndexSpecification("体脂", "%", bi);
+        break;
+      case BodyIndex.WEIGHT:
+        bodyIndexMap[bi] = BodyIndexSpecification("体重", "KG", bi);
+        break;
+      case BodyIndex.HEIGHT:
+        bodyIndexMap[bi] = BodyIndexSpecification("身高", "cm", bi);
+        break;
+      case BodyIndex.ARM_RADIUS:
+        bodyIndexMap[bi] = BodyIndexSpecification("臂围", "cm", bi);
+        break;
+      case BodyIndex.LEG_RADIUS:
+        bodyIndexMap[bi] = BodyIndexSpecification("腿围", "cm", bi);
+        break;
+      case BodyIndex.ABS_RADIUS:
+        bodyIndexMap[bi] = BodyIndexSpecification("腰围", "cm", bi);
+        break;
+      case BodyIndex.GLUTES_RADIUS:
+        bodyIndexMap[bi] = BodyIndexSpecification("臀围", "cm", bi);
+        break;
+      case BodyIndex.CHEST_RADIUS:
+        bodyIndexMap[bi] = BodyIndexSpecification("胸围", "cm", bi);
+        break;
+    }
+  });
+  return bodyIndexMap;
+}
+
+class BodyIndexSpecification {
+  String name;
+  String unit;
+  BodyIndex index;
+
+  BodyIndexSpecification(this.name, this.unit, this.index);
 }

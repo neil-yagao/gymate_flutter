@@ -7,7 +7,7 @@ import 'package:workout_helper/model/entities.dart';
 
 import 'basic_dio.dart';
 
-class CurrentUserStore {
+class CurrentUserStore extends ChangeNotifier{
   Dio dio;
 
   final GlobalKey<ScaffoldState> _scaffoldKey;
@@ -27,6 +27,7 @@ class CurrentUserStore {
       userResponse =
       await dio.get("/user/login", queryParameters: params);
       currentUser = User.fromJson(userResponse.data);
+      notifyListeners();
       return currentUser;
     } catch (error) {
       return null;
@@ -47,20 +48,24 @@ class CurrentUserStore {
 
     if (register.statusCode == 200) {
       this.currentUser = User.fromJson(register.data);
+      notifyListeners();
     }
     return currentUser;
   }
 
   void setCurrentUser(User user) {
     currentUser = user;
+    notifyListeners();
   }
 
   void updateUserAvatar(File file) async {
+    String fileSuffix = file.path.substring(file.path.lastIndexOf("\."));
     FormData fileUpdate = FormData.from({
-      'file': file
+      'file':  UploadFileInfo(file,currentUser.id.toString() + "-avatar." + fileSuffix)
     });
     Response updatedUser = await dio.post(
         "user/" + currentUser.id.toString() + "/avatar", data: fileUpdate);
     currentUser.avatar = User.fromJson(updatedUser.data).avatar;
+    notifyListeners();
   }
 }
