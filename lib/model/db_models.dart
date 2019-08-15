@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:moor_flutter/moor_flutter.dart';
 
 import 'entities.dart';
+import 'enum_to_string.dart';
 
 part 'db_models.g.dart';
 
@@ -123,6 +124,20 @@ class LocalSessionMaterials extends Table {
   TextColumn get sessionId => text().withLength(min: 32, max: 64)();
 }
 
+class LocalUserBodyIndex extends Table {
+  TextColumn get id => text().withLength(max: 64)();
+
+  TextColumn get index => text()();
+
+  RealColumn get value => real()();
+
+  TextColumn get unit => text()();
+
+  DateTimeColumn get recordTime => dateTime()();
+
+  TextColumn get userId => text()();
+}
+
 @UseMoor(tables: [
   LocalCompletedExerciseSets,
   LocalCompletedSessions,
@@ -132,7 +147,8 @@ class LocalSessionMaterials extends Table {
   LocalPlannedSetsMovementMaps,
   LocalExercisePlannedSets,
   LocalTrainingExercises,
-  LocalSessionMaterials
+  LocalSessionMaterials,
+  LocalUserBodyIndex
 ])
 class ExerciseDatabase extends _$ExerciseDatabase {
   ExerciseDatabase()
@@ -166,5 +182,35 @@ class ExerciseDatabase extends _$ExerciseDatabase {
       });
       return sessionMaterials;
     });
+  }
+
+  Future<List<UserBodyIndex>> getUserBodyIndexes(String userId) {
+    return (select(localUserBodyIndex)..where((t) => t.userId.equals(userId)))
+        .get()
+        .then((List<LocalUserBodyIndexData> indexes) {
+      List<UserBodyIndex> result = List();
+      indexes.forEach((LocalUserBodyIndexData lubi) {
+        BodyIndex index = EnumToString.fromString(BodyIndex.values, lubi.index);
+        UserBodyIndex userBodyIndex =
+            UserBodyIndex(index, lubi.value, lubi.unit, lubi.recordTime);
+        result.add(userBodyIndex);
+      });
+      return result;
+    });
+  }
+
+  void updateUserIndex(String userId, UserBodyIndex userBodyIndex) {
+    (update(localUserBodyIndex)
+          ..where((t) => t.userId.equals(userId))
+          ..where((t) => t.index.equals(userBodyIndex.toString())))
+        .write(LocalUserBodyIndexCompanion(
+            value: Value(userBodyIndex.value),
+            recordTime: Value(userBodyIndex.recordTime)));
+  }
+
+  void insertBodyIndex(UserBodyIndex index,String userId){
+    LocalUserBodyIndex localUserBodyIndex = LocalUserBodyIndex();
+    localUserBodyIndex.id = DateTime.now().millisecondsSinceEpoch.toString() as TextColumn;
+    into(localUserBodyIndex).insert()
   }
 }

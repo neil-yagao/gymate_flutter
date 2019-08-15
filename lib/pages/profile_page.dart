@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/component/profile_tile.dart';
 import 'package:workout_helper/service/current_user_store.dart';
+import 'package:workout_helper/service/profile_service.dart';
 
 import 'avatar_crop.dart';
 import 'component/body_index_detail.dart';
@@ -26,43 +27,52 @@ class ProfilePageState extends State<ProfilePage> {
 
   Map<BodyIndex, BodyIndexSpecification> bodyIndexMap;
 
-  Widget profileHeader() => Container(
-      height: MediaQuery.of(context).size.height / 4,
-      width: double.infinity,
-      color: Colors.transparent,
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Card(
-          clipBehavior: Clip.antiAlias,
-          elevation: 0,
+  ProfileService _profileService = ProfileService();
+
+  Widget profileHeader() =>
+      Container(
+          height: MediaQuery
+              .of(context)
+              .size
+              .height / 4,
+          width: double.infinity,
           color: Colors.transparent,
-          child: Consumer<CurrentUserStore>(
-            builder: (context, value, child) => FittedBox(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50.0),
-                        border: Border.all(width: 2.0, color: Colors.white)),
-                    child: getAvatar(value.currentUser),
-                  ),
-                  Text(
-                    value.currentUser.name,
-                    style: TextStyle(color: Colors.black, fontSize: 20.0),
-                  ),
-                  Text(
-                    value.currentUser.groupName == null
-                        ? "尚未加入任何小组"
-                        : value.currentUser.groupName,
-                    style: TextStyle(color: Colors.black),
-                  )
-                ],
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              elevation: 0,
+              color: Colors.transparent,
+              child: Consumer<CurrentUserStore>(
+                builder: (context, value, child) =>
+                    FittedBox(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50.0),
+                                border: Border.all(
+                                    width: 2.0, color: Colors.white)),
+                            child: getAvatar(value.currentUser),
+                          ),
+                          Text(
+                            value.currentUser.name,
+                            style: TextStyle(
+                                color: Colors.black, fontSize: 20.0),
+                          ),
+                          Text(
+                            value.currentUser.groupName == null
+                                ? "尚未加入任何小组"
+                                : value.currentUser.groupName,
+                            style: TextStyle(color: Colors.black),
+                          )
+                        ],
+                      ),
+                    ),
               ),
             ),
-          ),
-        ),
-      ));
+          ));
 
   Widget getAvatar(User currentUser) {
     if (_tempImage != null) {
@@ -92,13 +102,16 @@ class ProfilePageState extends State<ProfilePage> {
           child: CircleAvatar(
             radius: 40,
             child: Text(currentUser.alias),
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: Theme
+                .of(context)
+                .primaryColor,
           ));
     }
     ;
   }
 
-  Widget profileColumn() => Padding(
+  Widget profileColumn() =>
+      Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -109,30 +122,31 @@ class ProfilePageState extends State<ProfilePage> {
             ),
             Expanded(
                 child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "Pawan Kumar posted a photo",
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        "Pawan Kumar posted a photo",
+                      ),
+                      SizedBox(
+                        height: 5.0,
+                      ),
+                      Text(
+                        "25 mins ago",
+                      )
+                    ],
                   ),
-                  SizedBox(
-                    height: 5.0,
-                  ),
-                  Text(
-                    "25 mins ago",
-                  )
-                ],
-              ),
-            ))
+                ))
           ],
         ),
       );
 
   List<Widget> bodyIndexes() => buildBodyIndex();
 
-  Widget followColumn(Size deviceSize) => Container(
+  Widget followColumn(Size deviceSize) =>
+      Container(
         height: deviceSize.height * 0.13,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -155,11 +169,11 @@ class ProfilePageState extends State<ProfilePage> {
 
   Widget bodyData() {
     return ListView(
-      children: <Widget>[
+        children: <Widget>[
         profileHeader(),
-        followColumn(MediaQuery.of(context).size),
-        ...bodyIndexes()
-      ],
+    followColumn(MediaQuery.of(context).size),
+    ...bodyIndexes()
+    ],
     );
   }
 
@@ -204,67 +218,80 @@ class ProfilePageState extends State<ProfilePage> {
       ];
     } else {
       return [
-        ...userBodyIndexes.map((UserBodyIndex userBodyIndex) {
-          return ListTile(
-            title: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: <Widget>[
-                Expanded(
-                  flex: 2,
-                  child: Text(bodyIndexMap[userBodyIndex.index].name),
-                ),
-                Expanded(
-                    child: Row(
-                  children: <Widget>[
-                    Text(userBodyIndex.value.toString()),
-                    Padding(
-                      padding: const EdgeInsets.only(left:8.0),
-                      child: Text(userBodyIndex.unit),
-                    )
-                  ],
-                )),
-              ],
-            ),
-            subtitle: Text(DateFormat('yyyy-MM-dd HH:MM')
-                .format(userBodyIndex.recordTime)),
-          );
-        }).toList(),
-        Divider(),
-        RaisedButton(
-          elevation: 0,
-          splashColor: Colors.transparent,
-          onPressed: () {
-            addNewBodyIndex();
-          },
-          child: Icon(Icons.add),
-          color: Colors.transparent,
-          textColor: Colors.grey,
-        ),
-      ];
-    }
+    ...userBodyIndexes.map((UserBodyIndex userBodyIndex) {
+    return ListTile(
+    title: Row(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.baseline,
+    textBaseline: TextBaseline.alphabetic,
+    children: <Widget>[
+    Expanded(
+    flex: 2,
+    child: Text(bodyIndexMap[userBodyIndex.index].name),
+    ),
+    Expanded(
+    child: Row(
+    children: <Widget>[
+    Text(userBodyIndex.value.toString()),
+    Padding(
+    padding: const EdgeInsets.only(left:8.0),
+    child: Text(userBodyIndex.unit),
+    )
+    ],
+    )),
+    ],
+    ),
+    subtitle: Text(DateFormat('yyyy-MM-dd HH:MM')
+        .format(userBodyIndex.recordTime)),
+    );
+    }).toList(),
+    Divider(),
+    RaisedButton(
+    elevation: 0,
+    splashColor: Colors.transparent,
+    onPressed: () {
+    addNewBodyIndex();
+    },
+    child: Icon(Icons.add),
+    color: Colors.transparent,
+    textColor: Colors.grey
+    ,
+    )
+    ,
+    ];
+  }
+  }
+
+  void doAddBodyIndex(UserBodyIndex ubi) {
+    setState(() {
+      UserBodyIndex hasAdded;
+      this.userBodyIndexes.forEach((UserBodyIndex index) {
+        if (ubi.index == index.index) {
+          hasAdded = index;
+        }
+      });
+      if (hasAdded != null) {
+        //
+        this.userBodyIndexes.remove(hasAdded);
+        _profileService.updateUserIndex(hasAdded, Provider
+            .of<CurrentUserStore>(context)
+            .currentUser
+            .id
+            .toString());
+      }
+      this.userBodyIndexes.add(ubi);
+      if( hasAdded == null){
+
+      }
+    });
+    Navigator.of(context).maybePop();
   }
 
   void addNewBodyIndex() {
     showCupertinoModalPopup<UserBodyIndex>(
         context: context,
         builder: (BuildContext context) {
-          return BodyIndexDetail(appendIndex: (UserBodyIndex ubi) {
-            setState(() {
-              UserBodyIndex hasAdded;
-              this.userBodyIndexes.forEach((UserBodyIndex index) {
-                if (ubi.index == index.index) {
-                  hasAdded = index;
-                }
-              });
-              if (hasAdded != null) {
-                this.userBodyIndexes.remove(hasAdded);
-              }
-              this.userBodyIndexes.add(ubi);
-            });
-            Navigator.of(context).maybePop();
-          });
+          return BodyIndexDetail(appendIndex: doAddBodyIndex);
         });
   }
 }

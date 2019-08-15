@@ -2677,6 +2677,313 @@ class $LocalSessionMaterialsTable extends LocalSessionMaterials
   }
 }
 
+class LocalUserBodyIndexData extends DataClass
+    implements Insertable<LocalUserBodyIndexData> {
+  final String id;
+  final String index;
+  final double value;
+  final String unit;
+  final DateTime recordTime;
+  final String userId;
+  LocalUserBodyIndexData(
+      {@required this.id,
+      @required this.index,
+      @required this.value,
+      @required this.unit,
+      @required this.recordTime,
+      @required this.userId});
+  factory LocalUserBodyIndexData.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    final doubleType = db.typeSystem.forDartType<double>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    return LocalUserBodyIndexData(
+      id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      index:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}index']),
+      value:
+          doubleType.mapFromDatabaseResponse(data['${effectivePrefix}value']),
+      unit: stringType.mapFromDatabaseResponse(data['${effectivePrefix}unit']),
+      recordTime: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}record_time']),
+      userId:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+    );
+  }
+  factory LocalUserBodyIndexData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer = const ValueSerializer.defaults()}) {
+    return LocalUserBodyIndexData(
+      id: serializer.fromJson<String>(json['id']),
+      index: serializer.fromJson<String>(json['index']),
+      value: serializer.fromJson<double>(json['value']),
+      unit: serializer.fromJson<String>(json['unit']),
+      recordTime: serializer.fromJson<DateTime>(json['recordTime']),
+      userId: serializer.fromJson<String>(json['userId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson(
+      {ValueSerializer serializer = const ValueSerializer.defaults()}) {
+    return {
+      'id': serializer.toJson<String>(id),
+      'index': serializer.toJson<String>(index),
+      'value': serializer.toJson<double>(value),
+      'unit': serializer.toJson<String>(unit),
+      'recordTime': serializer.toJson<DateTime>(recordTime),
+      'userId': serializer.toJson<String>(userId),
+    };
+  }
+
+  @override
+  T createCompanion<T extends UpdateCompanion<LocalUserBodyIndexData>>(
+      bool nullToAbsent) {
+    return LocalUserBodyIndexCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      index:
+          index == null && nullToAbsent ? const Value.absent() : Value(index),
+      value:
+          value == null && nullToAbsent ? const Value.absent() : Value(value),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      recordTime: recordTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(recordTime),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+    ) as T;
+  }
+
+  LocalUserBodyIndexData copyWith(
+          {String id,
+          String index,
+          double value,
+          String unit,
+          DateTime recordTime,
+          String userId}) =>
+      LocalUserBodyIndexData(
+        id: id ?? this.id,
+        index: index ?? this.index,
+        value: value ?? this.value,
+        unit: unit ?? this.unit,
+        recordTime: recordTime ?? this.recordTime,
+        userId: userId ?? this.userId,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('LocalUserBodyIndexData(')
+          ..write('id: $id, ')
+          ..write('index: $index, ')
+          ..write('value: $value, ')
+          ..write('unit: $unit, ')
+          ..write('recordTime: $recordTime, ')
+          ..write('userId: $userId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      $mrjc(
+          $mrjc(
+              $mrjc(
+                  $mrjc($mrjc(0, id.hashCode), index.hashCode), value.hashCode),
+              unit.hashCode),
+          recordTime.hashCode),
+      userId.hashCode));
+  @override
+  bool operator ==(other) =>
+      identical(this, other) ||
+      (other is LocalUserBodyIndexData &&
+          other.id == id &&
+          other.index == index &&
+          other.value == value &&
+          other.unit == unit &&
+          other.recordTime == recordTime &&
+          other.userId == userId);
+}
+
+class LocalUserBodyIndexCompanion
+    extends UpdateCompanion<LocalUserBodyIndexData> {
+  final Value<String> id;
+  final Value<String> index;
+  final Value<double> value;
+  final Value<String> unit;
+  final Value<DateTime> recordTime;
+  final Value<String> userId;
+  const LocalUserBodyIndexCompanion({
+    this.id = const Value.absent(),
+    this.index = const Value.absent(),
+    this.value = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.recordTime = const Value.absent(),
+    this.userId = const Value.absent(),
+  });
+}
+
+class $LocalUserBodyIndexTable extends LocalUserBodyIndex
+    with TableInfo<$LocalUserBodyIndexTable, LocalUserBodyIndexData> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $LocalUserBodyIndexTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  GeneratedTextColumn _id;
+  @override
+  GeneratedTextColumn get id => _id ??= _constructId();
+  GeneratedTextColumn _constructId() {
+    return GeneratedTextColumn('id', $tableName, false, maxTextLength: 64);
+  }
+
+  final VerificationMeta _indexMeta = const VerificationMeta('index');
+  GeneratedTextColumn _index;
+  @override
+  GeneratedTextColumn get index => _index ??= _constructIndex();
+  GeneratedTextColumn _constructIndex() {
+    return GeneratedTextColumn(
+      'index',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _valueMeta = const VerificationMeta('value');
+  GeneratedRealColumn _value;
+  @override
+  GeneratedRealColumn get value => _value ??= _constructValue();
+  GeneratedRealColumn _constructValue() {
+    return GeneratedRealColumn(
+      'value',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _unitMeta = const VerificationMeta('unit');
+  GeneratedTextColumn _unit;
+  @override
+  GeneratedTextColumn get unit => _unit ??= _constructUnit();
+  GeneratedTextColumn _constructUnit() {
+    return GeneratedTextColumn(
+      'unit',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _recordTimeMeta = const VerificationMeta('recordTime');
+  GeneratedDateTimeColumn _recordTime;
+  @override
+  GeneratedDateTimeColumn get recordTime =>
+      _recordTime ??= _constructRecordTime();
+  GeneratedDateTimeColumn _constructRecordTime() {
+    return GeneratedDateTimeColumn(
+      'record_time',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  GeneratedTextColumn _userId;
+  @override
+  GeneratedTextColumn get userId => _userId ??= _constructUserId();
+  GeneratedTextColumn _constructUserId() {
+    return GeneratedTextColumn(
+      'user_id',
+      $tableName,
+      false,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, index, value, unit, recordTime, userId];
+  @override
+  $LocalUserBodyIndexTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'local_user_body_index';
+  @override
+  final String actualTableName = 'local_user_body_index';
+  @override
+  VerificationContext validateIntegrity(LocalUserBodyIndexCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.id.present) {
+      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    } else if (id.isRequired && isInserting) {
+      context.missing(_idMeta);
+    }
+    if (d.index.present) {
+      context.handle(
+          _indexMeta, index.isAcceptableValue(d.index.value, _indexMeta));
+    } else if (index.isRequired && isInserting) {
+      context.missing(_indexMeta);
+    }
+    if (d.value.present) {
+      context.handle(
+          _valueMeta, value.isAcceptableValue(d.value.value, _valueMeta));
+    } else if (value.isRequired && isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (d.unit.present) {
+      context.handle(
+          _unitMeta, unit.isAcceptableValue(d.unit.value, _unitMeta));
+    } else if (unit.isRequired && isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (d.recordTime.present) {
+      context.handle(_recordTimeMeta,
+          recordTime.isAcceptableValue(d.recordTime.value, _recordTimeMeta));
+    } else if (recordTime.isRequired && isInserting) {
+      context.missing(_recordTimeMeta);
+    }
+    if (d.userId.present) {
+      context.handle(
+          _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
+    } else if (userId.isRequired && isInserting) {
+      context.missing(_userIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
+  @override
+  LocalUserBodyIndexData map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return LocalUserBodyIndexData.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(LocalUserBodyIndexCompanion d) {
+    final map = <String, Variable>{};
+    if (d.id.present) {
+      map['id'] = Variable<String, StringType>(d.id.value);
+    }
+    if (d.index.present) {
+      map['index'] = Variable<String, StringType>(d.index.value);
+    }
+    if (d.value.present) {
+      map['value'] = Variable<double, RealType>(d.value.value);
+    }
+    if (d.unit.present) {
+      map['unit'] = Variable<String, StringType>(d.unit.value);
+    }
+    if (d.recordTime.present) {
+      map['record_time'] = Variable<DateTime, DateTimeType>(d.recordTime.value);
+    }
+    if (d.userId.present) {
+      map['user_id'] = Variable<String, StringType>(d.userId.value);
+    }
+    return map;
+  }
+
+  @override
+  $LocalUserBodyIndexTable createAlias(String alias) {
+    return $LocalUserBodyIndexTable(_db, alias);
+  }
+}
+
 abstract class _$ExerciseDatabase extends GeneratedDatabase {
   _$ExerciseDatabase(QueryExecutor e)
       : super(const SqlTypeSystem.withDefaults(), e);
@@ -2707,6 +3014,9 @@ abstract class _$ExerciseDatabase extends GeneratedDatabase {
   $LocalSessionMaterialsTable _localSessionMaterials;
   $LocalSessionMaterialsTable get localSessionMaterials =>
       _localSessionMaterials ??= $LocalSessionMaterialsTable(this);
+  $LocalUserBodyIndexTable _localUserBodyIndex;
+  $LocalUserBodyIndexTable get localUserBodyIndex =>
+      _localUserBodyIndex ??= $LocalUserBodyIndexTable(this);
   @override
   List<TableInfo> get allTables => [
         localCompletedExerciseSets,
@@ -2717,6 +3027,7 @@ abstract class _$ExerciseDatabase extends GeneratedDatabase {
         localPlannedSetsMovementMaps,
         localExercisePlannedSets,
         localTrainingExercises,
-        localSessionMaterials
+        localSessionMaterials,
+        localUserBodyIndex
       ];
 }
