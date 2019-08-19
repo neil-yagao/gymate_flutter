@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:uuid/uuid.dart';
 import 'package:workout_helper/model/db_models.dart';
-import 'package:workout_helper/model/entities.dart' ;
+import 'package:workout_helper/model/entities.dart';
 
 class SessionRepositoryService {
   var _idGenerator = Uuid();
@@ -44,19 +44,19 @@ class SessionRepositoryService {
 //    return session;
   }
 
-  void saveCompletedSet(Session session, CompletedExerciseSet ces){
-    if(session.accomplishedSets == null){
+  void saveCompletedSet(Session session, CompletedExerciseSet ces) {
+    if (session.accomplishedSets == null) {
       session.accomplishedSets = List();
     }
     ces.completedTime = DateTime.now();
     session.accomplishedSets.add(ces);
   }
 
-  void addSessionMaterial(SessionMaterial material){
+  void addSessionMaterial(SessionMaterial material) {
     db.addSessionMaterial(material);
   }
 
-  Future<List<SessionMaterial>> getSessionMaterialsBySessionId(String id){
+  Future<List<SessionMaterial>> getSessionMaterialsBySessionId(String id) {
     return db.getSessionMaterialsBySessionId(id);
   }
 
@@ -71,7 +71,7 @@ class SessionRepositoryService {
           });
         }
         maps[es.movement].add(es);
-      } else {
+      } else if (es is GiantSet) {
         //giant set
         GiantSet gs = es;
         if (!maps.containsKey(gs.extractMovementBasicInfo())) {
@@ -80,6 +80,20 @@ class SessionRepositoryService {
           });
         }
         maps[gs.extractMovementBasicInfo()].add(es);
+      } else if (es is HIITSet) {
+        HIITSet hs = es;
+        if (!maps.containsKey(hs.extractMovementBasicInfo())) {
+          maps.putIfAbsent(hs.extractMovementBasicInfo(), () {
+            return [];
+          });
+        }
+        maps[hs.extractMovementBasicInfo()].add(hs);
+      } else if(es is CardioSet){
+        Movement cardioMovement = Movement();
+        cardioMovement.id = uuid.v4();
+        cardioMovement.name = es.movementName;
+        cardioMovement.exerciseType = ExerciseType.cardio;
+        maps[cardioMovement] = [es];
       }
     });
     return maps;

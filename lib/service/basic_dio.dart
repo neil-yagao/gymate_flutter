@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 BaseOptions _options = new BaseOptions(
-  baseUrl: "http://localhost:8080/api",
+  baseUrl: "http://localhost:9090/api",
   connectTimeout: 5000,
   receiveTimeout: 3000,
 );
@@ -21,12 +21,16 @@ class DioInstance {
         print(response);
         return response; // continue
       }, onError: (DioError e) {
-        Map<String, dynamic> errorMap = e.response.data as Map;
-        if (_scaffoldKey == null) {
-          return null;
+        print(e);
+        if (e.response.data != null) {
+          if (_scaffoldKey == null) {
+            return null;
+          }
+          Map<String, dynamic> errorMap = e.response.data as Map;
+          _scaffoldKey.currentState
+              .showSnackBar(SnackBar(content: Text(errorMap["message"])));
         }
-        _scaffoldKey.currentState
-            .showSnackBar(SnackBar(content: Text(errorMap["message"])));
+        return e;
       }));
     }
   }
@@ -37,4 +41,3 @@ class DioInstance {
     return _dio;
   }
 }
-

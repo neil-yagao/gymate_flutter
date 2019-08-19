@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:workout_helper/general/autocomplete.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/service/movement_service.dart';
 
+import 'bottom_sheet_util.dart';
 import 'label_radio.dart';
 
 const MovementTypeLabelMap = {
@@ -26,6 +26,9 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
   MovementType _movementType = MovementType.SINGLE;
 
   MovementService service = MovementService();
+
+  MovementBottomSheetUtil movementBottomSheetUtil;
+
   TextEditingController expectingSetController =
       TextEditingController(text: '1');
 
@@ -36,6 +39,16 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
   final Function(List<ExerciseSet> newMovement) onSubmitted;
 
   MovementBottomSheetState(this.onSubmitted);
+
+  @override
+  void initState() {
+    super.initState();
+    service.getMovements().then((List<Movement> movements) {
+      setState(() {
+        movementBottomSheetUtil = MovementBottomSheetUtil(movements);
+      });
+    });
+  }
 
   List<ExerciseSet> appendSets() {
     switch (_movementType) {
@@ -61,29 +74,6 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
         });
     }
     return [];
-  }
-
-  AutoCompleteTextField<Movement> buildMovementSearchBar() {
-    return AutoCompleteTextField<Movement>(
-      itemBuilder: (BuildContext context, Movement suggestion) {
-        return ListTile(
-            title: Text(suggestion.name, style: Typography.dense2018.caption));
-      },
-      itemFilter: (Movement suggestion, String query) =>
-          suggestion.name.indexOf(query) >= 0,
-      suggestions: service.getMovements(),
-      itemSorter: (Movement a, Movement b) {
-        return a.name.compareTo(b.name);
-      },
-      clearOnSubmit: false,
-      itemSubmitted: (Movement data) {
-        setState(() {
-          this._regularSet.movement = data;
-        });
-      },
-      decoration:
-          InputDecoration(labelText: "训练动作", suffixIcon: Icon(Icons.search)),
-    );
   }
 
   List<Widget> buildMovementDefinition(MovementType type) {
@@ -169,10 +159,18 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
   }
 
   List<Widget> basicMovementWidget() {
+    if (movementBottomSheetUtil == null) {
+      return [];
+    }
     return <Widget>[
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: buildMovementSearchBar(),
+        child: movementBottomSheetUtil.buildMovementSearchBar((Movement data) {
+          setState(() {
+            this._regularSet.movement = data;
+            this._regularSet.movement.exerciseType = ExerciseType.lifting;
+          });
+        }, TextEditingController()),
       ),
       Row(
         children: <Widget>[
@@ -222,12 +220,11 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
   }
 
   Widget build(BuildContext buildContext) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.4,
+    return Center(
       child: Card(
         margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.1),
         child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 12,vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           shrinkWrap: true,
           children: <Widget>[
             Row(

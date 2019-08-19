@@ -95,11 +95,14 @@ class ExerciseSetLineState extends State<ExerciseSetLine> {
           es.reduceWeight.toString() +
           "KG";
       return ListTile(
+        dense: true,
         title: exerciseContent(es, textStyle),
         subtitle: Text(subtitle),
       );
     } else if (es is SingleMovementSet) {
-      return ListTile(title: exerciseContent(es, textStyle));
+      return ListTile(
+          dense: true,
+          title: exerciseContent(es, textStyle));
     } else {
       //giant Set
       GiantSet giantSet = es as GiantSet;
@@ -110,6 +113,7 @@ class ExerciseSetLineState extends State<ExerciseSetLine> {
       });
       superSetWidget = superSetWidget.sublist(0, superSetWidget.length - 1);
       return ListTile(
+          dense: true,
           title: Column(
         children: superSetWidget,
       ));

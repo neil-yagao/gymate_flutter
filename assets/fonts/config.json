@@ -1,0 +1,70 @@
+{
+  "name": "",
+  "css_prefix_text": "",
+  "css_use_suffix": false,
+  "hinting": true,
+  "units_per_em": 1000,
+  "ascent": 850,
+  "glyphs": [
+    {
+      "uid": "8a9b269fb3c1f9b41ecf7c43c30e70ae",
+      "css": "leak_remove",
+      "code": 59392,
+      "src": "material"
+    },
+    {
+      "uid": "03b2757fc1149194db8e5b75459351e1",
+      "css": "directions_run",
+      "code": 59393,
+      "src": "material"
+    },
+    {
+      "uid": "8d3c5a615d4f09862f26d7e620eed1a7",
+      "css": "directions_bike",
+      "code": 59394,
+      "src": "material"
+    },
+    {
+      "uid": "7d4a4fec374a31574a64f97284447c2f",
+      "css": "rowing",
+      "code": 59395,
+      "src": "material"
+    },
+    {
+      "uid": "a6d4cb043657a701baa51cdbbfbcef4f",
+      "css": "directions_walk",
+      "code": 59396,
+      "src": "material"
+    },
+    {
+      "uid": "d84a06c5ce6da9ebdc9b0a5cb94db4c4",
+      "css": "heartbeat",
+      "code": 61982,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "34cb6ce62bf3f1efd59e2f5eb0d79f82",
+      "css": "wechat",
+      "code": 61911,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "31562b831ad0016b89ddf9693214041f",
+      "css": "hand-peace-o",
+      "code": 62043,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "74b2f1d1ee541715b3f389f7cdf63d1c",
+      "css": "logout",
+      "code": 59397,
+      "src": "websymbols"
+    },
+    {
+      "uid": "d368c9b110be1daa21f992afca084b8c",
+      "css": "swimming",
+      "code": 59448,
+      "src": "maki"
+    }
+  ]
+}

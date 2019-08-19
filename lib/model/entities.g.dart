@@ -27,20 +27,20 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
 
 UserBodyIndex _$UserBodyIndexFromJson(Map<String, dynamic> json) {
   return UserBodyIndex(
-      _$enumDecodeNullable(_$BodyIndexEnumMap, json['index']),
+      _$enumDecodeNullable(_$BodyIndexEnumMap, json['body_index']),
       (json['value'] as num)?.toDouble(),
       json['unit'] as String,
-      json['recordTime'] == null
+      json['record_time'] == null
           ? null
-          : DateTime.parse(json['recordTime'] as String));
+          : DateTime.fromMillisecondsSinceEpoch(json['record_time']));
 }
 
 Map<String, dynamic> _$UserBodyIndexToJson(UserBodyIndex instance) =>
     <String, dynamic>{
-      'index': _$BodyIndexEnumMap[instance.index],
+      'body_index': _$BodyIndexEnumMap[instance.bodyIndex],
       'value': instance.value,
       'unit': instance.unit,
-      'recordTime': instance.recordTime?.toIso8601String()
+      'record_time': instance.recordTime?.toIso8601String()
     };
 
 T _$enumDecode<T>(Map<T, dynamic> enumValues, dynamic source) {
@@ -49,7 +49,10 @@ T _$enumDecode<T>(Map<T, dynamic> enumValues, dynamic source) {
         '${enumValues.values.join(', ')}');
   }
   return enumValues.entries
-      .singleWhere((e) => e.value == source,
+      .singleWhere(
+          (e) =>
+              e.value == source ||
+              e.key.runtimeType.toString() + '.' + e.value == source,
           orElse: () => throw ArgumentError(
               '`$source` is not one of the supported values: '
               '${enumValues.values.join(', ')}'))

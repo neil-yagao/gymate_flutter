@@ -34,7 +34,7 @@ class MovementService {
     movements.add(squat);
   }
 
-  List<Movement> getMovements() {
+  Future<List<Movement>> getMovements() async {
     return movements;
   }
 }

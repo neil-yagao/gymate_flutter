@@ -110,18 +110,18 @@ enum BodyIndex {
 }
 
 @JsonSerializable()
-
 class UserBodyIndex {
-  BodyIndex index;
+  BodyIndex bodyIndex;
   double value;
   String unit;
   DateTime recordTime;
 
-  UserBodyIndex(this.index, this.value, this.unit, this.recordTime);
+  UserBodyIndex(this.bodyIndex, this.value, this.unit, this.recordTime);
+  factory UserBodyIndex.fromJson(Map<String, dynamic> json) => _$UserBodyIndexFromJson(json);
 
+  Map<String, dynamic> toJson() => _$UserBodyIndexToJson(this);
 }
 
-@JsonSerializable()
 class ExerciseSet {
   String id;
   int sequence;
@@ -134,7 +134,7 @@ class ExerciseSet {
     return this.id.hashCode;
   }
 
-  bool operator ==(Object other) {
+  bool operator == (Object other) {
     if (other is ExerciseSet) {
       return this.id == other.id;
     }
@@ -163,6 +163,8 @@ abstract class Cloneable<T> {
   void clone(T t);
 }
 
+enum ExerciseType {lifting,hiit,cardio}
+
 ///训练动作
 class Movement implements Cloneable<Movement> {
   String id;
@@ -171,10 +173,13 @@ class Movement implements Cloneable<Movement> {
   String picReference;
   String videoReference;
 
+  ExerciseType exerciseType;
+
   List<MuscleGroup> involvedMuscle;
 
   //all time in seconds
   int recommendRestingTimeBetweenSet;
+
 
   @override
   String toString() {
@@ -199,7 +204,7 @@ class Movement implements Cloneable<Movement> {
 
   bool operator ==(Object other) {
     if (other is Movement) {
-      return this.id == other.id;
+      return this.id == other.id && this.name == other.name;
     }
     return false;
   }
@@ -247,6 +252,41 @@ class GiantSet extends ExerciseSet {
         movements.map((SingleMovementSet m) => m.movement.name).join('/');
     return combinedMovement;
   }
+}
+
+class HIITSet extends ExerciseSet {
+  List<SingleMovementSet>  movements = List();
+  int exerciseTime;
+  int restTime;
+
+  Movement extractMovementBasicInfo() {
+    Movement combinedMovement = Movement();
+    combinedMovement.id =
+        movements.map((SingleMovementSet m) => m.movement.id).join('/');
+    combinedMovement.name = "HIIT第" + sequence.toString() + "组";
+    combinedMovement.exerciseType = ExerciseType.hiit;
+    return combinedMovement;
+  }
+}
+
+class CardioSet extends ExerciseSet {
+
+  String movementName;
+  CardioType movement;
+
+  int exerciseTime;
+  double exerciseDistance;
+
+  double exerciseCals;
+
+}
+
+enum CardioType {
+  walking,
+  running,
+  cycle,
+  swimming,
+  rowing
 }
 
 ///单次训练模板

@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 enum SessionOption {
   EDITING,
   SAVE_TEMPLATE,
-  SHARE_TEMPLATE,
+//  SHARE_TEMPLATE,
 }
 
 Map<SessionOption, String> actionMenu = {
   SessionOption.EDITING: "编辑训练",
   SessionOption.SAVE_TEMPLATE: "保存模板",
-  SessionOption.SHARE_TEMPLATE: "分享模板",
+//  SessionOption.SHARE_TEMPLATE: "分享模板",
 };
 
 Map<SessionOption, Icon> actionIconMap = {
   SessionOption.EDITING: Icon(Icons.mode_edit),
   SessionOption.SAVE_TEMPLATE: Icon(Icons.save_alt),
-  SessionOption.SHARE_TEMPLATE: Icon(Icons.share),
+//  SessionOption.SHARE_TEMPLATE: Icon(Icons.share),
 };
 
 class SessionActionMenu extends StatelessWidget {

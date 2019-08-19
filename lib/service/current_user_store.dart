@@ -64,7 +64,7 @@ class CurrentUserStore extends ChangeNotifier{
       'file':  UploadFileInfo(file,currentUser.id.toString() + "-avatar." + fileSuffix)
     });
     Response updatedUser = await dio.post(
-        "user/" + currentUser.id.toString() + "/avatar", data: fileUpdate);
+        "/user/" + currentUser.id.toString() + "/avatar", data: fileUpdate);
     currentUser.avatar = User.fromJson(updatedUser.data).avatar;
     notifyListeners();
   }
