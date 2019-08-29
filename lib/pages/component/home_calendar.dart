@@ -10,7 +10,6 @@ class HomeCalendar extends StatefulWidget {
 }
 
 class HomeCalendarState extends State<HomeCalendar> {
-  bool _expanding = false;
   @override
   Widget build(BuildContext context) {
     CalendarCarousel _calendarCarousel = CalendarCarousel<Event>(
@@ -18,7 +17,10 @@ class HomeCalendarState extends State<HomeCalendar> {
         //this.setState(() => _currentDate = date);
         events.forEach((event) => print(event.title));
       },
-      weekFormat: !_expanding,
+      weekDayMargin:EdgeInsets.all(0),
+      dayPadding: 0,
+      headerMargin: EdgeInsets.only(bottom: 8),
+      weekFormat: false,
       weekendTextStyle: TextStyle(
         fontSize: 14.0,
         color: Colors.black,
@@ -37,7 +39,7 @@ class HomeCalendarState extends State<HomeCalendar> {
       customGridViewPhysics: NeverScrollableScrollPhysics(),
       selectedDayButtonColor: Colors.transparent,
       selectedDayTextStyle: TextStyle(fontSize: 14.0, color: Colors.teal),
-      height: _expanding ? 420.0 : 180,
+      height:MediaQuery.of(context).size.height * 0.5 ,
       locale: 'zh',
       showHeader: true,
       markedDateShowIcon: true,
@@ -48,25 +50,6 @@ class HomeCalendarState extends State<HomeCalendar> {
       markedDateMoreShowTotal:
           false, // null for not showing hidden events indicator
     );
-    return Card(
-        child: Column(
-      children: <Widget>[
-        _calendarCarousel,
-        Container(
-            height: 40,
-            child: RaisedButton(
-              color: Colors.transparent,
-              elevation: 0,
-              onPressed: () {
-                setState(() {
-                  _expanding = !_expanding;
-                });
-              },
-              child: _expanding
-                  ? Icon(Icons.expand_less)
-                  : Icon(Icons.expand_more),
-            )),
-      ],
-    ));
+    return _calendarCarousel;
   }
 }

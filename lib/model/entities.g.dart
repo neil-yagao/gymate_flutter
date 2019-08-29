@@ -74,14 +74,193 @@ const _$BodyIndexEnumMap = <BodyIndex, dynamic>{
   BodyIndex.LEG_RADIUS: 'LEG_RADIUS',
   BodyIndex.ABS_RADIUS: 'ABS_RADIUS',
   BodyIndex.GLUTES_RADIUS: 'GLUTES_RADIUS',
-  BodyIndex.CHEST_RADIUS: 'CHEST_RADIUS'
+  BodyIndex.CHEST_RADIUS: 'CHEST_RADIUS',
+  BodyIndex.AGE:'AGE'
 };
 
-ExerciseSet _$ExerciseSetFromJson(Map<String, dynamic> json) {
-  return ExerciseSet()
-    ..id = json['id'] as String
-    ..sequence = json['sequence'] as int;
+SingleMovementSet _$SingleMovementSetFromJson(Map<String, dynamic> json) {
+  return SingleMovementSet(
+      json['id'].toString(),
+      json['sequence'] as int,
+      json['movement'] == null
+          ? null
+          : Movement.fromJson(json['movement'] as Map<String, dynamic>),
+      json['expectingRepeatsPerSet'] as int,
+      (json['expectingWeight'] as num)?.toDouble());
 }
 
-Map<String, dynamic> _$ExerciseSetToJson(ExerciseSet instance) =>
-    <String, dynamic>{'id': instance.id, 'sequence': instance.sequence};
+Map<String, dynamic> _$SingleMovementSetToJson(SingleMovementSet instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'sequence': instance.sequence,
+      'movement': instance.movement,
+      'expectingRepeatsPerSet': instance.expectingRepeatsPerSet,
+      'expectingWeight': instance.expectingWeight
+    };
+
+Movement _$MovementFromJson(Map<String, dynamic> json) {
+  return Movement(
+      json['id'].toString(),
+      json['name'] as String,
+      json['description'] as String,
+      json['picReference'] as String,
+      json['videoReference'] as String,
+      _$enumDecodeNullable(_$ExerciseTypeEnumMap, json['exerciseType']),
+      (json['involvedMuscle'].toString().split(","))
+          ?.map((e) => _$enumDecodeNullable(_$MuscleGroupEnumMap, e))
+          ?.toList(),
+      json['recommendRestingTimeBetweenSet'] as int);
+}
+
+Map<String, dynamic> _$MovementToJson(Movement instance) => <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'description': instance.description,
+      'picReference': instance.picReference,
+      'videoReference': instance.videoReference,
+      'exerciseType': _$ExerciseTypeEnumMap[instance.exerciseType],
+      'involvedMuscle': instance.involvedMuscle
+          ?.map((e) => _$MuscleGroupEnumMap[e])
+          ?.toList()?.join(","),
+      'recommendRestingTimeBetweenSet': instance.recommendRestingTimeBetweenSet
+    };
+
+const _$ExerciseTypeEnumMap = <ExerciseType, dynamic>{
+  ExerciseType.lifting: 'lifting',
+  ExerciseType.hiit: 'hiit',
+  ExerciseType.cardio: 'cardio'
+};
+
+const _$MuscleGroupEnumMap = <MuscleGroup, dynamic>{
+  MuscleGroup.SHOULDER: 'SHOULDER',
+  MuscleGroup.TRAP: 'TRAP',
+  MuscleGroup.CHEST: 'CHEST',
+  MuscleGroup.ARM: 'ARM',
+  MuscleGroup.BICEPS: 'BICEPS',
+  MuscleGroup.TRICEPS: 'TRICEPS',
+  MuscleGroup.FOREARM: 'FOREARM',
+  MuscleGroup.BACK: 'BACK',
+  MuscleGroup.LATS: 'LATS',
+  MuscleGroup.MIDDLE_BACK: 'MIDDLE_BACK',
+  MuscleGroup.LOWER_BACK: 'LOWER_BACK',
+  MuscleGroup.ABS: 'ABS',
+  MuscleGroup.LEG: 'LEG',
+  MuscleGroup.QUADS: 'QUADS',
+  MuscleGroup.GLUTES: 'GLUTES',
+  MuscleGroup.HAMSTRING: 'HAMSTRING',
+  MuscleGroup.CALVES: 'CALVES'
+};
+
+ReduceSet _$ReduceSetFromJson(Map<String, dynamic> json) {
+  return ReduceSet(
+      json['id'].toString(),
+      json['sequence'] as int,
+      json['movement'] == null
+          ? null
+          : Movement.fromJson(json['movement'] as Map<String, dynamic>),
+      json['expectingRepeatsPerSet'] as int,
+      (json['expectingWeight'] as num)?.toDouble(),
+      (json['reduceWeight'] as num)?.toDouble(),
+      (json['reduceTo'] as num)?.toDouble(),
+      json['intervalTime'] as int);
+}
+
+Map<String, dynamic> _$ReduceSetToJson(ReduceSet instance) => <String, dynamic>{
+      'id': instance.id,
+      'sequence': instance.sequence,
+      'movement': instance.movement,
+      'expectingRepeatsPerSet': instance.expectingRepeatsPerSet,
+      'expectingWeight': instance.expectingWeight,
+      'reduceWeight': instance.reduceWeight,
+      'reduceTo': instance.reduceTo,
+      'intervalTime': instance.intervalTime
+    };
+
+GiantSet _$GiantSetFromJson(Map<String, dynamic> json) {
+  return GiantSet(
+      json['id'].toString(),
+      json['sequence'] as int,
+      (json['movements'] as List)
+          ?.map((e) => e == null
+              ? null
+              : SingleMovementSet.fromJson(e as Map<String, dynamic>))
+          ?.toSet(),
+      json['intervalTimeSecond'] as int);
+}
+
+Map<String, dynamic> _$GiantSetToJson(GiantSet instance) => <String, dynamic>{
+      'id': instance.id,
+      'sequence': instance.sequence,
+      'movements': instance.movements?.toList(),
+      'intervalTimeSecond': instance.intervalTimeSecond
+    };
+
+HIITSet _$HIITSetFromJson(Map<String, dynamic> json) {
+  return HIITSet(
+      json['id'].toString(),
+      json['sequence'] as int,
+      (json['movements'] as List)
+          ?.map((e) => e == null
+              ? null
+              : SingleMovementSet.fromJson(e as Map<String, dynamic>))
+          ?.toList(),
+      json['exerciseTime'] as int,
+      json['restTime'] as int);
+}
+
+Map<String, dynamic> _$HIITSetToJson(HIITSet instance) => <String, dynamic>{
+      'id': instance.id,
+      'sequence': instance.sequence,
+      'movements': instance.movements,
+      'exerciseTime': instance.exerciseTime,
+      'restTime': instance.restTime
+    };
+
+CardioSet _$CardioSetFromJson(Map<String, dynamic> json) {
+  return CardioSet(
+      json['id'].toString(),
+      json['sequence'] as int,
+      json['movementName'] as String,
+      _$enumDecodeNullable(_$CardioTypeEnumMap, json['movement']),
+      json['exerciseTime'] as int,
+      (json['exerciseDistance'] as num)?.toDouble(),
+      (json['exerciseCals'] as num)?.toDouble());
+}
+
+Map<String, dynamic> _$CardioSetToJson(CardioSet instance) => <String, dynamic>{
+      'id': instance.id,
+      'sequence': instance.sequence,
+      'movementName': instance.movementName,
+      'movement': _$CardioTypeEnumMap[instance.movement],
+      'exerciseTime': instance.exerciseTime,
+      'exerciseDistance': instance.exerciseDistance,
+      'exerciseCals': instance.exerciseCals
+    };
+
+const _$CardioTypeEnumMap = <CardioType, dynamic>{
+  CardioType.walking: 'walking',
+  CardioType.running: 'running',
+  CardioType.cycle: 'cycle',
+  CardioType.swimming: 'swimming',
+  CardioType.rowing: 'rowing'
+};
+
+MovementOneRepMax _$MovementOneRepMaxFromJson(Map<String, dynamic> json) {
+  return MovementOneRepMax(
+      json['userId'] as String,
+      json['movement'] == null
+          ? null
+          : Movement.fromJson(json['movement'] as Map<String, dynamic>),
+      (json['oneRepMax'] as num)?.toDouble(),
+      json['practiseTime'] == null
+          ? null
+          : DateTime.parse(json['practiseTime'] as String));
+}
+
+Map<String, dynamic> _$MovementOneRepMaxToJson(MovementOneRepMax instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'movement': instance.movement,
+      'oneRepMax': instance.oneRepMax,
+      'practiseTime': instance.practiseTime?.toIso8601String()
+    };

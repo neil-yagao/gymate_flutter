@@ -9,7 +9,7 @@ class MovementBottomSheetUtil {
 
   AutoCompleteTextField<Movement> buildMovementSearchBar(
       InputEventCallback<Movement> itemSubmitted,TextEditingController controller) {
-    assert(suggestions.length != 0);
+    //assert(suggestions.length != 0);
     return AutoCompleteTextField<Movement>(
       itemBuilder: (BuildContext context, Movement suggestion) {
         return ListTile(

@@ -69,7 +69,7 @@ class AvatarCropState extends State<AvatarCrop> {
             children: <Widget>[
               FlatButton(
                 child: Text(
-                  'Crop Image',
+                  '确定',
                   style: Theme.of(context)
                       .textTheme
                       .button
@@ -88,7 +88,7 @@ class AvatarCropState extends State<AvatarCrop> {
   Widget _buildOpenImage() {
     return FlatButton(
       child: Text(
-        'Open Image',
+        '重新选择',
         style: Theme.of(context).textTheme.button.copyWith(color: Colors.white),
       ),
       onPressed: () => _openImage(),
@@ -112,8 +112,6 @@ class AvatarCropState extends State<AvatarCrop> {
     } catch (error) {
       Navigator.of(context).maybePop();
     }
-
-
   }
 
   Future<void> _cropImage() async {

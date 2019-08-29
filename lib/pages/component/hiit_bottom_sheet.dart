@@ -32,7 +32,7 @@ class HIITBottomSheetState extends State<HIITBottomSheet> {
 
   List<SingleMovementSet> _predefineRoutine = List();
 
-  SingleMovementSet _regularSet = SingleMovementSet(null);
+  SingleMovementSet _regularSet = SingleMovementSet.fromOther(null);
 
   MovementService service = MovementService();
 
@@ -53,7 +53,7 @@ class HIITBottomSheetState extends State<HIITBottomSheet> {
   @override
   void initState() {
     super.initState();
-    service.getMovements().then((List<Movement> movements) {
+    service.getMovements(ExerciseType.hiit).then((List<Movement> movements) {
       setState(() {
         movementBottomSheetUtil = MovementBottomSheetUtil(movements);
       });
@@ -192,7 +192,7 @@ class HIITBottomSheetState extends State<HIITBottomSheet> {
                         _regularSet.expectingRepeatsPerSet = -1;
                         _regularSet.sequence = _predefineRoutine.length + 1;
                         _predefineRoutine.add(_regularSet);
-                        _regularSet = SingleMovementSet(null);
+                        _regularSet = SingleMovementSet.fromOther(null);
                         movement.text = '';
                       });
                     },
@@ -210,12 +210,12 @@ class HIITBottomSheetState extends State<HIITBottomSheet> {
             onPressed: () {
               List<ExerciseSet> hiitSets = List.generate(
                   int.parse(repeatTimes.text), (int index) {
-                HIITSet template = HIITSet();
+                HIITSet template = HIITSet.empty();
                 template.id = Random(index).nextDouble().toString();
                 template.sequence = index + 1;
                 List<SingleMovementSet> smss = List();
                 _predefineRoutine.forEach((SingleMovementSet sms){
-                  SingleMovementSet nsms = SingleMovementSet(sms);
+                  SingleMovementSet nsms = SingleMovementSet.fromOther(sms);
                   nsms.id = uuid.v4();
                   smss.add(nsms);
                 });

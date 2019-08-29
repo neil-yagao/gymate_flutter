@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:workout_helper/pages/camera_page.dart';
+import 'package:workout_helper/pages/component/bottom_navigation_bar.dart';
 import 'package:workout_helper/pages/home_page.dart';
 import 'package:workout_helper/pages/login.dart';
+import 'package:workout_helper/pages/nutrition_page.dart';
 import 'package:workout_helper/pages/profile_page.dart';
 import 'package:workout_helper/pages/register_page.dart';
 import 'package:workout_helper/pages/session.dart';
@@ -12,8 +13,6 @@ import 'general/my_flutter_app_icons.dart';
 
 void main() => runApp(MyApp());
 
-final List<Widget> pages = [HomePage(), Text("饮食"), ProfilePage()];
-
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -21,7 +20,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider<CurrentUserStore>(
         builder: (context) => CurrentUserStore(null),
         child: MaterialApp(
-          title: 'Flutter Demo',
+          title: 'Lifting.ren',
           theme: ThemeData(
             //009FF2
             primarySwatch: MaterialColor(0XFF009FF2, <int, Color>{
@@ -41,62 +40,13 @@ class MyApp extends StatelessWidget {
           routes: {
             '/': (BuildContext content) => LoginPage(),
             '/register': (context) => RegisterPage(),
-            '/home': (BuildContext context) => MyHomePage(title: "GYMate"),
+            '/home': (BuildContext context) => HomePage(),
             '/quickExercise': (BuildContext context) => UserSession("randomId"),
-            '/camera': (context) => CameraExampleHome('none')
+            '/nutrition':(BuildContext context) => NutritionPage(),
+            '/profile':(BuildContext context) => ProfilePage(),
+            //'/camera': (context) => CameraExampleHome('none')
           },
           initialRoute: '/',
-        ));
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          automaticallyImplyLeading: false,
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(CustomIcon.logout),
-              onPressed: (){
-                Navigator.of(context).pushReplacementNamed("/");
-              },
-            )
-          ],
-        ),
-        body: SafeArea(child: pages.elementAt(_selectedIndex)),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(Icons.home), title: Text("首页")),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.restaurant), title: Text("饮食")),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.person), title: Text("我的")),
-          ],
-          currentIndex: _selectedIndex,
-          unselectedItemColor: Colors.grey,
-          selectedItemColor: Colors.blue,
-          showUnselectedLabels: true,
-          onTap: _onItemTapped,
         ));
   }
 }

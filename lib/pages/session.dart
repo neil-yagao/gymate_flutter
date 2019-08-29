@@ -4,13 +4,16 @@ import 'dart:collection';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:share/share.dart';
+import 'package:provider/provider.dart';
 import 'package:workout_helper/general/my_flutter_app_icons.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/camera_page.dart';
 import 'package:workout_helper/pages/component/exercise_set_line.dart';
 import 'package:workout_helper/pages/component/movement_bottom_sheet.dart';
+import 'package:workout_helper/pages/save_template.dart';
 import 'package:workout_helper/pages/session_report.dart';
+import 'package:workout_helper/service/current_user_store.dart';
+import 'package:workout_helper/service/exercise_service.dart';
 import 'package:workout_helper/service/session_service.dart';
 
 import 'component/cardio_bottom_sheet.dart';
@@ -20,6 +23,7 @@ import 'component/hiit_exercise_line.dart';
 import 'component/session_action_menu.dart';
 import 'component/session_completed.dart';
 import 'component/session_materials_grid.dart';
+import 'exercise_template_selection.dart';
 
 class UserSession extends StatefulWidget {
   UserSession(this.exerciseId);
@@ -33,10 +37,11 @@ class UserSession extends StatefulWidget {
 }
 
 class UserSessionState extends State<UserSession> {
-  SessionRepositoryService sessionRepositoryService =
-      SessionRepositoryService();
+  SessionService sessionRepositoryService = SessionService();
 
   UserSessionState(this.exerciseId);
+
+  ExerciseService exerciseService = ExerciseService();
 
   final String exerciseId;
 
@@ -70,7 +75,8 @@ class UserSessionState extends State<UserSession> {
             onPressed: () {
               leaveSession(context);
             }),
-        title: Text(_currentSession.matchingExercise.name == null ||
+        title: Text(_currentSession == null ||
+                _currentSession.matchingExercise.name == null ||
                 _currentSession.matchingExercise.name.isEmpty
             ? "快速开始"
             : _currentSession.matchingExercise.name),
@@ -87,37 +93,84 @@ class UserSessionState extends State<UserSession> {
                   break;
                 case SessionOption.SAVE_TEMPLATE:
                   // TODO: Handle this case.
+                  _saveAsTemplate();
                   break;
 //                case SessionOption.SHARE_TEMPLATE:
-                  // TODO: Handle this case.
+                // TODO: Handle this case.
 //                  Share.share('check out my website https://example.com');
 //                  break;
+                case SessionOption.CREATE_FROM_TEMPLATE:
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return ExerciseTemplateSelection();
+                  })).then((e) {
+                    if (e != null) {
+                      sessionRepositoryService
+                          .createNewSessionFromExercise(
+                              e,
+                              Provider.of<CurrentUserStore>(context)
+                                  .currentUser
+                                  .id
+                                  .toString())
+                          .then((Session session) {
+                        setState(() {
+                          _currentSession = session;
+                        });
+                      });
+                    }
+                  });
+                  break;
               }
             },
           )
         ]);
   }
 
+  ///jump to the new page to resolve save this template
+  void _saveAsTemplate() async {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => SaveTemplate(
+              exerciseToSave: _currentSession.matchingExercise,
+            )));
+  }
+
   void leaveSession(BuildContext context) {
     Navigator.of(context).pushReplacementNamed('/home');
+    sessionRepositoryService.removeSession(_currentSession);
   }
 
   @override
   void initState() {
     super.initState();
+    if (_currentSession != null) {
+      sessionRepositoryService
+          .getSessionMaterialsBySessionId(_currentSession.id)
+          .then((List<SessionMaterial> sessionMaterials) {
+        setState(() {
+          this.sessionMaterials = sessionMaterials;
+        });
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     Exercise exercise = Exercise();
     exercise.id = this.exerciseId;
-    _currentSession =
-        sessionRepositoryService.createNewSessionFromExercise(exercise);
-    if (_currentSession.matchingExercise.plannedSets == null) {
-      _currentSession.matchingExercise.plannedSets = List();
+    if (_currentSession != null) {
+      return;
     }
     sessionRepositoryService
-        .getSessionMaterialsBySessionId(_currentSession.id)
-        .then((List<SessionMaterial> sessionMaterials) {
+        .createNewSessionFromExercise(exercise,
+            Provider.of<CurrentUserStore>(context).currentUser.id.toString())
+        .then((Session session) {
       setState(() {
-        this.sessionMaterials = sessionMaterials;
+        _currentSession = session;
       });
+    }).catchError((error) {
+      print(error);
+      Navigator.maybePop(context);
     });
   }
 
@@ -132,8 +185,11 @@ class UserSessionState extends State<UserSession> {
   }
 
   Widget buildContent(BuildContext context) {
+    if (_currentSession == null) {
+      return Card();
+    }
     LinkedHashMap<Movement, List<ExerciseSet>> maps =
-        SessionRepositoryService.groupExerciseSetViaMovement(
+        SessionService.groupExerciseSetViaMovement(
             _currentSession.matchingExercise.plannedSets);
     List<ExpansionPanel> movements = [];
     int currentIndex = 0;
@@ -238,6 +294,7 @@ class UserSessionState extends State<UserSession> {
   ListTile expansionPanelHeader(Movement movement, List<ExerciseSet> sets) {
     int movementCompletedSet = 0;
     Icon tailingIcon;
+    //decide the icon of complete status
     if (movement.exerciseType == ExerciseType.lifting) {
       movementCompletedSet = completedLiftingSetsCount(sets);
       if (movementCompletedSet == 0) {
@@ -332,8 +389,8 @@ class UserSessionState extends State<UserSession> {
             marginRight: 18,
             marginBottom: 20,
             child: Icon(Icons.add),
-            animatedIcon: AnimatedIcons.menu_close,
-            animatedIconTheme: IconThemeData(size: 22.0),
+//            animatedIcon: AnimatedIcons.menu_close,
+//            animatedIconTheme: IconThemeData(size: 22.0),
             curve: Curves.bounceIn,
             overlayColor: Colors.grey,
             overlayOpacity: 0.5,
@@ -383,8 +440,14 @@ class UserSessionState extends State<UserSession> {
                       context: context,
                       builder: (context) {
                         return CardioBottomSheet(logExercise: (ExerciseSet es) {
-                          appendToCurrentSession([es]);
-                          completedExercise.add(es.id);
+                          appendToCurrentSession([es]).then((_) {
+                            completedExercise.add(es.id);
+                            CompletedExerciseSet ces =
+                                CompletedExerciseSet.empty();
+                            ces.accomplishedSet = es;
+                            sessionRepositoryService.saveCompletedSet(
+                                _currentSession, ces);
+                          });
                         });
                       })
                 },
@@ -393,24 +456,19 @@ class UserSessionState extends State<UserSession> {
           );
   }
 
-  void appendToCurrentSession(List<ExerciseSet> sets) {
-    setState(() {
-      _currentPanel = -1;
-      _currentSession.matchingExercise.plannedSets.addAll(sets);
+  Future<void> appendToCurrentSession(List<ExerciseSet> sets) async {
+    return exerciseService
+        .appendToExercise(_currentSession.matchingExercise, sets)
+        .then((List<ExerciseSet> es) {
+      setState(() {
+        _currentPanel = -1;
+      });
     });
   }
 
   Row buildBottomNavigationBar() {
-    int plannedCount = 0;
-    _currentSession.matchingExercise.plannedSets.forEach((ExerciseSet es) {
-      if (es is HIITSet) {
-        plannedCount += es.movements.length;
-      } else {
-        plannedCount++;
-      }
-    });
-    bool allCompleted = completedExercise.length == plannedCount &&
-        completedExercise.length != 0;
+    bool allCompleted =
+        completedExercise.length > 0 && completedExercise.length != 0;
     return _editing
         ? editingNavigatorBar()
         : allCompleted
@@ -424,10 +482,19 @@ class UserSessionState extends State<UserSession> {
                         onPressed: () {
                           setState(() {
                             _editing = false;
-                            Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                    builder: (context) => SessionReport(
-                                        completedSession: _currentSession)));
+                            sessionRepositoryService
+                                .completedSession(
+                                    _currentSession,
+                                    Provider.of<CurrentUserStore>(context)
+                                        .currentUser
+                                        .id
+                                        .toString())
+                                .then((_) {
+                              Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) => SessionReport(
+                                          completedSession: _currentSession)));
+                            });
                           });
                         },
                         color: Colors.transparent,
@@ -445,14 +512,15 @@ class UserSessionState extends State<UserSession> {
         Expanded(
           child: FlatButton(
               onPressed: () {
-                setState(() {
-                  _currentSession.matchingExercise.plannedSets
-                      .removeWhere((ExerciseSet es) {
-                    return _tempRemovingSets.indexOf(es) >= 0;
+                exerciseService
+                    .removeFromExercise(
+                        _currentSession.matchingExercise, _tempRemovingSets)
+                    .then((_) {
+                  setState(() {
+                    _editing = false;
+                    _tempRemovingSets = List();
+                    _removingMovement = List();
                   });
-                  _editing = false;
-                  _tempRemovingSets = List();
-                  _removingMovement = List();
                 });
               },
               color: Colors.transparent,
@@ -478,7 +546,14 @@ class UserSessionState extends State<UserSession> {
     FlatButton cameraButton = FlatButton(
       onPressed: () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => CameraExampleHome(_currentSession.id)));
+            builder: (context) => CameraExampleHome(
+                    "session/" + _currentSession.id, (String uploadedFile) {
+                  SessionMaterial sessionMaterial = SessionMaterial();
+                  sessionMaterial.isVideo = false;
+                  sessionMaterial.filePath = uploadedFile;
+                  sessionMaterial.sessionId = _currentSession.id;
+                  sessionRepositoryService.addSessionMaterial(sessionMaterial);
+                })));
       },
       color: Colors.transparent,
       child: Icon(
@@ -498,7 +573,9 @@ class UserSessionState extends State<UserSession> {
               child: FlatButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => SessionMaterialsGrid()));
+                        builder: (context) => SessionMaterialsGrid(
+                              sessionId: _currentSession.id,
+                            )));
                   },
                   child: Icon(
                     Icons.remove_red_eye,
@@ -586,6 +663,12 @@ class UserSessionState extends State<UserSession> {
                 });
               }
               this.completedExercise.add(currentMovement.id);
+              CompletedExerciseSet ces = CompletedExerciseSet.empty();
+              ces.accomplishedSet = hiitSet;
+              ces.completedTime = DateTime.now();
+              ces.repeats = hiitSet.exerciseTime;
+              ces.restAfterAccomplished = hiitSet.restTime;
+              sessionRepositoryService.saveCompletedSet(_currentSession, ces);
               Navigator.of(context).maybePop();
             },
           );
@@ -605,38 +688,38 @@ class UserSessionState extends State<UserSession> {
           return expansionPanelHeader(movement, sets);
         },
         body: ListView(
-          shrinkWrap: true,
+            shrinkWrap: true,
             children: sets.map((ExerciseSet es) {
-          CardioSet cs = es as CardioSet;
-          return ListTile(
-              dense: true,
-              leading: IconButton(
-                color: Colors.transparent,
-                icon: Icon(
-                  Icons.done,
-                  color: Colors.green,
-                ),
-                onPressed: null,
-              ),
-              title: Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.ideographic,
-                children: <Widget>[
-                  Expanded(
-                    child: Text(cs.movementName),
+              CardioSet cs = es as CardioSet;
+              return ListTile(
+                  dense: true,
+                  leading: IconButton(
+                    color: Colors.transparent,
+                    icon: Icon(
+                      Icons.done,
+                      color: Colors.green,
+                    ),
+                    onPressed: null,
                   ),
-                  Expanded(
-                    child: Text(cs.exerciseDistance.toString() + "KM"),
-                  ),
-                  Expanded(
-                    child: Text(cs.exerciseTime.toString() + "分钟"),
-                  ),
-                  Expanded(
-                    child:
-                        Text("约" + cs.exerciseCals.floor().toString() + "kCal"),
-                  ),
-                ],
-              ));
-        }).toList()));
+                  title: Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.ideographic,
+                    children: <Widget>[
+                      Expanded(
+                        child: Text(cs.movementName),
+                      ),
+                      Expanded(
+                        child: Text(cs.exerciseDistance.toString() + "KM"),
+                      ),
+                      Expanded(
+                        child: Text(cs.exerciseTime.toString() + "分钟"),
+                      ),
+                      Expanded(
+                        child: Text(
+                            "约" + cs.exerciseCals.floor().toString() + "kCal"),
+                      ),
+                    ],
+                  ));
+            }).toList()));
   }
 }

@@ -7,10 +7,15 @@ import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/component/profile_tile.dart';
 import 'package:workout_helper/service/current_user_store.dart';
+import 'package:workout_helper/service/movement_service.dart';
 import 'package:workout_helper/service/profile_service.dart';
+import 'package:workout_helper/service/session_service.dart';
 
 import 'avatar_crop.dart';
 import 'component/body_index_detail.dart';
+import 'component/bottom_navigation_bar.dart';
+import 'component/movement_one_rep_max.dart';
+import 'component/session_histories.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -28,6 +33,16 @@ class ProfilePageState extends State<ProfilePage> {
   Map<BodyIndex, BodyIndexSpecification> bodyIndexMap;
 
   ProfileService _profileService = ProfileService();
+
+  MovementService _movementService = MovementService();
+
+  SessionService _sessionService = SessionService();
+
+  int _movementAmount = 0;
+
+  int _sessionAmount = 0;
+
+  int _dietAmount = 0;
 
   Widget profileHeader() => Container(
       height: MediaQuery.of(context).size.height / 4,
@@ -100,38 +115,6 @@ class ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Widget profileColumn() => Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            CircleAvatar(
-              backgroundImage: NetworkImage(
-                  "https://avatars0.githubusercontent.com/u/12619420?s=460&v=4"),
-            ),
-            Expanded(
-                child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "Pawan Kumar posted a photo",
-                  ),
-                  SizedBox(
-                    height: 5.0,
-                  ),
-                  Text(
-                    "25 mins ago",
-                  )
-                ],
-              ),
-            ))
-          ],
-        ),
-      );
-
   List<Widget> bodyIndexes() => buildBodyIndex();
 
   Widget followColumn(Size deviceSize) => Container(
@@ -139,17 +122,43 @@ class ProfilePageState extends State<ProfilePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            ProfileTile(
-              title: "80",
-              subtitle: "训练动作",
+            Expanded(
+              child: ProfileTile(
+                title: _movementAmount.toString(),
+                subtitle: "训练动作",
+                onTap: () async {
+                  _movementService
+                      .getMovementOneRepMax(
+                          Provider.of<CurrentUserStore>(context).currentUser.id)
+                      .then((List<MovementOneRepMax> movements) {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return MovementOneRepMaxPage(movementOneRepMax: movements);
+                    }));
+                  });
+                },
+              ),
             ),
-            ProfileTile(
-              title: "140",
-              subtitle: "训练记录",
+            Expanded(
+              child: ProfileTile(
+                title: _sessionAmount.toString(),
+                subtitle: "训练记录",
+                onTap: () {
+                  _sessionService.getUserCompletedSessions(
+                      Provider.of<CurrentUserStore>(context).currentUser.id).then((List<Session> sessions){
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context){
+                          return SessionHistory(sessions: sessions,);
+                        }));
+                  });
+                },
+              ),
             ),
-            ProfileTile(
-              title: "104",
-              subtitle: "饮食记录",
+            Expanded(
+              child: ProfileTile(
+                title: _dietAmount.toString(),
+                subtitle: "饮食记录",
+                onTap: () {},
+              ),
             )
           ],
         ),
@@ -172,13 +181,20 @@ class ProfilePageState extends State<ProfilePage> {
 
   @override
   void didChangeDependencies() {
+    String userId =
+        Provider.of<CurrentUserStore>(context).currentUser.id.toString();
     super.didChangeDependencies();
-    _profileService
-        .loadUserIndexes(
-            Provider.of<CurrentUserStore>(context).currentUser.id.toString())
-        .then((List<UserBodyIndex> indexes) {
+    _profileService.loadUserIndexes(userId).then((List<UserBodyIndex> indexes) {
       setState(() {
         this.userBodyIndexes = indexes;
+      });
+    });
+    _profileService
+        .loadUserTrainingService(userId)
+        .then((Map<String, dynamic> data) {
+      setState(() {
+        _sessionAmount = data["session_amount"];
+        _movementAmount = data["movement_amount"];
       });
     });
   }
@@ -191,7 +207,11 @@ class ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(key: _key, body: bodyData());
+    return Scaffold(
+//      appBar: AppBar(),
+      body: SafeArea(child: bodyData()),
+      bottomNavigationBar: BottomNaviBar(currentIndex: 2,),
+    );
   }
 
   void switchHeaderAvatar() {

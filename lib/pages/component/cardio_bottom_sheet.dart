@@ -37,7 +37,7 @@ Map<String, String> metMap = {
 /// https://download.lww.com/wolterskluwer_vitalstream_com/PermaLink/MSS/A/MSS_43_8_2011_06_13_AINSWORTH_202093_SDC1.pdf
 
 class CardioBottomSheetState extends State<CardioBottomSheet> {
-  CardioSet _cs = CardioSet();
+  CardioSet _cs = CardioSet.empty();
 
   ProfileService _profileService = ProfileService();
 

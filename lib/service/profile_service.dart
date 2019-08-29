@@ -23,4 +23,10 @@ class ProfileService {
     db.insertBodyIndex(userBodyIndex,userId);
   }
 
+  Future<Map<String,dynamic>> loadUserTrainingService(String userId) async {
+    return dio.get("/user/" + userId + "/training_summary").then((Response r){
+      return r.data as Map<String, dynamic>;
+    });
+  }
+
 }

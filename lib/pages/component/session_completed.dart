@@ -94,9 +94,9 @@ class SessionCompletedState extends State<SessionCompleted> {
   }
 
   void emittingCompletedInfo() {
-    CompletedExerciseSet set = CompletedExerciseSet();
+    CompletedExerciseSet set = CompletedExerciseSet.empty();
     set.accomplishedSet = this.finishedSet;
-    set.id = uuid.v4().toString();
+    set.id = DateTime.now().millisecondsSinceEpoch;
     set.weight = double.parse(weight.text);
     set.repeats = int.parse(number.text);
     set.restAfterAccomplished = createTime.difference(DateTime.now()).inSeconds;

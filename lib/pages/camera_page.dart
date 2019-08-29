@@ -3,20 +3,20 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:video_player/video_player.dart';
 
 import 'component/show_clip_result.dart';
 
 
 class CameraExampleHome extends StatefulWidget {
-  final String currentSessionId;
-
-  CameraExampleHome(this.currentSessionId);
+  final String remoteStoreLocation;
+  final Function(String) fileUploaded;
+  CameraExampleHome(this.remoteStoreLocation, this.fileUploaded);
 
   @override
   _CameraExampleHomeState createState() {
-    return _CameraExampleHomeState(this.currentSessionId);
+    return _CameraExampleHomeState(this.remoteStoreLocation,this.fileUploaded);
   }
 }
 
@@ -38,18 +38,14 @@ void logError(String code, String message) =>
 
 class _CameraExampleHomeState extends State<CameraExampleHome>
     with WidgetsBindingObserver {
+
+  final Function(String) fileUploaded;
+
   CameraController controller;
   String imagePath;
-  String videoPath;
-  VideoPlayerController videoController;
-  VoidCallback videoPlayerListener;
-  bool enableAudio = true;
+  final String remoteStoreLocation;
 
-  bool _isRecording = false;
-
-  final String currentSessionId;
-
-  _CameraExampleHomeState(this.currentSessionId);
+  _CameraExampleHomeState(this.remoteStoreLocation, this.fileUploaded);
 
   @override
   void initState() {
@@ -79,7 +75,6 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    videoController?.dispose();
     controller?.dispose();
     super.dispose();
   }
@@ -180,29 +175,13 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         IconButton(
           icon: const Icon(Icons.camera_alt),
           color: Theme.of(context).primaryColor,
-          onPressed: controller != null &&
-                  controller.value.isInitialized &&
-                  !controller.value.isRecordingVideo
-              ? onTakePictureButtonPressed
-              : null,
+          onPressed: onTakePictureButtonPressed
+
         ),
         IconButton(
-          icon: const Icon(Icons.videocam),
+          icon: const Icon(Icons.image),
           color: Theme.of(context).primaryColor,
-          onPressed: controller != null &&
-                  controller.value.isInitialized &&
-                  !controller.value.isRecordingVideo
-              ? onVideoRecordButtonPressed
-              : null,
-        ),
-        IconButton(
-          icon: const Icon(Icons.stop),
-          color: Colors.red,
-          onPressed: controller != null &&
-                  controller.value.isInitialized &&
-                  controller.value.isRecordingVideo
-              ? onStopButtonPressed
-              : null,
+          onPressed: onGalleryButtonPressed
         )
       ],
     );
@@ -225,9 +204,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             onNewCameraSelected(this.cameras[index + 1]);
           }
         });
-    return _isRecording
-        ? Row()
-        : Row(
+    return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [switchCamera]);
   }
@@ -245,7 +222,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     controller = CameraController(
       cameraDescription,
       ResolutionPreset.high,
-      enableAudio: enableAudio,
+      enableAudio: true,
     );
 
     // If the controller is updated then update the UI.
@@ -272,107 +249,29 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       if (mounted) {
         setState(() {
           imagePath = filePath;
-          videoController?.dispose();
-          videoController = null;
         });
         if (filePath != null) {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => ShowClipResult(
-                    isVideo: false,
-                    filePath: filePath,
-                    currentSessionId: currentSessionId,
-                  )));
+          goToResult(filePath);
         }
       }
     });
   }
 
-  void onVideoRecordButtonPressed() {
-    startVideoRecording().then((String filePath) {
-      if (mounted)
-        setState(() {
-          _isRecording = true;
+  void goToResult(String filePath) {
+        Navigator.of(context).push(MaterialPageRoute<String>(
+        builder: (context) => ShowClipResult(
+              filePath: filePath,
+              remoteStoreLocation:  remoteStoreLocation,
+            ))).then((String filePath){
+              print('uploaded, stored @' + filePath);
+              this.fileUploaded(filePath);
         });
-      if (filePath != null) showInSnackBar('开始录制');
-    });
   }
 
-  void onStopButtonPressed() {
-    stopVideoRecording().then((_) {
-      if (mounted) setState(() {});
-      showInSnackBar('录制完成');
-      //showInSnackBar('Video recorded to: $videoPath');
-    });
-  }
-
-  Future<String> startVideoRecording() async {
-    if (!controller.value.isInitialized) {
-      showInSnackBar('Error: select a camera first.');
-      return null;
-    }
-
-    final Directory extDir = await getApplicationDocumentsDirectory();
-    final String dirPath = '${extDir.path}/TrainingRecord/Movies/';
-    await Directory(dirPath).create(recursive: true);
-    final String filePath = '$dirPath/${timestamp()}.mp4';
-
-    if (controller.value.isRecordingVideo) {
-      // A recording is already started, do nothing.
-      return null;
-    }
-
-    try {
-      videoPath = filePath;
-      await controller.startVideoRecording(filePath);
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      return null;
-    }
-    return filePath;
-  }
-
-  Future<void> stopVideoRecording() async {
-    if (!controller.value.isRecordingVideo) {
-      return null;
-    }
-
-    try {
-      await controller.stopVideoRecording();
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      return null;
-    }
-
-    await _startVideoPlayer();
-  }
-
-  Future<void> _startVideoPlayer() async {
-    final VideoPlayerController vcontroller =
-        VideoPlayerController.file(File(videoPath));
-    videoPlayerListener = () {
-      if (videoController != null && videoController.value.size != null) {
-        // Refreshing the state to update video player with the correct ratio.
-        if (mounted) setState(() {});
-        videoController.removeListener(videoPlayerListener);
-      }
-    };
-    vcontroller.addListener(videoPlayerListener);
-    await vcontroller.setLooping(true);
-    await vcontroller.initialize();
-    await videoController?.dispose();
-    if (mounted) {
-      setState(() {
-        imagePath = null;
-        videoController = vcontroller;
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => ShowClipResult(
-                  currentSessionId: currentSessionId,
-                  isVideo: true,
-                  videoController: vcontroller,
-                  filePath: videoPath,
-                )));
-      });
-    }
+  //todo using image picker
+  void onGalleryButtonPressed() async {
+    final file = await ImagePicker.pickImage(source: ImageSource.gallery);
+    goToResult(file.path);
   }
 
   Future<String> takePicture() async {

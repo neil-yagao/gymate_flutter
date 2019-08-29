@@ -3,16 +3,19 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:password/password.dart';
+import 'package:workout_helper/general/alicloud_oss.dart';
 import 'package:workout_helper/model/entities.dart';
 
 import 'basic_dio.dart';
 
-class CurrentUserStore extends ChangeNotifier{
+class CurrentUserStore extends ChangeNotifier {
   Dio dio;
 
   final GlobalKey<ScaffoldState> _scaffoldKey;
 
   User currentUser;
+
+  AliCloudOSS _aliCloudOSS = AliCloudOSS();
 
   CurrentUserStore(this._scaffoldKey) {
     dio = DioInstance.getInstance(_scaffoldKey);
@@ -24,8 +27,7 @@ class CurrentUserStore extends ChangeNotifier{
     params['password'] = Password.hash(password, PBKDF2());
     Response userResponse;
     try {
-      userResponse =
-      await dio.get("/user/login", queryParameters: params);
+      userResponse = await dio.get("/user/login", queryParameters: params);
       currentUser = User.fromJson(userResponse.data);
       notifyListeners();
       return currentUser;
@@ -34,10 +36,9 @@ class CurrentUserStore extends ChangeNotifier{
     }
   }
 
-  Future<User> register(String name, String password, String cell,
-      String verifyCode) async {
-    Response register = await dio.post(
-        '/user/register', data: {
+  Future<User> register(
+      String name, String password, String cell, String verifyCode) async {
+    Response register = await dio.post('/user/register', data: {
       'name': name,
       'alias': name,
       'password': Password.hash(password, new PBKDF2()),
@@ -59,13 +60,14 @@ class CurrentUserStore extends ChangeNotifier{
   }
 
   void updateUserAvatar(File file) async {
-    String fileSuffix = file.path.substring(file.path.lastIndexOf("\."));
-    FormData fileUpdate = FormData.from({
-      'file':  UploadFileInfo(file,currentUser.id.toString() + "-avatar." + fileSuffix)
+    _aliCloudOSS
+        .doUpload(currentUser.id.toString(), "avatar", file.path, file)
+        .then((String fileLocation) {
+      print(fileLocation);
+      dio.post("/user/" + currentUser.id.toString() + "/avatar",
+          data: {}, queryParameters: {'location': fileLocation});
+      currentUser.avatar = fileLocation;
+      notifyListeners();
     });
-    Response updatedUser = await dio.post(
-        "/user/" + currentUser.id.toString() + "/avatar", data: fileUpdate);
-    currentUser.avatar = User.fromJson(updatedUser.data).avatar;
-    notifyListeners();
   }
 }

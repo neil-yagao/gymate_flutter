@@ -3,18 +3,21 @@ import 'package:flutter/material.dart';
 enum SessionOption {
   EDITING,
   SAVE_TEMPLATE,
+  CREATE_FROM_TEMPLATE
 //  SHARE_TEMPLATE,
 }
 
 Map<SessionOption, String> actionMenu = {
   SessionOption.EDITING: "编辑训练",
   SessionOption.SAVE_TEMPLATE: "保存模板",
+  SessionOption.CREATE_FROM_TEMPLATE:"从模板导入"
 //  SessionOption.SHARE_TEMPLATE: "分享模板",
 };
 
 Map<SessionOption, Icon> actionIconMap = {
   SessionOption.EDITING: Icon(Icons.mode_edit),
   SessionOption.SAVE_TEMPLATE: Icon(Icons.save_alt),
+  SessionOption.CREATE_FROM_TEMPLATE:Icon(Icons.import_export)
 //  SessionOption.SHARE_TEMPLATE: Icon(Icons.share),
 };
 

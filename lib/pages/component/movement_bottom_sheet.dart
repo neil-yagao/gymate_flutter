@@ -32,9 +32,9 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
   TextEditingController expectingSetController =
       TextEditingController(text: '1');
 
-  GiantSet _giantSet = GiantSet(null);
-  SingleMovementSet _regularSet = SingleMovementSet(null);
-  ReduceSet _reduceSet = ReduceSet(null);
+  GiantSet _giantSet = GiantSet.fromObject(null);
+  SingleMovementSet _regularSet = SingleMovementSet.fromOther(null);
+  ReduceSet _reduceSet = ReduceSet.fromObject(null);
 
   final Function(List<ExerciseSet> newMovement) onSubmitted;
 
@@ -43,7 +43,7 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
   @override
   void initState() {
     super.initState();
-    service.getMovements().then((List<Movement> movements) {
+    service.getMovements(ExerciseType.lifting).then((List<Movement> movements) {
       setState(() {
         movementBottomSheetUtil = MovementBottomSheetUtil(movements);
       });
@@ -55,21 +55,21 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
       case MovementType.SINGLE:
         return List.generate(int.parse(expectingSetController.text),
             (int index) {
-          var instance = SingleMovementSet(_regularSet);
+          var instance = SingleMovementSet.fromOther(_regularSet);
           return instance;
         });
       case MovementType.REDUCE:
         _reduceSet.movement = _regularSet.movement;
         return List.generate(int.parse(expectingSetController.text),
             (int index) {
-          var instance = ReduceSet(_reduceSet);
+          var instance = ReduceSet.fromObject(_reduceSet);
           instance.copyFromRegularSet(_regularSet);
           return instance;
         });
       case MovementType.GIANT:
         return List.generate(int.parse(expectingSetController.text),
             (int index) {
-          var instance = GiantSet(_giantSet);
+          var instance = GiantSet.fromObject(_giantSet);
           return instance;
         });
     }
@@ -145,7 +145,7 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
                     onPressed: () {
                       setState(() {
                         this._giantSet.movements.add(_regularSet);
-                        _regularSet = SingleMovementSet(null);
+                        _regularSet = SingleMovementSet.fromOther(null);
                       });
                     },
                   ),

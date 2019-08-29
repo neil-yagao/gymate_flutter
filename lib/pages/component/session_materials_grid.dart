@@ -17,7 +17,7 @@ class SessionMaterialsGrid extends StatefulWidget {
 }
 
 class SessionMaterialsGridState extends State<SessionMaterialsGrid> {
-  final SessionRepositoryService srs = SessionRepositoryService();
+  final SessionService srs = SessionService();
   final String sessionId;
 
   List<SessionMaterial> _materials = List();
@@ -32,7 +32,6 @@ class SessionMaterialsGridState extends State<SessionMaterialsGrid> {
         .then((sms) {
       setState(() {
         _materials = sms;
-        print(_materials);
       });
     });
   }

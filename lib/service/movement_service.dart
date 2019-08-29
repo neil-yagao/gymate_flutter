@@ -1,40 +1,32 @@
+import 'package:dio/dio.dart';
 import 'package:workout_helper/model/entities.dart';
+import 'package:workout_helper/model/enum_to_string.dart';
+import 'package:workout_helper/service/basic_dio.dart';
 
 class MovementService {
 
-  static List<Movement> movements = List();
+  Dio dio = DioInstance.getInstance(null);
 
-  MovementService(){
-    movements = List();
-    Movement benchPress = Movement();
-    benchPress.id = "1";
-    benchPress.involvedMuscle = List();
-    benchPress.involvedMuscle.add(MuscleGroup.TRICEPS);
-    benchPress.involvedMuscle.add(MuscleGroup.CHEST);
-    benchPress.name = "Bench Press";
-    benchPress.description = "Best movement for chest muscle";
-    benchPress.picReference = '';
-    benchPress.videoReference = '';
-    movements.add(benchPress);
-    Movement squat = Movement();
-    squat.id = "2";
-    squat.involvedMuscle = List();
-    squat.involvedMuscle.addAll([
-      MuscleGroup.LEG,
-      MuscleGroup.QUADS,
-      MuscleGroup.GLUTES,
-      MuscleGroup.HAMSTRING,
-      MuscleGroup.CALVES
-    ]);
-    squat.involvedMuscle.add(MuscleGroup.CHEST);
-    squat.name = "Squat";
-    squat.description = "Best movement for Leg muscle";
-    squat.picReference = '';
-    squat.videoReference = '';
-    movements.add(squat);
+  Future<List<Movement>> getMovements(ExerciseType exerciseType) async {
+    return dio.get('/movements',queryParameters:{
+      "exerciseType": EnumToString.parse(exerciseType)
+    }).then((Response rs){
+      List<Movement> movements = List();
+      (rs.data as List).forEach((value){
+        movements.add(Movement.fromJson(value));
+      });
+      return movements;
+    });
   }
 
-  Future<List<Movement>> getMovements() async {
-    return movements;
+  Future<List<MovementOneRepMax>> getMovementOneRepMax(int userId){
+    return dio.get('/movements/' + userId.toString() + "/one_rep_max").then((Response r){
+      List<MovementOneRepMax> result = List();
+      (r.data as List).forEach((value){
+        result.add(MovementOneRepMax.fromJson(value));
+      });
+      return result;
+    });
+
   }
 }
