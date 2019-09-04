@@ -9,14 +9,14 @@ import 'package:path_provider/path_provider.dart';
 import 'component/show_clip_result.dart';
 
 
-class CameraExampleHome extends StatefulWidget {
+class CameraCapture extends StatefulWidget {
   final String remoteStoreLocation;
   final Function(String) fileUploaded;
-  CameraExampleHome(this.remoteStoreLocation, this.fileUploaded);
+  CameraCapture(this.remoteStoreLocation, this.fileUploaded);
 
   @override
-  _CameraExampleHomeState createState() {
-    return _CameraExampleHomeState(this.remoteStoreLocation,this.fileUploaded);
+  _CameraCaptureState createState() {
+    return _CameraCaptureState(this.remoteStoreLocation,this.fileUploaded);
   }
 }
 
@@ -36,7 +36,7 @@ IconData getCameraLensIcon(CameraLensDirection direction) {
 void logError(String code, String message) =>
     print('Error: $code\nError Message: $message');
 
-class _CameraExampleHomeState extends State<CameraExampleHome>
+class _CameraCaptureState extends State<CameraCapture>
     with WidgetsBindingObserver {
 
   final Function(String) fileUploaded;
@@ -45,7 +45,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   String imagePath;
   final String remoteStoreLocation;
 
-  _CameraExampleHomeState(this.remoteStoreLocation, this.fileUploaded);
+  _CameraCaptureState(this.remoteStoreLocation, this.fileUploaded);
 
   @override
   void initState() {

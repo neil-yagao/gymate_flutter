@@ -6,16 +6,19 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/component/profile_tile.dart';
+import 'package:workout_helper/pages/plan_generate.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/movement_service.dart';
 import 'package:workout_helper/service/profile_service.dart';
 import 'package:workout_helper/service/session_service.dart';
+import 'package:workout_helper/util/navigation_util.dart';
 
 import 'avatar_crop.dart';
 import 'component/body_index_detail.dart';
 import 'component/bottom_navigation_bar.dart';
 import 'component/movement_one_rep_max.dart';
 import 'component/session_histories.dart';
+import 'exercise_template_selection.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -41,6 +44,8 @@ class ProfilePageState extends State<ProfilePage> {
   int _movementAmount = 0;
 
   int _sessionAmount = 0;
+
+  int _exerciseTemplateAmount = 0;
 
   int _dietAmount = 0;
 
@@ -133,7 +138,8 @@ class ProfilePageState extends State<ProfilePage> {
                       .then((List<MovementOneRepMax> movements) {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (context) {
-                      return MovementOneRepMaxPage(movementOneRepMax: movements);
+                      return MovementOneRepMaxPage(
+                          movementOneRepMax: movements);
                     }));
                   });
                 },
@@ -144,12 +150,27 @@ class ProfilePageState extends State<ProfilePage> {
                 title: _sessionAmount.toString(),
                 subtitle: "训练记录",
                 onTap: () {
-                  _sessionService.getUserCompletedSessions(
-                      Provider.of<CurrentUserStore>(context).currentUser.id).then((List<Session> sessions){
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context){
-                          return SessionHistory(sessions: sessions,);
-                        }));
+                  _sessionService
+                      .getUserCompletedSessions(
+                          Provider.of<CurrentUserStore>(context).currentUser.id)
+                      .then((List<Session> sessions) {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return SessionHistory(
+                        sessions: sessions,
+                      );
+                    }));
                   });
+                },
+              ),
+            ),
+            Expanded(
+              child: ProfileTile(
+                title: _exerciseTemplateAmount.toString(),
+                subtitle: "训练模板",
+                onTap: () async {
+                  NavigationUtil.pushUsingDefaultFadingTransition(
+                      context, PlanGenerate());
                 },
               ),
             ),
@@ -195,6 +216,8 @@ class ProfilePageState extends State<ProfilePage> {
       setState(() {
         _sessionAmount = data["session_amount"];
         _movementAmount = data["movement_amount"];
+        _dietAmount = data['nutrition_amount'];
+        _exerciseTemplateAmount = data['exercise_template_amount'];
       });
     });
   }
@@ -210,7 +233,9 @@ class ProfilePageState extends State<ProfilePage> {
     return Scaffold(
 //      appBar: AppBar(),
       body: SafeArea(child: bodyData()),
-      bottomNavigationBar: BottomNaviBar(currentIndex: 2,),
+      bottomNavigationBar: BottomNaviBar(
+        currentIndex: 2,
+      ),
     );
   }
 
@@ -280,7 +305,7 @@ class ProfilePageState extends State<ProfilePage> {
           },
           child: Icon(Icons.add),
           color: Colors.transparent,
-          textColor: Colors.grey,
+          textColor: Theme.of(context).primaryColor,
         ),
       ];
     }

@@ -385,10 +385,11 @@ class UserSessionState extends State<UserSession> {
             style: TextStyle(color: Colors.transparent),
           )
         : SpeedDial(
+            backgroundColor: Colors.white,
             // both default to 16
             marginRight: 18,
             marginBottom: 20,
-            child: Icon(Icons.add),
+            child: Icon(Icons.add,color: Theme.of(context).primaryColor,),
 //            animatedIcon: AnimatedIcons.menu_close,
 //            animatedIconTheme: IconThemeData(size: 22.0),
             curve: Curves.bounceIn,
@@ -397,8 +398,8 @@ class UserSessionState extends State<UserSession> {
             tooltip: '添加运动',
             children: [
               SpeedDialChild(
-                  child: Icon(CustomIcon.leak_remove),
-                  backgroundColor: Colors.blue[800],
+                  child: Icon(CustomIcon.leak_remove,color:Colors.red[400]),
+                  backgroundColor:  Colors.white,
                   label: '力量训练',
                   labelStyle: Typography.dense2018.subhead,
                   onTap: () {
@@ -413,8 +414,8 @@ class UserSessionState extends State<UserSession> {
                         });
                   }),
               SpeedDialChild(
-                child: Icon(CustomIcon.heartbeat),
-                backgroundColor: Colors.blue[600],
+                child: Icon(CustomIcon.heartbeat,color: Colors.red[400],),
+                backgroundColor: Colors.white,
                 label: 'HIIT',
                 labelStyle: Typography.dense2018.subhead,
                 onTap: () {
@@ -431,8 +432,8 @@ class UserSessionState extends State<UserSession> {
                 },
               ),
               SpeedDialChild(
-                child: Icon(Icons.directions_run),
-                backgroundColor: Colors.blue[400],
+                child: Icon(Icons.directions_run,color: Colors.red[400],),
+                backgroundColor: Colors.white ,
                 label: '有氧运动',
                 labelStyle: TextStyle(fontSize: 18.0),
                 onTap: () => {
@@ -546,7 +547,7 @@ class UserSessionState extends State<UserSession> {
     FlatButton cameraButton = FlatButton(
       onPressed: () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => CameraExampleHome(
+            builder: (context) => CameraCapture(
                     "session/" + _currentSession.id, (String uploadedFile) {
                   SessionMaterial sessionMaterial = SessionMaterial();
                   sessionMaterial.isVideo = false;

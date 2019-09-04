@@ -59,86 +59,80 @@ class HomePageNoPlanState extends State<HomePage> {
     return Scaffold(
         body: SafeArea(
             child: ListView(
+                shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 children: [
+              Stack(
+                children: <Widget>[
                   HomeCalendar(),
-                  Divider(),
-                  buildSessionPart(_todaySession),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Expanded(child: Divider()),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          "或者",
-                          style: Typography.dense2018.subhead
-                              .merge(TextStyle(color: Colors.grey)),
-                        ),
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 75.0, bottom: 50),
+                      child: Image.asset(
+                        "assets/motto.jpg",
+                        fit: BoxFit.fill,
                       ),
-                      Expanded(child: Divider()),
+                    ),
+                    color: Color.fromRGBO(255, 255, 255, 0.8),
+                    height: MediaQuery.of(context).size.height * 0.5,
+                  ),
+                ],
+              ),
+              Container(
+                height: MediaQuery.of(context).size.height * 0.36,
+                child: Padding(
+                  padding: const EdgeInsets.only(top:14.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      buildSessionPart(_todaySession),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Expanded(flex: 1, child: Divider()),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                            child: Text(
+                              "或者",
+                              style: Typography.dense2018.subhead.merge(TextStyle(
+                                  color: Colors.grey,
+                                  fontStyle: FontStyle.italic)),
+                            ),
+                          ),
+                          Expanded(flex: 2, child: Divider()),
+                        ],
+                      ),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.08,
+                          child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.transparent,
+                                child: Icon(Icons.flash_on),
+                              ),
+                              title: Text("快速开始一次训练",
+                                  style: Typography.dense2018.title.merge(
+                                      TextStyle(
+                                          color: Colors.grey,
+                                          fontStyle: FontStyle.italic))),
+                              onTap: () {
+                                Navigator.of(context).pushReplacement(
+                                    PageRouteBuilder(
+                                        pageBuilder: (context, a1, a2) =>
+                                            UserSession("randomId"),
+                                        transitionsBuilder:
+                                            (context, animate, a2, child) =>
+                                                FadeTransition(
+                                                  opacity: animate,
+                                                  child: child,
+                                                ),
+                                        transitionDuration:
+                                            Duration(milliseconds: 500)));
+                              }))
                     ],
                   ),
-                  SizedBox(
-                      height: MediaQuery
-                          .of(context)
-                          .size
-                          .height * 0.1,
-                      child: FlatButton(
-                          onPressed: () {
-                            Navigator.of(context).pushReplacement(
-                                PageRouteBuilder(
-                                    pageBuilder: (context, a1, a2) =>
-                                        UserSession("randomId"),
-                                    transitionsBuilder: (context, animate, a2,
-                                        child) =>
-                                        FadeTransition(
-                                          opacity: animate,
-                                          child: child,
-                                        ),
-                                    transitionDuration: Duration(
-                                        milliseconds: 500)));
-                          },
-                          color: Colors.transparent,
-                          child: Row(children: <Widget>[
-                            Expanded(
-                                child: Center(
-                                  child: CircleAvatar(
-                                    backgroundColor: Colors.transparent,
-                                    child: Image.asset(
-                                        "assets/quick-session.jpg"),
-                                  ),
-                                )),
-                            Expanded(
-                                flex: 2,
-                                child: Center(
-                                    child: Text("快速开始一次训练",
-                                        style: Typography.dense2018.title.merge(
-                                            TextStyle(color: Colors.grey))))),
-                          ]))),
-                  Divider(),
-                  SizedBox(
-                    height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1,
-                    child: Center(
-                      child: Column(children: [
-                        Text(
-                          "\" 有时候勇气仅仅是一天结束后静静地说",
-                          style: Typography.dense2018.body1.merge(
-                              TextStyle(fontStyle: FontStyle.italic)),
-                        ),
-                        Text(
-                          "明天我再试试 \"",
-                          style: Typography.dense2018.body1.merge(
-                              TextStyle(fontStyle: FontStyle.italic)) ,
-                        )
-                      ]),
-                    ),
-                  ),
-
-                ])),
+                ),
+              ),
+            ])),
         bottomNavigationBar: BottomNaviBar(
           currentIndex: 0,
         ));
@@ -148,73 +142,56 @@ class HomePageNoPlanState extends State<HomePage> {
     if (todaySession == null || todaySession.id == null) {
       //user do not involved in any plan
       return SizedBox(
-        height: MediaQuery
-            .of(context)
-            .size
-            .height * 0.1,
-        child: FlatButton(
-            color: Colors.transparent,
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  flex: 1,
-                  child: IconButton(
-                      icon: Icon(
-                        Icons.add,
-                        color: Colors.grey,
-                      ),
-                      onPressed: null),
-                ),
-                Expanded(
-                    flex: 2,
-                    child: Center(
-                      child: Text(
-                        "查找合适的计划",
-                        style: Typography.dense2018.title
-                            .merge(TextStyle(color: Colors.grey)),
-                      ),
-                    ))
-              ],
+        height: MediaQuery.of(context).size.height * 0.08,
+        child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              child: Icon(Icons.search),
             ),
-            onPressed: () {}),
+            title: Text(
+              "查找合适的计划",
+              style: Typography.dense2018.title.merge(
+                  TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+            ),
+            onTap: () {}),
       );
     }
 
     return Card(
         child: Column(children: <Widget>[
-          Row(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text("训练进度", style: Typography.dense2018.title),
-              ),
-            ],
-          ),
+      Row(
+        children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: LinearProgressIndicator(
-              semanticsLabel: '现有计划进展',
-              value: 0.2,
-            ),
+            child: Text("训练进度", style: Typography.dense2018.title),
           ),
-          ListTile(
-            title: Text(todaySession.matchingExercise.name,
-                style: Typography.dense2018.subtitle),
-            subtitle: Text(todaySession.matchingExercise.description),
-            trailing: FloatingActionButton(
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              foregroundColor: Colors.grey,
-              onPressed: () {
-                goToTodaySession(context);
-              },
-              child: Icon(Icons.chevron_right),
-            ),
-            onTap: () {
-              goToTodaySession(context);
-            },
-          )
-        ]));
+        ],
+      ),
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: LinearProgressIndicator(
+          semanticsLabel: '现有计划进展',
+          value: 0.2,
+        ),
+      ),
+      ListTile(
+        title: Text(todaySession.matchingExercise.name,
+            style: Typography.dense2018.subtitle),
+        subtitle: Text(todaySession.matchingExercise.description),
+        trailing: FloatingActionButton(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.grey,
+          onPressed: () {
+            goToTodaySession(context);
+          },
+          child: Icon(Icons.chevron_right),
+        ),
+        onTap: () {
+          goToTodaySession(context);
+        },
+      )
+    ]));
   }
 
   void goToTodaySession(BuildContext context) {

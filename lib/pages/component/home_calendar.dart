@@ -20,6 +20,10 @@ class HomeCalendarState extends State<HomeCalendar> {
       weekDayMargin:EdgeInsets.all(0),
       dayPadding: 0,
       headerMargin: EdgeInsets.only(bottom: 8),
+      headerTextStyle: TextStyle(
+        fontStyle: FontStyle.italic,
+        color: Theme.of(context).primaryColor
+      ).merge(Typography.dense2018.subhead),
       weekFormat: false,
       weekendTextStyle: TextStyle(
         fontSize: 14.0,

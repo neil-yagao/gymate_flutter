@@ -1,4 +1,3 @@
-import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -403,21 +402,24 @@ class Exercise {
 
 ///训练计划
 class TrainingPlan {
-  String id;
+  int id;
+
+  String name;
 
   List<Exercise> schedule;
 
   String planGoal;
 
-  SupportedTrainingType planType;
+  int totalTrainingCycle;
 
-  int totalTrainingWeeks;
+  int sessionPerTrainingCycle;
 
-  int sessionPerWeek;
+  int trainingCycleDays;
 
   String extraNote;
 
-  String createdBy;
+  int createdBy;
+
 }
 
 ///单次训练记录

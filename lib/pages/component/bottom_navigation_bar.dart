@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:workout_helper/util/navigation_util.dart';
 
 import '../home_page.dart';
 import '../nutrition_page.dart';
@@ -22,29 +23,11 @@ class BottomNaviBarState extends State<BottomNaviBar> {
 
   void _onItemTapped(int index) {
     if (index == 0) {
-      Navigator.of(context).pushReplacement(PageRouteBuilder(
-          pageBuilder: (context, a1, a2) => HomePage(),
-          transitionsBuilder: (context, animate, a2, child) => FadeTransition(
-                opacity: animate,
-                child: child,
-              ),
-          transitionDuration: Duration(milliseconds: 500)));
+      NavigationUtil.replaceUsingDefaultFadingTransition(context, HomePage());
     } else if (index == 1) {
-      Navigator.of(context).pushReplacement(PageRouteBuilder(
-          pageBuilder: (context, a1, a2) => NutritionPage(),
-          transitionsBuilder: (context, animate, a2, child) => FadeTransition(
-            opacity: animate,
-            child: child,
-          ),
-          transitionDuration: Duration(milliseconds: 500)));
+      NavigationUtil.replaceUsingDefaultFadingTransition(context, NutritionPage());
     } else if (index == 2) {
-      Navigator.of(context).pushReplacement(PageRouteBuilder(
-          pageBuilder: (context, a1, a2) => ProfilePage(),
-          transitionsBuilder: (context, animate, a2, child) => FadeTransition(
-            opacity: animate,
-            child: child,
-          ),
-          transitionDuration: Duration(milliseconds: 500)));
+      NavigationUtil.replaceUsingDefaultFadingTransition(context, ProfilePage());
     }
   }
 
@@ -59,7 +42,7 @@ class BottomNaviBarState extends State<BottomNaviBar> {
       ],
       currentIndex: currentIndex,
       unselectedItemColor: Colors.grey,
-      selectedItemColor: Colors.blue,
+      selectedItemColor: Theme.of(context).primaryColor,
       showUnselectedLabels: true,
       onTap: _onItemTapped,
     );
