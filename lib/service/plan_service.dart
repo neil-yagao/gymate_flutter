@@ -21,9 +21,18 @@ class PlanService {
       'sessionPerTrainingCycle': tp.sessionPerTrainingCycle,
       'trainingCycleDays': tp.trainingCycleDays,
       'extraNote': tp.extraNote,
-      'createdBy': {'id': tp.createdBy}
+      'createdBy': {'id': tp.createdBy.id}
     }).then((Response t) {
       return t.data as Map<String, dynamic>;
+    });
+  }
+
+  Future<List<TrainingPlan>> getAllTrainingPlans() {
+    return instance.get('/plan').then((Response t) {
+      List<TrainingPlan> availablePlans = List();
+      (t.data as List)
+          .forEach((p) => availablePlans.add(TrainingPlan.fromJson(p)));
+      return availablePlans;
     });
   }
 }

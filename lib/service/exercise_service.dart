@@ -125,7 +125,7 @@ class ExerciseService {
   }
 
   static Exercise parseExercise(Map<String, dynamic> map) {
-    Exercise exercise = Exercise();
+    Exercise exercise = Exercise.empty();
     exercise.id = map['id'].toString();
     exercise.name = map['name'];
     exercise.description = map['description'];

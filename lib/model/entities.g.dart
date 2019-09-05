@@ -245,6 +245,58 @@ const _$CardioTypeEnumMap = <CardioType, dynamic>{
   CardioType.rowing: 'rowing'
 };
 
+Exercise _$ExerciseFromJson(Map<String, dynamic> json) {
+  return Exercise(
+      json['id'].toString(),
+      (json['muscleTarget'] as List)
+          ?.map((e) => _$enumDecodeNullable(_$MuscleGroupEnumMap, e))
+          ?.toList(),
+      json['name'] as String,
+      json['description'] as String,
+      json['recommendRestingTimeBetweenMovement'] as int);
+}
+
+Map<String, dynamic> _$ExerciseToJson(Exercise instance) => <String, dynamic>{
+      'id': instance.id,
+      'muscleTarget':
+          instance.muscleTarget?.map((e) => _$MuscleGroupEnumMap[e])?.toList(),
+      'name': instance.name,
+      'description': instance.description,
+      'recommendRestingTimeBetweenMovement':
+          instance.recommendRestingTimeBetweenMovement
+    };
+
+TrainingPlan _$TrainingPlanFromJson(Map<String, dynamic> json) {
+  return TrainingPlan(
+      json['id'] as int,
+      json['name'] as String,
+      json['planGoal'] as String,
+      json['totalTrainingCycle'] as int,
+      json['sessionPerTrainingCycle'] as int,
+      json['trainingCycleDays'] as int,
+      json['extraNote'] as String,
+      json['createdBy'] == null
+          ? null
+          : User.fromJson(json['createdBy'] as Map<String, dynamic>))
+    ..schedule = (json['schedule'] as List)
+        ?.map((e) =>
+            e == null ? null : Exercise.fromJson(e as Map<String, dynamic>))
+        ?.toList();
+}
+
+Map<String, dynamic> _$TrainingPlanToJson(TrainingPlan instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'schedule': instance.schedule,
+      'planGoal': instance.planGoal,
+      'totalTrainingCycle': instance.totalTrainingCycle,
+      'sessionPerTrainingCycle': instance.sessionPerTrainingCycle,
+      'trainingCycleDays': instance.trainingCycleDays,
+      'extraNote': instance.extraNote,
+      'createdBy': instance.createdBy
+    };
+
 MovementOneRepMax _$MovementOneRepMaxFromJson(Map<String, dynamic> json) {
   return MovementOneRepMax(
       json['userId'] as String,

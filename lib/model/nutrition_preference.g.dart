@@ -9,7 +9,7 @@ part of 'nutrition_preference.dart';
 UserNutritionPreference _$UserNutritionPreferenceFromJson(
     Map<String, dynamic> json) {
   return UserNutritionPreference(
-      (json['id'] as num)?.toInt(),
+      json['id'] as int,
       json['user'] == null
           ? null
           : User.fromJson(json['user'] as Map<String, dynamic>),
@@ -73,9 +73,9 @@ const _$NutritionPreferenceEnumMap = <NutritionPreference, dynamic>{
 
 NutritionRecord _$NutritionRecordFromJson(Map<String, dynamic> json) {
   return NutritionRecord(
-      (json['id'] as num)?.toInt(),
+      json['id'] as int,
       (json['materials'] as List)?.map((e) => e as String)?.toList(),
-      (json['name']) as String,
+      json['name'] as String,
       json['recorder'] == null
           ? null
           : User.fromJson(json['recorder'] as Map<String, dynamic>),

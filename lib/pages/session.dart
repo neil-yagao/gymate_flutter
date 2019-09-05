@@ -156,7 +156,7 @@ class UserSessionState extends State<UserSession> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Exercise exercise = Exercise();
+    Exercise exercise = Exercise.empty();
     exercise.id = this.exerciseId;
     if (_currentSession != null) {
       return;

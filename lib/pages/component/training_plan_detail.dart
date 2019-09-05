@@ -75,9 +75,9 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
                 "创建",
               ),
               onPressed: () async {
-                TrainingPlan proposalTrainingPlan = TrainingPlan();
+                TrainingPlan proposalTrainingPlan = TrainingPlan.empty();
                 proposalTrainingPlan.schedule = filedExerciseTemplate;
-                proposalTrainingPlan.createdBy = currentUser.id;
+                proposalTrainingPlan.createdBy = currentUser;
                 proposalTrainingPlan.extraNote = _extraNote.text;
                 proposalTrainingPlan.sessionPerTrainingCycle =
                     int.parse(_sessionPerTrainingCycle.text);
@@ -237,7 +237,7 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
     for (int i = 0;
         i < int.parse(_trainingCycleDays.text) - exerciseTemplate.length;
         i++) {
-      Exercise restingExercise = Exercise();
+      Exercise restingExercise = Exercise.empty();
       restingExercise.id = (0 - i).toString();
       restingExercise.name = "休息";
       restingExercise.plannedSets = List();

@@ -386,6 +386,7 @@ class CardioSet extends ExerciseSet {
 enum CardioType { walking, running, cycle, swimming, rowing }
 
 ///单次训练模板
+@JsonSerializable()
 class Exercise {
   String id;
 
@@ -398,9 +399,21 @@ class Exercise {
   List<ExerciseSet> plannedSets;
 
   int recommendRestingTimeBetweenMovement;
+
+
+  Exercise(this.id, this.muscleTarget, this.name, this.description,
+      this.recommendRestingTimeBetweenMovement);
+
+  Exercise.empty();
+
+  factory Exercise.fromJson(Map<String, dynamic> json) =>
+      _$ExerciseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ExerciseToJson(this);
 }
 
 ///训练计划
+@JsonSerializable()
 class TrainingPlan {
   int id;
 
@@ -418,8 +431,19 @@ class TrainingPlan {
 
   String extraNote;
 
-  int createdBy;
+  User createdBy;
 
+
+  TrainingPlan(this.id, this.name, this.planGoal, this.totalTrainingCycle,
+      this.sessionPerTrainingCycle, this.trainingCycleDays, this.extraNote,
+      this.createdBy);
+
+  TrainingPlan.empty();
+
+  factory TrainingPlan.fromJson(Map<String, dynamic> json) =>
+      _$TrainingPlanFromJson(json);
+
+  Map<String, dynamic> toJson() => _$TrainingPlanToJson(this);
 }
 
 ///单次训练记录
@@ -433,13 +457,13 @@ class Session {
   DateTime accomplishedTime;
 
   Session() {
-    matchingExercise = Exercise();
+    matchingExercise = Exercise.empty();
     accomplishedSets = List();
   }
 
   Session.fromJson(value) {
     this.id = value["id"].toString();
-    this.matchingExercise = Exercise();
+    this.matchingExercise = Exercise.empty();
     this.matchingExercise.id = value['matchingExerciseId'].toString();
     this.accomplishedSets = List();
     this.accomplishedTime = DateTime.parse(value['accomplishedTime']);
