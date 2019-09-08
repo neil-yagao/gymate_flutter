@@ -15,6 +15,18 @@ class LocalUsers extends Table {
 
   TextColumn get avatar => text()();
 }
+
+class LocalPlannedExercise extends Table {
+  TextColumn get id => text().withLength(min: 32, max: 64)();
+
+  TextColumn get executeDate => text().withLength(max: 32)();
+
+  IntColumn get exerciseTemplateId => integer()();
+
+  IntColumn get userId => integer()();
+
+  IntColumn get hasBeenExecuted =>integer()();
+}
 //
 //class LocalUserTrainings extends Table {
 //  TextColumn get userId => text().withLength(min: 32, max: 64)();
@@ -147,7 +159,8 @@ class LocalUserBodyIndex extends Table {
 //  LocalExercisePlannedSets,
 //  LocalTrainingExercises,
   LocalSessionMaterials,
-  LocalUserBodyIndex
+  LocalUserBodyIndex,
+  LocalPlannedExercise
 ])
 class ExerciseDatabase extends _$ExerciseDatabase {
   ExerciseDatabase()
@@ -199,14 +212,14 @@ class ExerciseDatabase extends _$ExerciseDatabase {
     return customSelect(
         "select l.* from local_user_body_index l "
         "left outer join local_user_body_index lm "
-            "on l.body_index = lm.body_index and l.user_id = lm.user_id and l.record_time < lm.record_time "
-            "where l.user_id = ? and lm.record_time is NULL order by l.record_time desc",
-        variables:[Variable.withString(userId)]).then((List<QueryRow> rows){
-          List<UserBodyIndex> indexes = List();
-          rows.forEach((QueryRow r){
-            indexes.add(UserBodyIndex.fromJson(r.data));
-          });
-          return indexes;
+        "on l.body_index = lm.body_index and l.user_id = lm.user_id and l.record_time < lm.record_time "
+        "where l.user_id = ? and lm.record_time is NULL order by l.record_time desc",
+        variables: [Variable.withString(userId)]).then((List<QueryRow> rows) {
+      List<UserBodyIndex> indexes = List();
+      rows.forEach((QueryRow r) {
+        indexes.add(UserBodyIndex.fromJson(r.data));
+      });
+      return indexes;
     });
   }
 
@@ -223,5 +236,27 @@ class ExerciseDatabase extends _$ExerciseDatabase {
         userId: userId);
     into(localUserBodyIndex).insert(index);
     return userIndex;
+  }
+
+  Future<List<LocalPlannedExerciseData>> savePlannedExercise(
+      Map<String, Exercise> exercises, int userId) async {
+    List<LocalPlannedExerciseData> plannedExercise = List();
+    for (String key in exercises.keys) {
+      LocalPlannedExerciseData row = LocalPlannedExerciseData(
+          id: uuid.v4(),
+          executeDate: key,
+          exerciseTemplateId: int.parse(exercises[key].id),
+          userId: userId);
+      plannedExercise.add(row);
+    }
+    into(localPlannedExercise).insertAll(plannedExercise);
+    return plannedExercise;
+  }
+
+  Future<List<LocalPlannedExerciseData>> queryForPlannedExercise(int userId) {
+    return (select(localPlannedExercise)..where((t) => t.userId.equals(userId)))
+        .get().then((List<LocalPlannedExerciseData> value){
+
+    });
   }
 }

@@ -46,14 +46,15 @@ class NutritionPageState extends State<NutritionPage> {
   UserNutritionPreference _cacheNutritionPreference;
 
   double _activityMultiply = 1.2;
+  User user;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    int userId = Provider.of<CurrentUserStore>(context).currentUser.id;
+    user = Provider.of<CurrentUserStore>(context).currentUser;
     Future.wait([
-      nutritionService.getUserNutritionPreference(userId),
-      profileService.loadUserIndexes(userId.toString())
+      nutritionService.getUserNutritionPreference(user.id),
+      profileService.loadUserIndexes(user.id.toString())
     ]).then((result) {
       if (result.length < 2) {
         return;
@@ -143,10 +144,8 @@ class NutritionPageState extends State<NutritionPage> {
                       color: nr.id == null ? Colors.grey : Colors.greenAccent,
                     ),
                     onTap: () {
-                      int userId =
-                          Provider.of<CurrentUserStore>(context).currentUser.id;
                       nutritionService
-                          .saveNutritionRecord(userId, nr)
+                          .saveNutritionRecord(user.id, nr)
                           .then((NutritionRecord savedNutritionRecord) {
                         setState(() {
                           nr.id = savedNutritionRecord.id;
@@ -156,9 +155,9 @@ class NutritionPageState extends State<NutritionPage> {
                     }),
                 title: Row(
                   children: <Widget>[
-                    Text(nr.name + ", 总计约：",
+                    Text(nr.name + ", 约：",
                         style: TextStyle(
-                            fontSize: 14, fontStyle: FontStyle.italic)),
+                            fontSize: 12, fontStyle: FontStyle.italic)),
                     Padding(
                       padding: const EdgeInsets.only(left: 12.0),
                       child: Text(nr.estimateCals.floor().toString()),
@@ -340,8 +339,7 @@ class NutritionPageState extends State<NutritionPage> {
                   onPressed: () {
                     UserNutritionPreference preference =
                         UserNutritionPreference.empty();
-                    preference.user =
-                        Provider.of<CurrentUserStore>(context).currentUser;
+                    preference.user = user;
                     preference.bmr = 10 * double.parse(_weight.text) +
                         6.25 * double.parse(_height.text) -
                         5 * double.parse(_age.text) +
@@ -417,9 +415,18 @@ class NutritionPageState extends State<NutritionPage> {
                 }
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => CameraCapture(
-                        "nutrition/" +
-                            DateFormat("yyyy-MM-dd").format(DateTime.now()),
-                        (String uploadedFile) {})));
+                            "nutrition/" +
+                                DateFormat("yyyy-MM-dd").format(DateTime.now()),
+                            (String uploadedFile) {
+                          NutritionRecord matchingRecord =
+                              todayRecords.elementAt(_expandingPanel - 1);
+                          if (matchingRecord.materials == null) {
+                            matchingRecord.materials = List();
+                          }
+                          matchingRecord.materials.add(uploadedFile);
+                          nutritionService.saveNutritionRecord(
+                              user.id, matchingRecord);
+                        })));
               },
               child: Icon(
                 Icons.camera_enhance,

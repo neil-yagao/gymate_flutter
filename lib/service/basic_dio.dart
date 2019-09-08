@@ -2,9 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 BaseOptions _options = new BaseOptions(
-  baseUrl: "http://localhost:9090/api",
-  connectTimeout: 50000,
-  receiveTimeout: 30000,
+  baseUrl: "http://192.168.100.245:9090/api",
+  connectTimeout: 5000,
+  receiveTimeout: 6000,
 );
 
 class DioInstance {

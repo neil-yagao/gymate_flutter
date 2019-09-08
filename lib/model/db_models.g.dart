@@ -81,9 +81,8 @@ class LocalUser extends DataClass implements Insertable<LocalUser> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      $mrjc($mrjc($mrjc(0, id.hashCode), name.hashCode), token.hashCode),
-      avatar.hashCode));
+  int get hashCode => $mrjf($mrjc(id.hashCode,
+      $mrjc(name.hashCode, $mrjc(token.hashCode, avatar.hashCode))));
   @override
   bool operator ==(other) =>
       identical(this, other) ||
@@ -105,6 +104,18 @@ class LocalUsersCompanion extends UpdateCompanion<LocalUser> {
     this.token = const Value.absent(),
     this.avatar = const Value.absent(),
   });
+  LocalUsersCompanion copyWith(
+      {Value<String> id,
+      Value<String> name,
+      Value<String> token,
+      Value<String> avatar}) {
+    return LocalUsersCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      token: token ?? this.token,
+      avatar: avatar ?? this.avatar,
+    );
+  }
 }
 
 class $LocalUsersTable extends LocalUsers
@@ -304,9 +315,8 @@ class LocalSessionMaterial extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      $mrjc($mrjc($mrjc(0, id.hashCode), filePath.hashCode), isVideo.hashCode),
-      sessionId.hashCode));
+  int get hashCode => $mrjf($mrjc(id.hashCode,
+      $mrjc(filePath.hashCode, $mrjc(isVideo.hashCode, sessionId.hashCode))));
   @override
   bool operator ==(other) =>
       identical(this, other) ||
@@ -329,6 +339,18 @@ class LocalSessionMaterialsCompanion
     this.isVideo = const Value.absent(),
     this.sessionId = const Value.absent(),
   });
+  LocalSessionMaterialsCompanion copyWith(
+      {Value<String> id,
+      Value<String> filePath,
+      Value<bool> isVideo,
+      Value<String> sessionId}) {
+    return LocalSessionMaterialsCompanion(
+      id: id ?? this.id,
+      filePath: filePath ?? this.filePath,
+      isVideo: isVideo ?? this.isVideo,
+      sessionId: sessionId ?? this.sessionId,
+    );
+  }
 }
 
 class $LocalSessionMaterialsTable extends LocalSessionMaterials
@@ -556,13 +578,13 @@ class LocalUserBodyIndexData extends DataClass
 
   @override
   int get hashCode => $mrjf($mrjc(
+      id.hashCode,
       $mrjc(
+          bodyIndex.hashCode,
           $mrjc(
-              $mrjc($mrjc($mrjc(0, id.hashCode), bodyIndex.hashCode),
-                  value.hashCode),
-              unit.hashCode),
-          recordTime.hashCode),
-      userId.hashCode));
+              value.hashCode,
+              $mrjc(unit.hashCode,
+                  $mrjc(recordTime.hashCode, userId.hashCode))))));
   @override
   bool operator ==(other) =>
       identical(this, other) ||
@@ -591,6 +613,22 @@ class LocalUserBodyIndexCompanion
     this.recordTime = const Value.absent(),
     this.userId = const Value.absent(),
   });
+  LocalUserBodyIndexCompanion copyWith(
+      {Value<String> id,
+      Value<String> bodyIndex,
+      Value<double> value,
+      Value<String> unit,
+      Value<int> recordTime,
+      Value<String> userId}) {
+    return LocalUserBodyIndexCompanion(
+      id: id ?? this.id,
+      bodyIndex: bodyIndex ?? this.bodyIndex,
+      value: value ?? this.value,
+      unit: unit ?? this.unit,
+      recordTime: recordTime ?? this.recordTime,
+      userId: userId ?? this.userId,
+    );
+  }
 }
 
 class $LocalUserBodyIndexTable extends LocalUserBodyIndex
@@ -755,6 +793,304 @@ class $LocalUserBodyIndexTable extends LocalUserBodyIndex
   }
 }
 
+class LocalPlannedExerciseData extends DataClass
+    implements Insertable<LocalPlannedExerciseData> {
+  final String id;
+  final String executeDate;
+  final int exerciseTemplateId;
+  final int userId;
+  final int hasBeenExecuted;
+  LocalPlannedExerciseData(
+      {@required this.id,
+      @required this.executeDate,
+      @required this.exerciseTemplateId,
+      @required this.userId,
+      @required this.hasBeenExecuted});
+  factory LocalPlannedExerciseData.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    final intType = db.typeSystem.forDartType<int>();
+    return LocalPlannedExerciseData(
+      id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      executeDate: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}execute_date']),
+      exerciseTemplateId: intType.mapFromDatabaseResponse(
+          data['${effectivePrefix}exercise_template_id']),
+      userId:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      hasBeenExecuted: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}has_been_executed']),
+    );
+  }
+  factory LocalPlannedExerciseData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer = const ValueSerializer.defaults()}) {
+    return LocalPlannedExerciseData(
+      id: serializer.fromJson<String>(json['id']),
+      executeDate: serializer.fromJson<String>(json['executeDate']),
+      exerciseTemplateId: serializer.fromJson<int>(json['exerciseTemplateId']),
+      userId: serializer.fromJson<int>(json['userId']),
+      hasBeenExecuted: serializer.fromJson<int>(json['hasBeenExecuted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson(
+      {ValueSerializer serializer = const ValueSerializer.defaults()}) {
+    return {
+      'id': serializer.toJson<String>(id),
+      'executeDate': serializer.toJson<String>(executeDate),
+      'exerciseTemplateId': serializer.toJson<int>(exerciseTemplateId),
+      'userId': serializer.toJson<int>(userId),
+      'hasBeenExecuted': serializer.toJson<int>(hasBeenExecuted),
+    };
+  }
+
+  @override
+  T createCompanion<T extends UpdateCompanion<LocalPlannedExerciseData>>(
+      bool nullToAbsent) {
+    return LocalPlannedExerciseCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      executeDate: executeDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(executeDate),
+      exerciseTemplateId: exerciseTemplateId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(exerciseTemplateId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      hasBeenExecuted: hasBeenExecuted == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hasBeenExecuted),
+    ) as T;
+  }
+
+  LocalPlannedExerciseData copyWith(
+          {String id,
+          String executeDate,
+          int exerciseTemplateId,
+          int userId,
+          int hasBeenExecuted}) =>
+      LocalPlannedExerciseData(
+        id: id ?? this.id,
+        executeDate: executeDate ?? this.executeDate,
+        exerciseTemplateId: exerciseTemplateId ?? this.exerciseTemplateId,
+        userId: userId ?? this.userId,
+        hasBeenExecuted: hasBeenExecuted ?? this.hasBeenExecuted,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlannedExerciseData(')
+          ..write('id: $id, ')
+          ..write('executeDate: $executeDate, ')
+          ..write('exerciseTemplateId: $exerciseTemplateId, ')
+          ..write('userId: $userId, ')
+          ..write('hasBeenExecuted: $hasBeenExecuted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      id.hashCode,
+      $mrjc(
+          executeDate.hashCode,
+          $mrjc(exerciseTemplateId.hashCode,
+              $mrjc(userId.hashCode, hasBeenExecuted.hashCode)))));
+  @override
+  bool operator ==(other) =>
+      identical(this, other) ||
+      (other is LocalPlannedExerciseData &&
+          other.id == id &&
+          other.executeDate == executeDate &&
+          other.exerciseTemplateId == exerciseTemplateId &&
+          other.userId == userId &&
+          other.hasBeenExecuted == hasBeenExecuted);
+}
+
+class LocalPlannedExerciseCompanion
+    extends UpdateCompanion<LocalPlannedExerciseData> {
+  final Value<String> id;
+  final Value<String> executeDate;
+  final Value<int> exerciseTemplateId;
+  final Value<int> userId;
+  final Value<int> hasBeenExecuted;
+  const LocalPlannedExerciseCompanion({
+    this.id = const Value.absent(),
+    this.executeDate = const Value.absent(),
+    this.exerciseTemplateId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.hasBeenExecuted = const Value.absent(),
+  });
+  LocalPlannedExerciseCompanion copyWith(
+      {Value<String> id,
+      Value<String> executeDate,
+      Value<int> exerciseTemplateId,
+      Value<int> userId,
+      Value<int> hasBeenExecuted}) {
+    return LocalPlannedExerciseCompanion(
+      id: id ?? this.id,
+      executeDate: executeDate ?? this.executeDate,
+      exerciseTemplateId: exerciseTemplateId ?? this.exerciseTemplateId,
+      userId: userId ?? this.userId,
+      hasBeenExecuted: hasBeenExecuted ?? this.hasBeenExecuted,
+    );
+  }
+}
+
+class $LocalPlannedExerciseTable extends LocalPlannedExercise
+    with TableInfo<$LocalPlannedExerciseTable, LocalPlannedExerciseData> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $LocalPlannedExerciseTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  GeneratedTextColumn _id;
+  @override
+  GeneratedTextColumn get id => _id ??= _constructId();
+  GeneratedTextColumn _constructId() {
+    return GeneratedTextColumn('id', $tableName, false,
+        minTextLength: 32, maxTextLength: 64);
+  }
+
+  final VerificationMeta _executeDateMeta =
+      const VerificationMeta('executeDate');
+  GeneratedTextColumn _executeDate;
+  @override
+  GeneratedTextColumn get executeDate =>
+      _executeDate ??= _constructExecuteDate();
+  GeneratedTextColumn _constructExecuteDate() {
+    return GeneratedTextColumn('execute_date', $tableName, false,
+        maxTextLength: 32);
+  }
+
+  final VerificationMeta _exerciseTemplateIdMeta =
+      const VerificationMeta('exerciseTemplateId');
+  GeneratedIntColumn _exerciseTemplateId;
+  @override
+  GeneratedIntColumn get exerciseTemplateId =>
+      _exerciseTemplateId ??= _constructExerciseTemplateId();
+  GeneratedIntColumn _constructExerciseTemplateId() {
+    return GeneratedIntColumn(
+      'exercise_template_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  GeneratedIntColumn _userId;
+  @override
+  GeneratedIntColumn get userId => _userId ??= _constructUserId();
+  GeneratedIntColumn _constructUserId() {
+    return GeneratedIntColumn(
+      'user_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _hasBeenExecutedMeta =
+      const VerificationMeta('hasBeenExecuted');
+  GeneratedIntColumn _hasBeenExecuted;
+  @override
+  GeneratedIntColumn get hasBeenExecuted =>
+      _hasBeenExecuted ??= _constructHasBeenExecuted();
+  GeneratedIntColumn _constructHasBeenExecuted() {
+    return GeneratedIntColumn(
+      'has_been_executed',
+      $tableName,
+      false,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, executeDate, exerciseTemplateId, userId, hasBeenExecuted];
+  @override
+  $LocalPlannedExerciseTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'local_planned_exercise';
+  @override
+  final String actualTableName = 'local_planned_exercise';
+  @override
+  VerificationContext validateIntegrity(LocalPlannedExerciseCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.id.present) {
+      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    } else if (id.isRequired && isInserting) {
+      context.missing(_idMeta);
+    }
+    if (d.executeDate.present) {
+      context.handle(_executeDateMeta,
+          executeDate.isAcceptableValue(d.executeDate.value, _executeDateMeta));
+    } else if (executeDate.isRequired && isInserting) {
+      context.missing(_executeDateMeta);
+    }
+    if (d.exerciseTemplateId.present) {
+      context.handle(
+          _exerciseTemplateIdMeta,
+          exerciseTemplateId.isAcceptableValue(
+              d.exerciseTemplateId.value, _exerciseTemplateIdMeta));
+    } else if (exerciseTemplateId.isRequired && isInserting) {
+      context.missing(_exerciseTemplateIdMeta);
+    }
+    if (d.userId.present) {
+      context.handle(
+          _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
+    } else if (userId.isRequired && isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (d.hasBeenExecuted.present) {
+      context.handle(
+          _hasBeenExecutedMeta,
+          hasBeenExecuted.isAcceptableValue(
+              d.hasBeenExecuted.value, _hasBeenExecutedMeta));
+    } else if (hasBeenExecuted.isRequired && isInserting) {
+      context.missing(_hasBeenExecutedMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
+  @override
+  LocalPlannedExerciseData map(Map<String, dynamic> data,
+      {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return LocalPlannedExerciseData.fromData(data, _db,
+        prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(LocalPlannedExerciseCompanion d) {
+    final map = <String, Variable>{};
+    if (d.id.present) {
+      map['id'] = Variable<String, StringType>(d.id.value);
+    }
+    if (d.executeDate.present) {
+      map['execute_date'] = Variable<String, StringType>(d.executeDate.value);
+    }
+    if (d.exerciseTemplateId.present) {
+      map['exercise_template_id'] =
+          Variable<int, IntType>(d.exerciseTemplateId.value);
+    }
+    if (d.userId.present) {
+      map['user_id'] = Variable<int, IntType>(d.userId.value);
+    }
+    if (d.hasBeenExecuted.present) {
+      map['has_been_executed'] =
+          Variable<int, IntType>(d.hasBeenExecuted.value);
+    }
+    return map;
+  }
+
+  @override
+  $LocalPlannedExerciseTable createAlias(String alias) {
+    return $LocalPlannedExerciseTable(_db, alias);
+  }
+}
+
 abstract class _$ExerciseDatabase extends GeneratedDatabase {
   _$ExerciseDatabase(QueryExecutor e)
       : super(const SqlTypeSystem.withDefaults(), e);
@@ -766,7 +1102,14 @@ abstract class _$ExerciseDatabase extends GeneratedDatabase {
   $LocalUserBodyIndexTable _localUserBodyIndex;
   $LocalUserBodyIndexTable get localUserBodyIndex =>
       _localUserBodyIndex ??= $LocalUserBodyIndexTable(this);
+  $LocalPlannedExerciseTable _localPlannedExercise;
+  $LocalPlannedExerciseTable get localPlannedExercise =>
+      _localPlannedExercise ??= $LocalPlannedExerciseTable(this);
   @override
-  List<TableInfo> get allTables =>
-      [localUsers, localSessionMaterials, localUserBodyIndex];
+  List<TableInfo> get allTables => [
+        localUsers,
+        localSessionMaterials,
+        localUserBodyIndex,
+        localPlannedExercise
+      ];
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/session.dart';
+import 'package:workout_helper/pages/training_plan_selection.dart';
 import 'package:workout_helper/service/session_service.dart';
+import 'package:workout_helper/util/navigation_util.dart';
 
 import 'component/bottom_navigation_bar.dart';
 import 'component/home_calendar.dart';
@@ -81,7 +83,7 @@ class HomePageNoPlanState extends State<HomePage> {
               Container(
                 height: MediaQuery.of(context).size.height * 0.36,
                 child: Padding(
-                  padding: const EdgeInsets.only(top:14.0),
+                  padding: const EdgeInsets.only(top: 14.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
@@ -91,12 +93,14 @@ class HomePageNoPlanState extends State<HomePage> {
                         children: <Widget>[
                           Expanded(flex: 1, child: Divider()),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 0.0),
                             child: Text(
                               "或者",
-                              style: Typography.dense2018.subhead.merge(TextStyle(
-                                  color: Colors.grey,
-                                  fontStyle: FontStyle.italic)),
+                              style: Typography.dense2018.subhead.merge(
+                                  TextStyle(
+                                      color: Colors.grey,
+                                      fontStyle: FontStyle.italic)),
                             ),
                           ),
                           Expanded(flex: 2, child: Divider()),
@@ -153,7 +157,10 @@ class HomePageNoPlanState extends State<HomePage> {
               style: Typography.dense2018.title.merge(
                   TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
             ),
-            onTap: () {}),
+            onTap: () {
+              NavigationUtil.pushUsingDefaultFadingTransition(
+                  context, TrainingPlanSelection());
+            }),
       );
     }
 
