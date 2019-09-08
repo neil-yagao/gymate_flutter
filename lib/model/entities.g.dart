@@ -60,7 +60,7 @@ T _$enumDecode<T>(Map<T, dynamic> enumValues, dynamic source) {
 }
 
 T _$enumDecodeNullable<T>(Map<T, dynamic> enumValues, dynamic source) {
-  if (source == null) {
+  if (source == null || (source is String && source.isEmpty)) {
     return null;
   }
   return _$enumDecode<T>(enumValues, source);
@@ -248,7 +248,7 @@ const _$CardioTypeEnumMap = <CardioType, dynamic>{
 Exercise _$ExerciseFromJson(Map<String, dynamic> json) {
   return Exercise(
       json['id'].toString(),
-      (json['muscleTarget'] as List)
+      ( (json['muscleTarget'] as String).split(","))
           ?.map((e) => _$enumDecodeNullable(_$MuscleGroupEnumMap, e))
           ?.toList(),
       json['name'] as String,
