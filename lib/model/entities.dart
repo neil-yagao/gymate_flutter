@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -586,4 +587,19 @@ class MovementOneRepMax {
       _$MovementOneRepMaxFromJson(json);
 
   Map<String, dynamic> toJson() => _$MovementOneRepMaxToJson(this);
+}
+
+class UserPlannedExercise{
+
+  int id;
+
+  DateTime executeDate;
+
+  Exercise exercise;
+
+  Widget icon;
+
+  bool hasBeenExecuted;
+
+  int userId;
 }

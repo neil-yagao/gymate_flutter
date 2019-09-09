@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
 import 'package:moor_flutter/moor_flutter.dart';
 
 import 'entities.dart';
@@ -17,7 +18,7 @@ class LocalUsers extends Table {
 }
 
 class LocalPlannedExercise extends Table {
-  TextColumn get id => text().withLength(min: 32, max: 64)();
+  TextColumn get id => text().withLength(max: 64)();
 
   TextColumn get executeDate => text().withLength(max: 32)();
 
@@ -25,7 +26,7 @@ class LocalPlannedExercise extends Table {
 
   IntColumn get userId => integer()();
 
-  IntColumn get hasBeenExecuted =>integer()();
+  IntColumn get hasBeenExecuted => integer()();
 }
 //
 //class LocalUserTrainings extends Table {
@@ -168,8 +169,17 @@ class ExerciseDatabase extends _$ExerciseDatabase {
             path: 'db.sqlite', logStatements: true));
 
   @override
-  // TODO: implement schemaVersion
-  int get schemaVersion => 1;
+  int get schemaVersion => 2; // bump because the tables have changed
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(onCreate: (Migrator m) {
+        return m.createAllTables();
+      }, onUpgrade: (Migrator m, int from, int to) async {
+        if (from == 1) {
+          // we added the dueDate property in the change from version 1
+          await m.createTable(localPlannedExercise);
+        }
+      });
 
   void addSessionMaterial(SessionMaterial sessionMaterial) {
     if (sessionMaterial.id == null) {}
@@ -239,24 +249,60 @@ class ExerciseDatabase extends _$ExerciseDatabase {
   }
 
   Future<List<LocalPlannedExerciseData>> savePlannedExercise(
-      Map<String, Exercise> exercises, int userId) async {
+      Map<DateTime, UserPlannedExercise> exercises, int userId) async {
     List<LocalPlannedExerciseData> plannedExercise = List();
-    for (String key in exercises.keys) {
+    (delete(localPlannedExercise)..where(
+        //(t) => and(t.userId.equals(userId), t.hasBeenExecuted.equals(0))))
+        (t) => t.userId.equals(userId))).go();
+    for (DateTime key in exercises.keys) {
       LocalPlannedExerciseData row = LocalPlannedExerciseData(
-          id: uuid.v4(),
-          executeDate: key,
-          exerciseTemplateId: int.parse(exercises[key].id),
+          id: exercises[key].exercise.id,
+          executeDate: DateFormat("yyyy-MM-dd").format(
+            key,
+          ),
+          exerciseTemplateId: int.parse(exercises[key].exercise.id),
+          hasBeenExecuted: exercises[key].hasBeenExecuted ? 1 : 0,
           userId: userId);
+      into(localPlannedExercise).insert(row);
       plannedExercise.add(row);
     }
-    into(localPlannedExercise).insertAll(plannedExercise);
     return plannedExercise;
   }
 
-  Future<List<LocalPlannedExerciseData>> queryForPlannedExercise(int userId) {
+  Future<List<UserPlannedExercise>> queryForPlannedExercise(int userId) {
     return (select(localPlannedExercise)..where((t) => t.userId.equals(userId)))
-        .get().then((List<LocalPlannedExerciseData> value){
+        .get()
+        .then((List<LocalPlannedExerciseData> value) {
+      List<UserPlannedExercise> plannedExercises = List();
+      value.forEach((LocalPlannedExerciseData localPlannedExercise) {
+        plannedExercises
+            .add(parseToUserPlannedExercise(localPlannedExercise, userId));
+      });
+      return plannedExercises;
+    });
+  }
 
+  UserPlannedExercise parseToUserPlannedExercise(
+      LocalPlannedExerciseData localPlannedExercise, int userId) {
+    UserPlannedExercise planned = UserPlannedExercise();
+    planned.id = int.parse(localPlannedExercise.id);
+    planned.exercise = Exercise.empty();
+    planned.exercise.id = localPlannedExercise.exerciseTemplateId.toString();
+    planned.hasBeenExecuted = localPlannedExercise.hasBeenExecuted == 1;
+    planned.userId = userId;
+    planned.executeDate =
+        DateFormat('yyyy-MM-dd').parse(localPlannedExercise.executeDate);
+    return planned;
+  }
+
+  Future<UserPlannedExercise> queryForPlannedExerciseByUserAndDate(
+      int userId, String date) {
+    return (select(localPlannedExercise)
+          ..where(
+              (e) => and(e.userId.equals(userId), e.executeDate.equals(date))))
+        .getSingle()
+        .then((LocalPlannedExerciseData data) {
+      return parseToUserPlannedExercise(data, -1);
     });
   }
 }

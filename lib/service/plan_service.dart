@@ -1,11 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:workout_helper/model/db_models.dart';
 import 'package:workout_helper/model/entities.dart';
 
 import 'basic_dio.dart';
 
 class PlanService {
+
   Dio instance;
+
+  ExerciseDatabase db = ExerciseDatabase();
 
   PlanService(GlobalKey<ScaffoldState> defaultState) {
     instance = DioInstance.getInstance(defaultState);
@@ -36,25 +41,37 @@ class PlanService {
     });
   }
 
-  Future<Map<String, Exercise>> applyPlanToUser(
+  Future<Map<DateTime, UserPlannedExercise>> applyPlanToUser(
       TrainingPlan selectedPlan, int id) {
     return instance
         .post('/plan/' + selectedPlan.id.toString() + "/apply/" + id.toString())
         .then((Response r) {
-      Map<String, Exercise> appliedResult = Map();
+      Map<DateTime, UserPlannedExercise> appliedResult = Map();
       (r.data as List).forEach((d ){
         Exercise exerciseToExecute = Exercise.empty();
         if(d['exercise'] == null){
-          exerciseToExecute.id = "resting";
+          exerciseToExecute.id = "-1";
          exerciseToExecute.name = "休息日";
          exerciseToExecute.description = "休息是为了更好的训练，建议进行有氧恢复";
         }else {
           exerciseToExecute = Exercise.fromJson(d['exercise']);
         }
-        appliedResult[d['plannedExecutionDate']] = exerciseToExecute;
+        UserPlannedExercise userPlannedExercise = UserPlannedExercise();
+        userPlannedExercise.id = d['id'];
+        userPlannedExercise.executeDate = DateFormat('yyyy-MM-dd').parse(d['plannedExecutionDate']);
+        userPlannedExercise.exercise = exerciseToExecute;
+        userPlannedExercise.hasBeenExecuted = d['hasBeenExecuted'];
+        userPlannedExercise.userId = d['user']['id'];
+        appliedResult[userPlannedExercise.executeDate] = userPlannedExercise;
+        db.savePlannedExercise(appliedResult, id);
       });
-      print(appliedResult);
       return appliedResult;
     });
   }
+
+
+  Future<List<UserPlannedExercise>> getUserPlannedExercise(int userId) async{
+    return db.queryForPlannedExercise(userId);
+  }
+
 }

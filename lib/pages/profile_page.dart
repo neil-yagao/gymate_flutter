@@ -334,7 +334,7 @@ class ProfilePageState extends State<ProfilePage> {
     showCupertinoModalPopup<UserBodyIndex>(
         context: context,
         builder: (BuildContext context) {
-          return BodyIndexDetail(appendIndex: doAddBodyIndex);
+          return Center(child: BodyIndexDetail(appendIndex: doAddBodyIndex));
         });
   }
 }

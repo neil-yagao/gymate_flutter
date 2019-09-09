@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/session.dart';
 import 'package:workout_helper/pages/training_plan_selection.dart';
+import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/session_service.dart';
 import 'package:workout_helper/util/navigation_util.dart';
 
@@ -22,10 +24,15 @@ class HomePageNoPlanState extends State<HomePage> {
   SessionService _sessionService = SessionService();
   Session _todaySession;
 
+  bool _showCalendar = false;
+
+  User _currentUser;
+
   @override
-  void initState() {
-    super.initState();
-    _sessionService.getTodaySession().then((Session session) {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _currentUser = Provider.of<CurrentUserStore>(context).currentUser;
+    _sessionService.getTodaySession(_currentUser.id).then((Session session) {
       if (session != null) {
         setState(() {
           _todaySession = session;
@@ -33,28 +40,6 @@ class HomePageNoPlanState extends State<HomePage> {
       }
     });
   }
-
-//
-//  final List<Map<String, String>> options = [
-//    {
-//      "title": "力量举",
-//      "headingLogo": "assets/powerlifting.jpg",
-//      "description": "卧推、硬拉、深蹲三项力量训练",
-//      "to": 'powerlifting'
-//    },
-//    {
-//      "title": "健美",
-//      "headingLogo": "assets/fitness.jpeg",
-//      "description": "健美形体训练",
-//      "to": 'bodybuilding'
-//    },
-//    {
-//      "title": "Crossfit",
-//      "headingLogo": "assets/crossfit.jpeg",
-//      "description": "提高综合身体素质",
-//      "to": 'crossfit'
-//    }
-//  ];
 
   @override
   Widget build(BuildContext context) {
@@ -64,22 +49,7 @@ class HomePageNoPlanState extends State<HomePage> {
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 children: [
-              Stack(
-                children: <Widget>[
-                  HomeCalendar(),
-                  Container(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 75.0, bottom: 50),
-                      child: Image.asset(
-                        "assets/motto.jpg",
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                    color: Color.fromRGBO(255, 255, 255, 0.8),
-                    height: MediaQuery.of(context).size.height * 0.5,
-                  ),
-                ],
-              ),
+              buildFirstHalf(),
               Container(
                 height: MediaQuery.of(context).size.height * 0.36,
                 child: Padding(
@@ -166,19 +136,12 @@ class HomePageNoPlanState extends State<HomePage> {
 
     return Card(
         child: Column(children: <Widget>[
-      Row(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text("训练进度", style: Typography.dense2018.title),
-          ),
-        ],
-      ),
       Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: LinearProgressIndicator(
-          semanticsLabel: '现有计划进展',
-          value: 0.2,
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Text(
+          "今日训练",
+          style: Typography.dense2018.title.merge(
+              TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
         ),
       ),
       ListTile(
@@ -204,5 +167,51 @@ class HomePageNoPlanState extends State<HomePage> {
   void goToTodaySession(BuildContext context) {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (BuildContext context) => UserSession("today")));
+  }
+
+  Widget buildFirstHalf() {
+    if (_showCalendar) {
+      return HomeCalendar();
+    }
+    return Stack(
+      children: <Widget>[
+        HomeCalendar(),
+        Container(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _showCalendar = true;
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "显示计划",
+                          style: Typography.dense2018.caption.merge(
+                              TextStyle(color: Theme.of(context).primaryColor)),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                Image.asset(
+                  "assets/motto.jpg",
+                  fit: BoxFit.fill,
+                ),
+              ],
+            ),
+          ),
+          color: Color.fromRGBO(255, 255, 255, 0.8),
+          height: MediaQuery.of(context).size.height * 0.5,
+        ),
+      ],
+    );
   }
 }
