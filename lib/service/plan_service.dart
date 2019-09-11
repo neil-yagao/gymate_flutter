@@ -63,8 +63,8 @@ class PlanService {
         userPlannedExercise.hasBeenExecuted = d['hasBeenExecuted'];
         userPlannedExercise.userId = d['user']['id'];
         appliedResult[userPlannedExercise.executeDate] = userPlannedExercise;
-        db.savePlannedExercise(appliedResult, id);
       });
+      db.savePlannedExercise(appliedResult, id);
       return appliedResult;
     });
   }

@@ -136,7 +136,9 @@ class UserSessionState extends State<UserSession> {
 
   void leaveSession(BuildContext context) {
     Navigator.of(context).pushReplacementNamed('/home');
-    sessionRepositoryService.removeSession(_currentSession);
+    if(_currentSession.accomplishedSets.length == 0) {
+      sessionRepositoryService.removeSession(_currentSession);
+    }
   }
 
   @override
@@ -169,7 +171,7 @@ class UserSessionState extends State<UserSession> {
         _currentSession = session;
       });
     }).catchError((error) {
-      print(error);
+      print("error in session" + error.toString());
       Navigator.maybePop(context);
     });
   }
@@ -389,7 +391,10 @@ class UserSessionState extends State<UserSession> {
             // both default to 16
             marginRight: 18,
             marginBottom: 20,
-            child: Icon(Icons.add,color: Theme.of(context).primaryColor,),
+            child: Icon(
+              Icons.add,
+              color: Theme.of(context).primaryColor,
+            ),
 //            animatedIcon: AnimatedIcons.menu_close,
 //            animatedIconTheme: IconThemeData(size: 22.0),
             curve: Curves.bounceIn,
@@ -398,8 +403,8 @@ class UserSessionState extends State<UserSession> {
             tooltip: '添加运动',
             children: [
               SpeedDialChild(
-                  child: Icon(CustomIcon.leak_remove,color:Colors.red[400]),
-                  backgroundColor:  Colors.white,
+                  child: Icon(CustomIcon.leak_remove, color: Colors.red[400]),
+                  backgroundColor: Colors.white,
                   label: '力量训练',
                   labelStyle: Typography.dense2018.subhead,
                   onTap: () {
@@ -414,7 +419,10 @@ class UserSessionState extends State<UserSession> {
                         });
                   }),
               SpeedDialChild(
-                child: Icon(CustomIcon.heartbeat,color: Colors.red[400],),
+                child: Icon(
+                  CustomIcon.heartbeat,
+                  color: Colors.red[400],
+                ),
                 backgroundColor: Colors.white,
                 label: 'HIIT',
                 labelStyle: Typography.dense2018.subhead,
@@ -432,8 +440,11 @@ class UserSessionState extends State<UserSession> {
                 },
               ),
               SpeedDialChild(
-                child: Icon(Icons.directions_run,color: Colors.red[400],),
-                backgroundColor: Colors.white ,
+                child: Icon(
+                  Icons.directions_run,
+                  color: Colors.red[400],
+                ),
+                backgroundColor: Colors.white,
                 label: '有氧运动',
                 labelStyle: TextStyle(fontSize: 18.0),
                 onTap: () => {
@@ -491,10 +502,12 @@ class UserSessionState extends State<UserSession> {
                                         .id
                                         .toString())
                                 .then((_) {
-                              Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
+                              Navigator.of(context)
+                                  .pushReplacement(MaterialPageRoute(
                                       builder: (context) => SessionReport(
-                                          completedSession: _currentSession)));
+                                            completedSession: _currentSession,
+                                            canGoBack: true,
+                                          )));
                             });
                           });
                         },
@@ -547,8 +560,8 @@ class UserSessionState extends State<UserSession> {
     FlatButton cameraButton = FlatButton(
       onPressed: () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => CameraCapture(
-                    "session/" + _currentSession.id, (String uploadedFile) {
+            builder: (context) => CameraCapture("session/" + _currentSession.id,
+                    (String uploadedFile) {
                   SessionMaterial sessionMaterial = SessionMaterial();
                   sessionMaterial.isVideo = false;
                   sessionMaterial.filePath = uploadedFile;

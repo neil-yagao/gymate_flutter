@@ -137,21 +137,20 @@ class SessionReport extends StatelessWidget {
           )
         ],
       ));
-
-      listViewChildren.add(Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "直接卡路里消耗(来自有氧或hiit)约：" +
-                  cardioTotalCals.floor().toString() +
-                  "kClas",
-              style: Typography.dense2018.subtitle,
-            ),
-          )
-        ],
-      ));
     });
+    listViewChildren.add(Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            "直接卡路里消耗(来自有氧或hiit)约：" +
+                cardioTotalCals.floor().toString() +
+                "kClas",
+            style: Typography.dense2018.subtitle,
+          ),
+        )
+      ],
+    ));
     return Scaffold(
       appBar: AppBar(
         title: Text("本次运动报告"),
@@ -169,27 +168,25 @@ class SessionReport extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: ButtonBar(
+        alignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          canGoBack
-              ? RaisedButton(
-                  child: Text("训练集锦"),
-                  textColor: Colors.white,
-                  color: Theme.of(context).primaryColor,
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => SessionMaterialsGrid(
-                          sessionId: completedSession.id,
-                        )));
-                  },
-                )
-              : RaisedButton(
-                  child: Text("确定"),
-                  textColor: Colors.white,
-                  color: Theme.of(context).primaryColor,
-                  onPressed: () {
-                    Navigator.of(context).popAndPushNamed('/home');
-                  },
-                )
+          FlatButton(
+            child: Text("训练集锦"),
+            textColor: Theme.of(context).primaryColor,
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => SessionMaterialsGrid(
+                        sessionId: completedSession.id,
+                      )));
+            },
+          ),
+          FlatButton(
+            child: Text("返回首页"),
+            textColor: Colors.lightBlueAccent,
+            onPressed: () {
+              Navigator.of(context).popAndPushNamed('/home');
+            },
+          )
         ],
       ),
     );

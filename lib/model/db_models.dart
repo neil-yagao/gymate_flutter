@@ -166,13 +166,14 @@ class LocalUserBodyIndex extends Table {
 class ExerciseDatabase extends _$ExerciseDatabase {
   ExerciseDatabase()
       : super(FlutterQueryExecutor.inDatabaseFolder(
-            path: 'db.sqlite', logStatements: true));
+      path: 'db.sqlite', logStatements: true));
 
   @override
   int get schemaVersion => 2; // bump because the tables have changed
 
   @override
-  MigrationStrategy get migration => MigrationStrategy(onCreate: (Migrator m) {
+  MigrationStrategy get migration =>
+      MigrationStrategy(onCreate: (Migrator m) {
         return m.createAllTables();
       }, onUpgrade: (Migrator m, int from, int to) async {
         if (from == 1) {
@@ -185,12 +186,13 @@ class ExerciseDatabase extends _$ExerciseDatabase {
     if (sessionMaterial.id == null) {}
     String jsonValue = jsonEncode(sessionMaterial);
     LocalSessionMaterial lsm =
-        LocalSessionMaterial.fromJson(jsonDecode(jsonValue));
+    LocalSessionMaterial.fromJson(jsonDecode(jsonValue));
     into(localSessionMaterials).insert(lsm);
   }
 
   Future<List<SessionMaterial>> getSessionMaterialsBySessionId(String id) {
-    return (select(localSessionMaterials)..where((t) => t.sessionId.equals(id)))
+    return (select(localSessionMaterials)
+      ..where((t) => t.sessionId.equals(id)))
         .get()
         .then((List<LocalSessionMaterial> result) {
       List<SessionMaterial> sessionMaterials = List();
@@ -221,9 +223,9 @@ class ExerciseDatabase extends _$ExerciseDatabase {
 //    });
     return customSelect(
         "select l.* from local_user_body_index l "
-        "left outer join local_user_body_index lm "
-        "on l.body_index = lm.body_index and l.user_id = lm.user_id and l.record_time < lm.record_time "
-        "where l.user_id = ? and lm.record_time is NULL order by l.record_time desc",
+            "left outer join local_user_body_index lm "
+            "on l.body_index = lm.body_index and l.user_id = lm.user_id and l.record_time < lm.record_time "
+            "where l.user_id = ? and lm.record_time is NULL order by l.record_time desc",
         variables: [Variable.withString(userId)]).then((List<QueryRow> rows) {
       List<UserBodyIndex> indexes = List();
       rows.forEach((QueryRow r) {
@@ -233,14 +235,19 @@ class ExerciseDatabase extends _$ExerciseDatabase {
     });
   }
 
-  Future<UserBodyIndex> insertBodyIndex(
-      UserBodyIndex userIndex, String userId) async {
+  Future<UserBodyIndex> insertBodyIndex(UserBodyIndex userIndex,
+      String userId) async {
     LocalUserBodyIndexData index = LocalUserBodyIndexData(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: DateTime
+            .now()
+            .millisecondsSinceEpoch
+            .toString(),
         value: userIndex.value,
         bodyIndex: userIndex.bodyIndex.toString(),
         recordTime: userIndex.recordTime == null
-            ? DateTime.now().millisecondsSinceEpoch
+            ? DateTime
+            .now()
+            .millisecondsSinceEpoch
             : userIndex.recordTime.millisecondsSinceEpoch,
         unit: userIndex.unit,
         userId: userId);
@@ -251,12 +258,13 @@ class ExerciseDatabase extends _$ExerciseDatabase {
   Future<List<LocalPlannedExerciseData>> savePlannedExercise(
       Map<DateTime, UserPlannedExercise> exercises, int userId) async {
     List<LocalPlannedExerciseData> plannedExercise = List();
-    (delete(localPlannedExercise)..where(
+    (delete(localPlannedExercise)
+      ..where(
         //(t) => and(t.userId.equals(userId), t.hasBeenExecuted.equals(0))))
-        (t) => t.userId.equals(userId))).go();
+              (t) => t.userId.equals(userId))).go();
     for (DateTime key in exercises.keys) {
       LocalPlannedExerciseData row = LocalPlannedExerciseData(
-          id: exercises[key].exercise.id,
+          id: exercises[key].id.toString(),
           executeDate: DateFormat("yyyy-MM-dd").format(
             key,
           ),
@@ -270,7 +278,8 @@ class ExerciseDatabase extends _$ExerciseDatabase {
   }
 
   Future<List<UserPlannedExercise>> queryForPlannedExercise(int userId) {
-    return (select(localPlannedExercise)..where((t) => t.userId.equals(userId)))
+    return (select(localPlannedExercise)
+      ..where((t) => t.userId.equals(userId)))
         .get()
         .then((List<LocalPlannedExerciseData> value) {
       List<UserPlannedExercise> plannedExercises = List();
@@ -295,14 +304,21 @@ class ExerciseDatabase extends _$ExerciseDatabase {
     return planned;
   }
 
-  Future<UserPlannedExercise> queryForPlannedExerciseByUserAndDate(
-      int userId, String date) {
+  Future<UserPlannedExercise> queryForPlannedExerciseByUserAndDate(int userId,
+      String date) {
     return (select(localPlannedExercise)
-          ..where(
+      ..where(
               (e) => and(e.userId.equals(userId), e.executeDate.equals(date))))
         .getSingle()
         .then((LocalPlannedExerciseData data) {
       return parseToUserPlannedExercise(data, -1);
     });
+  }
+
+  Future updateUserPlannedExercise(int plannedExerciseId) {
+    return (update(localPlannedExercise)
+      ..where((p) => p.id.equals(plannedExerciseId.toString()))).write(
+        LocalPlannedExerciseCompanion(hasBeenExecuted: Value(1))
+    );
   }
 }

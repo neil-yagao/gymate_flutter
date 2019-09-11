@@ -134,34 +134,52 @@ class HomePageNoPlanState extends State<HomePage> {
       );
     }
 
-    return Card(
-        child: Column(children: <Widget>[
-      Padding(
-        padding: const EdgeInsets.only(top: 8.0),
-        child: Text(
-          "今日训练",
-          style: Typography.dense2018.title.merge(
-              TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+    return Padding(
+      padding: const EdgeInsets.only(bottom:16.0,top: 8),
+      child: Card(
+          child: Column(children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(left:28.0),
+                child: Text(
+                  "今日训练",
+                  style: Typography.dense2018.title.merge(
+                      TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right:18.0),
+                child: InkWell(
+                  child: Icon(Icons.edit,size: 18,color:Colors.grey,),
+                  onTap: (){
+                    NavigationUtil.pushUsingDefaultFadingTransition(
+                        context, TrainingPlanSelection());
+                  },
+                ),
+              )
+            ],
+          ),
         ),
-      ),
-      ListTile(
-        title: Text(todaySession.matchingExercise.name,
-            style: Typography.dense2018.subtitle),
-        subtitle: Text(todaySession.matchingExercise.description),
-        trailing: FloatingActionButton(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.grey,
-          onPressed: () {
+        ListTile(
+          title: Text(todaySession.matchingExercise.name,
+              style: Typography.dense2018.subtitle),
+          subtitle: Text(todaySession.matchingExercise.description),
+          trailing: _todaySession.accomplishedTime == null ?IconButton(
+            onPressed: () {
+              goToTodaySession(context);
+            },
+            icon: Icon(Icons.chevron_right),
+          ):Icon(Icons.check,color: Colors.greenAccent,),
+          onTap: _todaySession.accomplishedTime == null? () {
             goToTodaySession(context);
-          },
-          child: Icon(Icons.chevron_right),
-        ),
-        onTap: () {
-          goToTodaySession(context);
-        },
-      )
-    ]));
+          }:null,
+        )
+      ])),
+    );
   }
 
   void goToTodaySession(BuildContext context) {

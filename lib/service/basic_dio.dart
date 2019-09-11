@@ -18,7 +18,7 @@ class DioInstance {
           .add(InterceptorsWrapper(onRequest: (RequestOptions options) {
         return options; //continue
       }, onResponse: (Response response) {
-        print(response);
+        print("response from request: " + response.toString());
         return response; // continue
       }, onError: (DioError e) {
         print(e);

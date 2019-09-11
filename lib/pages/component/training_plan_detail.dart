@@ -34,7 +34,7 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
 
   List<Exercise> exerciseTemplate;
 
-  List<Exercise> filedExerciseTemplate =List();
+  List<Exercise> filedExerciseTemplate = List();
 
   GlobalKey<ScaffoldState> defaultState = GlobalKey<ScaffoldState>();
 
@@ -127,9 +127,10 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
                   padding: const EdgeInsets.only(
                       top: 2, left: 8, right: 4, bottom: 2),
                   child: TextField(
-                    onChanged:(val) async{
-                      if(int.parse(val)< exerciseTemplate.length){
-                        _trainingCycleDays.text = exerciseTemplate.length.toString();
+                    onChanged: (val) async {
+                      if (int.parse(val) < exerciseTemplate.length) {
+                        _trainingCycleDays.text =
+                            exerciseTemplate.length.toString();
                       }
                       fillWithRestExercise();
                     },
@@ -222,6 +223,18 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
                         ],
                       ),
                       subtitle: Text(e.description),
+                      trailing: IconButton(
+                          icon: Icon(Icons.content_copy),
+                          onPressed: () {
+                            /// only duplicate when exercise is not rest
+                            /// and still not filling trainingCycles
+                            if (e.plannedSets.length > 0 &&
+                                exerciseTemplate.length <
+                                    int.parse(_trainingCycleDays.text)) {
+                              exerciseTemplate.add(e);
+                              fillWithRestExercise();
+                            }
+                          }),
                     );
                   }),
                 ],

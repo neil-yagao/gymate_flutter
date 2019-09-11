@@ -74,11 +74,82 @@ class ProfilePageState extends State<ProfilePage> {
                     value.currentUser.name,
                     style: TextStyle(color: Colors.black, fontSize: 20.0),
                   ),
-                  Text(
-                    value.currentUser.groupName == null
-                        ? "尚未加入任何小组"
-                        : value.currentUser.groupName,
-                    style: TextStyle(color: Colors.black),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        value.currentUser.groupName == null
+                            ? "尚未加入任何小组"
+                            : value.currentUser.groupName,
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      InkWell(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                              left: 6.0, bottom: 6, right: 6),
+                          child: Icon(
+                            Icons.mode_edit,
+                            size: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        onTap: () {
+                          showDialog<String>(
+                              context: context,
+                              builder: (context) {
+                                String groupCode = '';
+                                return Center(
+                                  child: Card(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            "请输入小组的编码",
+                                            style: Typography.dense2018.subhead
+                                                .merge(TextStyle(
+                                                    color: Colors.grey)),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8.0),
+                                          child: TextField(
+                                            onChanged: (val) {
+                                              groupCode = val;
+                                            },
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: <Widget>[
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 8.0, bottom: 8),
+                                              child: FlatButton(
+                                                child: Text("确定"),
+                                                textColor: Theme.of(context)
+                                                    .primaryColor,
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .maybePop(groupCode);
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).then((groupCode) {
+                            print("groupCode:" + groupCode);
+                          });
+                        },
+                      )
+                    ],
                   )
                 ],
               ),

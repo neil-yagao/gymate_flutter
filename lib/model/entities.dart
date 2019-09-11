@@ -457,6 +457,8 @@ class Session {
 
   DateTime accomplishedTime;
 
+  int matchingPlannedExerciseId;
+
   Session() {
     matchingExercise = Exercise.empty();
     accomplishedSets = List();

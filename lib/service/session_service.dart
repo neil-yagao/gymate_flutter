@@ -54,8 +54,13 @@ class SessionService {
     String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
     UserPlannedExercise plannedExercise =
         await db.queryForPlannedExerciseByUserAndDate(userId, date);
-    return createNewSessionFromExercise(
+    Session session = await createNewSessionFromExercise(
         plannedExercise.exercise, userId.toString());
+    session.matchingPlannedExerciseId = plannedExercise.id;
+    if(plannedExercise.hasBeenExecuted){
+      session.accomplishedTime = plannedExercise.executeDate;
+    }
+    return session;
   }
 
   void saveCompletedSet(Session session, CompletedExerciseSet ces) {
@@ -135,8 +140,11 @@ class SessionService {
         };
       }).toList(),
       'accomplishedTime': DateTime.now().toIso8601String() + "Z",
+      'matchingPlannedExerciseId':currentSession.matchingPlannedExerciseId
     };
-
+    if(currentSession.matchingPlannedExerciseId != null ) {
+      db.updateUserPlannedExercise(currentSession.matchingPlannedExerciseId);
+    }
     return dio.put("/session/" + userId, data: data);
   }
 
