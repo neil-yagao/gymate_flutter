@@ -27,12 +27,12 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
 
 UserBodyIndex _$UserBodyIndexFromJson(Map<String, dynamic> json) {
   return UserBodyIndex(
-      _$enumDecodeNullable(_$BodyIndexEnumMap, json['body_index']),
+      _$enumDecodeNullable(_$BodyIndexEnumMap, json['bodyIndex']),
       (json['value'] as num)?.toDouble(),
       json['unit'] as String,
-      json['record_time'] == null
+      json['recordTime'] == null
           ? null
-          : DateTime.fromMillisecondsSinceEpoch(json['record_time']));
+          : DateTime.parse(json['recordTime']));
 }
 
 Map<String, dynamic> _$UserBodyIndexToJson(UserBodyIndex instance) =>
@@ -86,7 +86,7 @@ SingleMovementSet _$SingleMovementSetFromJson(Map<String, dynamic> json) {
           ? null
           : Movement.fromJson(json['movement'] as Map<String, dynamic>),
       json['expectingRepeatsPerSet'] as int,
-      (json['expectingWeight'] as num)?.toDouble());
+      (json['expectingWeight'] as num)?.toDouble(),json['unit'] as String);
 }
 
 Map<String, dynamic> _$SingleMovementSetToJson(SingleMovementSet instance) =>
@@ -94,6 +94,7 @@ Map<String, dynamic> _$SingleMovementSetToJson(SingleMovementSet instance) =>
       'id': instance.id,
       'sequence': instance.sequence,
       'movement': instance.movement,
+      'unit':instance.unit,
       'expectingRepeatsPerSet': instance.expectingRepeatsPerSet,
       'expectingWeight': instance.expectingWeight
     };
@@ -133,7 +134,6 @@ const _$ExerciseTypeEnumMap = <ExerciseType, dynamic>{
 
 const _$MuscleGroupEnumMap = <MuscleGroup, dynamic>{
   MuscleGroup.SHOULDER: 'SHOULDER',
-  MuscleGroup.TRAP: 'TRAP',
   MuscleGroup.CHEST: 'CHEST',
   MuscleGroup.ARM: 'ARM',
   MuscleGroup.BICEPS: 'BICEPS',
@@ -160,6 +160,7 @@ ReduceSet _$ReduceSetFromJson(Map<String, dynamic> json) {
           : Movement.fromJson(json['movement'] as Map<String, dynamic>),
       json['expectingRepeatsPerSet'] as int,
       (json['expectingWeight'] as num)?.toDouble(),
+      (json['unit'] as String),
       (json['reduceWeight'] as num)?.toDouble(),
       (json['reduceTo'] as num)?.toDouble(),
       json['intervalTime'] as int);

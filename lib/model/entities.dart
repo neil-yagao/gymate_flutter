@@ -29,6 +29,8 @@ class User {
 
   User(this.id, this.name, this.alias, this.token, this.avatar, this.groupName);
 
+  User.empty();
+
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserToJson(this);
@@ -40,7 +42,6 @@ enum SupportedTrainingType { BODYBUILDING, POWERLIFTING, CROSSFIT }
 enum MovementType { SINGLE, REDUCE, GIANT }
 enum MuscleGroup {
   SHOULDER,
-  TRAP,
   CHEST,
   ARM,
   BICEPS,
@@ -56,6 +57,46 @@ enum MuscleGroup {
   GLUTES,
   HAMSTRING,
   CALVES
+}
+
+String muscleGroupToChinese(MuscleGroup g){
+  switch (g) {
+
+    case MuscleGroup.SHOULDER:
+      return "肩部";
+    case MuscleGroup.CHEST:
+      return "胸部";
+    case MuscleGroup.ARM:
+      return "手臂";
+    case MuscleGroup.BICEPS:
+      return "肱二头肌";
+    case MuscleGroup.TRICEPS:
+      return "肱三头肌";
+    case MuscleGroup.FOREARM:
+      return "小臂";
+    case MuscleGroup.BACK:
+      return "背部";
+    case MuscleGroup.LATS:
+      return "背阔肌";
+    case MuscleGroup.MIDDLE_BACK:
+      return "肩胛肌群";
+    case MuscleGroup.LOWER_BACK:
+      return "竖脊肌";
+    case MuscleGroup.ABS:
+      return "腹肌";
+    case MuscleGroup.LEG:
+      return "腿部";
+    case MuscleGroup.QUADS:
+      return "肱四头肌";
+      // TODO: Handle this case.
+    case MuscleGroup.GLUTES:
+      return "臀部";
+      // TODO: Handle this case.
+    case MuscleGroup.HAMSTRING:
+      return "股二头肌";
+    case MuscleGroup.CALVES:
+      return "小腿";
+  }
 }
 
 enum BodyIndex {
@@ -154,13 +195,15 @@ class SingleMovementSet extends ExerciseSet {
   int expectingRepeatsPerSet;
   double expectingWeight;
 
+  String unit;
+
   factory SingleMovementSet.fromJson(Map<String, dynamic> json) =>
       _$SingleMovementSetFromJson(json);
 
   Map<String, dynamic> toJson() => _$SingleMovementSetToJson(this);
 
   SingleMovementSet(String id, int sequence, this.movement,
-      this.expectingRepeatsPerSet, this.expectingWeight) {
+      this.expectingRepeatsPerSet, this.expectingWeight,this.unit) {
     this.id = id;
     this.sequence = sequence;
   }
@@ -271,10 +314,11 @@ class ReduceSet extends SingleMovementSet {
       Movement movement,
       int expectingRepeatsPerSet,
       double expectingWeight,
+      String unit,
       this.reduceWeight,
       this.reduceTo,
       this.intervalTime)
-      : super(id, sequence, movement, expectingRepeatsPerSet, expectingWeight);
+      : super(id, sequence, movement, expectingRepeatsPerSet, expectingWeight,unit);
 
   ReduceSet.fromObject(ReduceSet set) : super.fromOther(null) {
     if (set != null) {
