@@ -6,14 +6,16 @@ import 'package:workout_helper/pages/session_report.dart';
 class SessionHistory extends StatelessWidget {
   final List<Session> sessions;
 
-  const SessionHistory({Key key, @required this.sessions}) : super(key: key);
+  final String sessionPractiseName;
+
+  const SessionHistory({Key key, @required this.sessions, this.sessionPractiseName}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        title: Text("训练记录"),
+        title: Text(sessionPractiseName == null?"":sessionPractiseName + "训练记录"),
       ),
       body: SafeArea(
           child: ListView(

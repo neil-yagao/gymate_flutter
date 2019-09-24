@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:workout_helper/model/db_models.dart';
 import 'package:workout_helper/model/entities.dart';
@@ -10,11 +11,15 @@ import 'basic_dio.dart';
 class SessionService {
   ExerciseDatabase db = ExerciseDatabase();
 
-  Dio dio = DioInstance.getInstance(null);
+  Dio dio;
+
+  SessionService(GlobalKey<ScaffoldState> key) {
+    dio = DioInstance.getInstance(key);
+  }
 
   Future<Session> createNewSessionFromExercise(
       Exercise exercise, String userId) async {
-    if (exercise.id == 'today') {
+    if (exercise != null && exercise.id == 'today') {
       return getTodaySession(int.parse(userId));
     }
     return dio
@@ -36,17 +41,27 @@ class SessionService {
   Exercise toExercise(Map<String, dynamic> data) {
     Exercise result = Exercise.fromJson(data);
     result.plannedSets = List();
-    (data['singleMovementSets'] as List)
-        .forEach((m) => result.plannedSets.add(SingleMovementSet.fromJson(m)));
-    (data['reduceSets'] as List)
-        .forEach((m) => result.plannedSets.add(ReduceSet.fromJson(m)));
-    (data['giantSets'] as List)
-        .forEach((m) => result.plannedSets.add(GiantSet.fromJson(m)));
-    (data['hiitSets'] as List)
-        .forEach((m) => result.plannedSets.add(HIITSet.fromJson(m)));
-    (data['cardioSets'] as List)
-        .forEach((m) => result.plannedSets.add(CardioSet.fromJson(m)));
-    result.plannedSets.sort((a,b)=> a.sequence.compareTo(b.sequence));
+    if (data['singleMovementSets'] != null) {
+      (data['singleMovementSets'] as List).forEach(
+          (m) => result.plannedSets.add(SingleMovementSet.fromJson(m)));
+    }
+    if (data['reduceSets'] != null) {
+      (data['reduceSets'] as List)
+          .forEach((m) => result.plannedSets.add(ReduceSet.fromJson(m)));
+    }
+    if (data['giantSets'] != null) {
+      (data['giantSets'] as List)
+          .forEach((m) => result.plannedSets.add(GiantSet.fromJson(m)));
+    }
+    if (data['hiitSets'] != null) {
+      (data['hiitSets'] as List)
+          .forEach((m) => result.plannedSets.add(HIITSet.fromJson(m)));
+    }
+    if (data['cardioSets'] != null) {
+      (data['cardioSets'] as List)
+          .forEach((m) => result.plannedSets.add(CardioSet.fromJson(m)));
+    }
+    result.plannedSets.sort((a, b) => a.sequence.compareTo(b.sequence));
     return result;
   }
 
@@ -54,10 +69,13 @@ class SessionService {
     String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
     UserPlannedExercise plannedExercise =
         await db.queryForPlannedExerciseByUserAndDate(userId, date);
+    if (plannedExercise.exercise == null) {
+      return null;
+    }
     Session session = await createNewSessionFromExercise(
         plannedExercise.exercise, userId.toString());
     session.matchingPlannedExerciseId = plannedExercise.id;
-    if(plannedExercise.hasBeenExecuted){
+    if (plannedExercise.hasBeenExecuted) {
       session.accomplishedTime = plannedExercise.executeDate;
     }
     return session;
@@ -71,12 +89,24 @@ class SessionService {
     session.accomplishedSets.add(ces);
   }
 
-  void addSessionMaterial(SessionMaterial material) {
-    db.addSessionMaterial(material);
+  Future<SessionMaterial> addSessionMaterial(SessionMaterial material) {
+    return dio.post('/session/' + material.sessionId + "/material",data:material.toJson()).then((r) {
+      if (r.data != null) {
+        return SessionMaterial.fromJson(r.data);
+      }
+      throw NullThrownError();
+    });
   }
 
   Future<List<SessionMaterial>> getSessionMaterialsBySessionId(String id) {
-    return db.getSessionMaterialsBySessionId(id);
+    return dio.get('/session/' + id + "/material").then((r) {
+      List<SessionMaterial> materials = List();
+      if (r.data != null) {
+        (r.data as List)
+            .forEach((m) => materials.add(SessionMaterial.fromJson(m)));
+      }
+      return materials;
+    });
   }
 
   Future saveSessionAsTemplate(Exercise exercise, String userId) {
@@ -140,9 +170,9 @@ class SessionService {
         };
       }).toList(),
       'accomplishedTime': DateTime.now().toIso8601String() + "Z",
-      'matchingPlannedExerciseId':currentSession.matchingPlannedExerciseId
+      'matchingPlannedExerciseId': currentSession.matchingPlannedExerciseId
     };
-    if(currentSession.matchingPlannedExerciseId != null ) {
+    if (currentSession.matchingPlannedExerciseId != null) {
       db.updateUserPlannedExercise(currentSession.matchingPlannedExerciseId);
     }
     return dio.put("/session/" + userId, data: data);
@@ -171,6 +201,7 @@ class SessionService {
           ?.map((MuscleGroup mg) => mg.toString())
           ?.join(","),
       'name': exercise.name,
+      'description': exercise.description,
       'recommendRestingTimeBetweenMovement': 45,
     };
     if (exercise.id != null &&
@@ -195,6 +226,17 @@ class SessionService {
         sessions.add(Session.fromJson(value));
       });
       return sessions;
+    });
+  }
+
+  Future<List> getUserLatestExerciseDate(List<User> users) {
+    return dio.get('/session/latest', queryParameters: {
+      "users": users.map((user) => user.id).join(","),
+    }).then((r) {
+      if (r.data != null) {
+        return r.data;
+      }
+      return List();
     });
   }
 }

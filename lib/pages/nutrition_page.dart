@@ -25,9 +25,12 @@ class NutritionPageState extends State<NutritionPage> {
 
   UserNutritionPreference _userNutritionPreference;
 
-  NutritionService nutritionService = NutritionService();
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState> ();
 
-  ProfileService profileService = ProfileService();
+
+  NutritionService nutritionService;
+
+  ProfileService profileService;
 
   List<UserBodyIndex> _userBodyIndexes;
 
@@ -52,6 +55,8 @@ class NutritionPageState extends State<NutritionPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     user = Provider.of<CurrentUserStore>(context).currentUser;
+    nutritionService =  NutritionService(_scaffoldKey);
+    profileService = ProfileService(_scaffoldKey);
     Future.wait([
       nutritionService.getUserNutritionPreference(user.id),
       profileService.loadUserIndexes(user.id.toString())
@@ -98,7 +103,6 @@ class NutritionPageState extends State<NutritionPage> {
   }
 
   Widget userChosenPreference() {
-    int index = 0;
     return SingleChildScrollView(
       child: ExpansionPanelList(
         expansionCallback: (int index, bool expanded) {
@@ -369,6 +373,7 @@ class NutritionPageState extends State<NutritionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: _userNutritionPreference != null
             ? Colors.white
@@ -425,7 +430,12 @@ class NutritionPageState extends State<NutritionPage> {
                           }
                           matchingRecord.materials.add(uploadedFile);
                           nutritionService.saveNutritionRecord(
-                              user.id, matchingRecord);
+                              user.id, matchingRecord).then((nutritionRecord){
+                                setState(() {
+                                  todayRecords.replaceRange(_expandingPanel - 1,
+                                      _expandingPanel, [nutritionRecord]);
+                                });
+                          });
                         })));
               },
               child: Icon(
@@ -434,7 +444,7 @@ class NutritionPageState extends State<NutritionPage> {
               ),
             ),
       bottomNavigationBar: BottomNaviBar(
-        currentIndex: 1,
+        currentIndex: 2,
       ),
     );
   }

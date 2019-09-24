@@ -18,7 +18,7 @@ UserNutritionPreference _$UserNutritionPreferenceFromJson(
       json['recordTime'] == null
           ? null
           : DateTime.parse(json['recordTime'] as String),
-      (json['specialDates'] as String),
+      json['specialDates'] as String,
       (json['tdee'] as num)?.toDouble(),
       (json['bmr'] as num)?.toDouble(),
       (json['recommendedProtein'] as num)?.toDouble(),
@@ -82,7 +82,11 @@ NutritionRecord _$NutritionRecordFromJson(Map<String, dynamic> json) {
       (json['protein'] as num)?.toDouble(),
       (json['carbohydrate'] as num)?.toDouble(),
       (json['fat'] as num)?.toDouble(),
-      (json['estimateCals'] as num)?.toDouble());
+      (json['estimateCals'] as num)?.toDouble(),
+      json['recordTime'] == null
+          ? null
+          : DateTime.parse(json['recordTime'] as String));
+
 }
 
 Map<String, dynamic> _$NutritionRecordToJson(NutritionRecord instance) =>
@@ -94,5 +98,6 @@ Map<String, dynamic> _$NutritionRecordToJson(NutritionRecord instance) =>
       'protein': instance.protein,
       'carbohydrate': instance.carbohydrate,
       'fat': instance.fat,
-      'estimateCals': instance.estimateCals
+      'estimateCals': instance.estimateCals,
+      'recordTime': instance.recordTime?.toIso8601String()
     };

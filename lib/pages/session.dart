@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:badges/badges.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 import 'package:workout_helper/general/my_flutter_app_icons.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/camera_page.dart';
@@ -37,13 +39,15 @@ class UserSession extends StatefulWidget {
 }
 
 class UserSessionState extends State<UserSession> {
-  SessionService sessionRepositoryService = SessionService();
+  SessionService sessionRepositoryService;
 
   UserSessionState(this.exerciseId);
 
-  ExerciseService exerciseService = ExerciseService();
+  ExerciseService exerciseService;
 
   final String exerciseId;
+
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Session _currentSession;
 
@@ -62,6 +66,9 @@ class UserSessionState extends State<UserSession> {
   int _currentExerciseIndex = 0;
 
   bool _isClockShow = false;
+
+  List<VideoPlayerController> controllers = List();
+
 
   Timer t;
 
@@ -136,7 +143,7 @@ class UserSessionState extends State<UserSession> {
 
   void leaveSession(BuildContext context) {
     Navigator.of(context).pushReplacementNamed('/home');
-    if(_currentSession.accomplishedSets.length == 0) {
+    if (_currentSession.accomplishedSets.length == 0) {
       sessionRepositoryService.removeSession(_currentSession);
     }
   }
@@ -144,6 +151,7 @@ class UserSessionState extends State<UserSession> {
   @override
   void initState() {
     super.initState();
+    sessionRepositoryService = SessionService(_scaffoldKey);
     if (_currentSession != null) {
       sessionRepositoryService
           .getSessionMaterialsBySessionId(_currentSession.id)
@@ -153,6 +161,7 @@ class UserSessionState extends State<UserSession> {
         });
       });
     }
+    exerciseService = ExerciseService(_scaffoldKey);
   }
 
   @override
@@ -171,7 +180,7 @@ class UserSessionState extends State<UserSession> {
         _currentSession = session;
       });
     }).catchError((error) {
-      print("error in session" + error.toString());
+      print("error in session:" + error.toString());
       Navigator.maybePop(context);
     });
   }
@@ -204,7 +213,7 @@ class UserSessionState extends State<UserSession> {
         panel = getHiitPanel(currentIndex, movement, sets);
         canAutoProcess = true;
       } else if (movement.exerciseType == ExerciseType.cardio) {
-        panel = getCardioPanel(movement, sets);
+        panel = getCardioPanel(currentIndex, movement, sets);
       }
 
       movements.add(panel);
@@ -351,8 +360,71 @@ class UserSessionState extends State<UserSession> {
                 },
               )
             : null,
-        title: Text(movement.name),
+        title: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: InkWell(
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.play_circle_outline,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  Text(movement.name)
+                ],
+              ),
+              onTap: () {
+                ExerciseSet set = sets.elementAt(0);
+                Widget dialogWidget;
+                if (set is GiantSet) {
+                  dialogWidget = Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      ...set.movements.map((SingleMovementSet s) {
+                        return showMovementVedio(s.movement);
+                      })
+                    ],
+                  );
+                } else if (set is HIITSet) {
+                  dialogWidget = Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      ...set.movements.map((SingleMovementSet s) {
+                        return showMovementVedio(s.movement);
+                      })
+                    ],
+                  );
+                } else if (!(set is CardioSet)) {
+                  dialogWidget = showMovementVedio(movement);
+                }
+                showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (context) {
+                      return dialogWidget;
+                    });
+              },
+            )),
         trailing: tailingIcon);
+  }
+
+  Widget showMovementVedio(Movement movement) {
+    VideoPlayerController _videoPlayerController;
+    ChewieController _chewieController;
+    _videoPlayerController =
+        VideoPlayerController.network(movement.videoReference);
+    _chewieController = ChewieController(
+      videoPlayerController: _videoPlayerController,
+      autoPlay: true,
+      looping: false,
+    );
+    return Container(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Chewie(
+          controller: _chewieController,
+        ),
+      ),
+    );
   }
 
   Icon partialCompletedIcon() {
@@ -372,6 +444,7 @@ class UserSessionState extends State<UserSession> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: buildAppBar(context),
       body: SafeArea(child: buildContent(context)),
       floatingActionButton: buildActionButton(),
@@ -412,6 +485,7 @@ class UserSessionState extends State<UserSession> {
                         context: context,
                         builder: (BuildContext context) {
                           return MovementBottomSheet(
+                            scaffoldKey: _scaffoldKey,
                             onSubmitted: (List<ExerciseSet> m) {
                               appendToCurrentSession(m);
                             },
@@ -435,6 +509,7 @@ class UserSessionState extends State<UserSession> {
                             appendToCurrentSession(sets);
                             Navigator.of(context).maybePop();
                           },
+                          scaffoldKey: _scaffoldKey,
                         );
                       });
                 },
@@ -562,9 +637,9 @@ class UserSessionState extends State<UserSession> {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => CameraCapture("session/" + _currentSession.id,
                     (String uploadedFile) {
-                  SessionMaterial sessionMaterial = SessionMaterial();
+                  SessionMaterial sessionMaterial = SessionMaterial.empty();
                   sessionMaterial.isVideo = false;
-                  sessionMaterial.filePath = uploadedFile;
+                  sessionMaterial.storeLocation = uploadedFile;
                   sessionMaterial.sessionId = _currentSession.id;
                   sessionRepositoryService.addSessionMaterial(sessionMaterial);
                 })));
@@ -578,27 +653,34 @@ class UserSessionState extends State<UserSession> {
     if (sessionMaterials.length != 0) {
       return cameraButton;
     } else {
-      return Row(
-        children: <Widget>[
-          Expanded(flex: 2, child: cameraButton),
-          Expanded(
-            child: Badge(
-              badgeContent: Text('0'),
-              child: FlatButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => SessionMaterialsGrid(
+      return FutureBuilder<List<SessionMaterial>>(
+        future: sessionRepositoryService.getSessionMaterialsBySessionId(_currentSession.id),
+        builder: (context, sessionMaterials){
+          return Row(
+            children: <Widget>[
+              Expanded(flex: 2, child: cameraButton),
+              Expanded(
+                child: Badge(
+                  badgeContent: Text(sessionMaterials.data.length.toString()),
+                  child: FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => SessionMaterialsGrid(
                               sessionId: _currentSession.id,
                             )));
-                  },
-                  child: Icon(
-                    Icons.remove_red_eye,
-                    color: Colors.grey,
-                  )),
-            ),
-          )
-        ],
+                      },
+                      child: Icon(
+                        Icons.remove_red_eye,
+                        color: Colors.grey,
+                      )),
+                ),
+              )
+            ],
+          );
+        },
       );
+
+
     }
   }
 
@@ -624,6 +706,7 @@ class UserSessionState extends State<UserSession> {
     });
     return result;
   }
+
 
   void startHiitSession() {
     HIITSet hiitSet =
@@ -695,15 +778,17 @@ class UserSessionState extends State<UserSession> {
     super.dispose();
   }
 
-  ExpansionPanel getCardioPanel(Movement movement, List<ExerciseSet> sets) {
+  ExpansionPanel getCardioPanel(
+      int index, Movement movement, List<ExerciseSet> sets) {
     return ExpansionPanel(
-        isExpanded: true,
+        isExpanded: _currentPanel == index,
         headerBuilder: (BuildContext context, bool isExpanded) {
           return expansionPanelHeader(movement, sets);
         },
         body: ListView(
             shrinkWrap: true,
             children: sets.map((ExerciseSet es) {
+              print(es);
               CardioSet cs = es as CardioSet;
               return ListTile(
                   dense: true,

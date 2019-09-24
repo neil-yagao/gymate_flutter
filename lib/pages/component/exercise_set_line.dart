@@ -93,7 +93,8 @@ class ExerciseSetLineState extends State<ExerciseSetLine> {
               .toString() +
           "组 每组减少" +
           es.reduceWeight.toString() +
-          "KG";
+          es.unit == null?"KG":es.unit;
+
       return ListTile(
         dense: true,
         title: exerciseContent(es, textStyle),
@@ -131,9 +132,9 @@ class ExerciseSetLineState extends State<ExerciseSetLine> {
         Expanded(
           child: Text(
             es.expectingRepeatsPerSet.toString() +
-                ' X ' +
+                ' X   ' +
                 es.expectingWeight.toString() +
-                'KG',
+                es.unit,
             style: textStyle,
           ),
         )

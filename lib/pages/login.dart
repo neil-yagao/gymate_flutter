@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/component/logo.dart';
 import 'package:workout_helper/service/current_user_store.dart';
+import 'package:workout_helper/util/navigation_util.dart';
 
 import 'component/rounded_input.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -14,7 +17,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  var db;
   bool isReady = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -22,19 +24,25 @@ class _LoginPageState extends State<LoginPage> {
 
   TextEditingController password = TextEditingController();
 
-  initDB() async {
-    // this.db = await openDatabase('training.db');
+  SharedPreferences _preferences;
+
+//  @override
+//  void initState() {
+//    super.initState();
+//    email.text = '13951928868';
+//    password.text = '12345678';
+//  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    SharedPreferences.getInstance().then((prefs) {
+      _preferences = prefs;
+    });
   }
 
   @override
-  void initState() {
-    super.initState();
-    email.text = '13951928868';
-    password.text = '12345678';
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext ctx) {
     final loginButton = Padding(
       padding: EdgeInsets.only(top: 16.0),
       child: RaisedButton(
@@ -42,12 +50,7 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () async {
-          await initDB();
-          User currentUser = await Provider.of<CurrentUserStore>(context).doLogin(email.text, password.text);
-          if (currentUser != null) {
-            Navigator.of(context)
-                .pushNamedAndRemoveUntil("/home", (_) => false);
-          }
+          doLogin(email.text, password.text);
         },
         padding: EdgeInsets.all(12),
         color: Colors.lightBlueAccent,
@@ -108,10 +111,27 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 8.0),
             registerButton,
             Divider(),
-            //fwechatLoginButton
+            //wechatLoginButton
           ],
         ),
       ),
     );
+  }
+
+  Future doLogin(String username, String password) async {
+    _preferences.setString("username", username);
+    _preferences.setString("password", password);
+    if (!this.mounted) {
+      return;
+    }
+    User currentUser = await Provider.of<CurrentUserStore>(context)
+        .doLogin(username, password);
+    if (currentUser != null && currentUser.id != null) {
+      print('before switch');
+      NavigationUtil.replaceUsingDefaultFadingTransition( context, HomePage());
+    } else {
+      _scaffoldKey.currentState
+          .showSnackBar(SnackBar(content: Text("登录失败，请检查网络或者用户名密码是否正确。")));
+    }
   }
 }

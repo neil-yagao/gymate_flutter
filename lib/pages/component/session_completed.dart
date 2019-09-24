@@ -113,19 +113,26 @@ class SessionCompletedState extends State<SessionCompleted> {
         Row(
           children: <Widget>[
             Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 18.0),
-                child: Text(
-                  "完成数量：",
-                  style: Typography.dense2018.subtitle,
-                ),
+                child: FlatButton(
+              padding: EdgeInsets.symmetric(horizontal: 1),
+              child: Text(
+                '-5',
+                style: Typography.dense2018.button,
               ),
-            ),
+              onPressed: () {
+                if (double.parse(number.text) >= 5) {
+                  number.text = (int.parse(number.text) - 5).toString();
+                  this.emittingCompletedInfo();
+                }
+              },
+            )),
             Expanded(
-                child: IconButton(
-              iconSize: 15,
-              icon: Icon(Icons.remove),
+                child: FlatButton(
+                  padding: EdgeInsets.symmetric(horizontal: 1),
+                  child:Text(
+                    '-1',
+                    style: Typography.dense2018.button,
+                  ),
               onPressed: () {
                 if (int.parse(number.text) > 0) {
                   number.text = (int.parse(number.text) - 1).toString();
@@ -134,17 +141,33 @@ class SessionCompletedState extends State<SessionCompleted> {
               },
             )),
             Expanded(
+                flex: 2,
                 child: TextField(
-              textAlign: TextAlign.center,
-              controller: number,
-              keyboardType: TextInputType.numberWithOptions(),
-            )),
+                  textAlign: TextAlign.center,
+                  controller: number,
+                  keyboardType: TextInputType.numberWithOptions(),
+                  decoration: InputDecoration(suffixText: "个"),
+                )),
             Expanded(
-                child: IconButton(
-              iconSize: 15,
-              icon: Icon(Icons.add),
+                child: FlatButton(
+                  padding: EdgeInsets.symmetric(horizontal: 1),
+                  child:Text(
+                    '+1',
+                    style: Typography.dense2018.button,
+                  ),
               onPressed: () {
                 number.text = (int.parse(number.text) + 1).toString();
+                this.emittingCompletedInfo();
+              },
+            )),
+            Expanded(
+                child: FlatButton(
+              child: Text(
+                '+5',
+                style: Typography.dense2018.button,
+              ),
+              onPressed: () {
+                number.text = (int.parse(number.text) + 5).toString();
                 this.emittingCompletedInfo();
               },
             )),
@@ -153,42 +176,79 @@ class SessionCompletedState extends State<SessionCompleted> {
         Row(
           children: <Widget>[
             Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 18.0),
-                child: Text(
-                  "完成重量：",
-                  style: Typography.dense2018.subtitle,
-                ),
-              ),
-            ),
-            Expanded(
                 child: FlatButton(
-              padding: EdgeInsets.symmetric(horizontal: 2),
+              padding: EdgeInsets.symmetric(horizontal: 1),
               child: Text(
-                '-0.5',
+                '-10',
                 style: Typography.dense2018.button,
               ),
               onPressed: () {
-                if (double.parse(weight.text) > 0) {
-                  weight.text = (double.parse(weight.text) - 0.5).toString();
+                if (double.parse(weight.text) > 10) {
+                  weight.text = (double.parse(weight.text) - 10).toString();
                   this.emittingCompletedInfo();
                 }
               },
             )),
             Expanded(
-                child: TextField(
-              controller: weight,
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.numberWithOptions(),
-              decoration: InputDecoration(isDense: true, suffixText: 'KG'),
+                child: FlatButton(
+              padding: EdgeInsets.symmetric(horizontal: 1),
+              child: Text(
+                '-5',
+                style: Typography.dense2018.button,
+              ),
+              onPressed: () {
+                if (double.parse(weight.text) > 5) {
+                  weight.text = (double.parse(weight.text) - 5).toString();
+                  this.emittingCompletedInfo();
+                }
+              },
             )),
             Expanded(
                 child: FlatButton(
-              padding: EdgeInsets.symmetric(horizontal: 2),
-              child: Text('+0.5', style: Typography.dense2018.button),
+              padding: EdgeInsets.symmetric(horizontal: 1),
+              child: Text(
+                '-2.5',
+                style: Typography.dense2018.button,
+              ),
               onPressed: () {
-                weight.text = (double.parse(weight.text) + 0.5).toString();
+                if (double.parse(weight.text) > 2.5) {
+                  weight.text = (double.parse(weight.text) - 2.5).toString();
+                  this.emittingCompletedInfo();
+                }
+              },
+            )),
+            Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: weight,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.numberWithOptions(),
+                  decoration: InputDecoration(isDense: true, suffixText: 'KG'),
+                )),
+            Expanded(
+                child: FlatButton(
+              padding: EdgeInsets.symmetric(horizontal: 1),
+              child: Text('+2.5', style: Typography.dense2018.button),
+              onPressed: () {
+                weight.text = (double.parse(weight.text) + 2.5).toString();
+                this.emittingCompletedInfo();
+              },
+            )),
+            Expanded(
+                child: FlatButton(
+              padding: EdgeInsets.symmetric(horizontal: 1),
+              child: Text('+5', style: Typography.dense2018.button),
+              onPressed: () {
+                weight.text = (double.parse(weight.text) + 5).toString();
+                this.emittingCompletedInfo();
+              },
+            )),
+            Expanded(
+                child: FlatButton(
+              padding: EdgeInsets.symmetric(horizontal: 1),
+              child: Text('+10', style: Typography.dense2018.button),
+              onPressed: () {
+                weight.text = (double.parse(weight.text) + 10).toString();
                 this.emittingCompletedInfo();
               },
             )),

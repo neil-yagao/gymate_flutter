@@ -42,5 +42,6 @@ class CustomIcon {
   static const IconData heartbeat = const IconData(0xf21e, fontFamily: _kFontFam);
   static const IconData hand_peace_o = const IconData(0xf25b, fontFamily: _kFontFam);
   static const IconData swimming = const IconData(0xe838, fontFamily: _kFontFam);
+  static const IconData isight = const IconData(0xf039, fontFamily: _kFontFam);
 
 }

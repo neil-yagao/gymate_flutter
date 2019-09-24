@@ -2,7 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 BaseOptions _options = new BaseOptions(
-  baseUrl: "http://192.168.100.245:9090/api",
+//  baseUrl: "http://localhost:9090/api",
+  baseUrl: 'https://www.lifting.ren/api',
   connectTimeout: 5000,
   receiveTimeout: 6000,
 );
@@ -22,13 +23,16 @@ class DioInstance {
         return response; // continue
       }, onError: (DioError e) {
         print(e);
-        if (e.response.data != null) {
-          if (_scaffoldKey == null) {
-            return null;
-          }
+        if (_scaffoldKey == null) {
+          return null;
+        }
+        if (e.response != null && e.response.data != null) {
           Map<String, dynamic> errorMap = e.response.data as Map;
           _scaffoldKey.currentState
               .showSnackBar(SnackBar(content: Text(errorMap["message"])));
+        } else {
+          _scaffoldKey.currentState.showSnackBar(SnackBar(
+              content: Text("网络出现问题：" + e.response.statusCode.toString())));
         }
         return e;
       }));

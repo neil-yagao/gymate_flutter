@@ -17,11 +17,13 @@ class ExerciseTemplateSelection extends StatefulWidget {
 }
 
 class ExerciseTemplateSelectionState extends State<ExerciseTemplateSelection> {
-  ExerciseService _service = ExerciseService();
+  ExerciseService _service;
 
   List<Exercise> _template = List();
 
   Exercise _selectedExercise;
+
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState> ();
 
   String title;
 
@@ -34,6 +36,7 @@ class ExerciseTemplateSelectionState extends State<ExerciseTemplateSelection> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _service = ExerciseService(_scaffoldKey);
     _service
         .getUserExerciseTemplate(
             Provider.of<CurrentUserStore>(context).currentUser.id)
@@ -48,6 +51,7 @@ class ExerciseTemplateSelectionState extends State<ExerciseTemplateSelection> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(title),
         actions: <Widget>[

@@ -21,7 +21,7 @@ class TrainingPlanSelectionState extends State<TrainingPlanSelection> {
   TrainingPlan _selectedPlan;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _planService = PlanService(defaultState);
   }
@@ -43,74 +43,81 @@ class TrainingPlanSelectionState extends State<TrainingPlanSelection> {
         title: Text("训练计划选择"),
       ),
       body: SafeArea(
-        key: defaultState,
+          key: defaultState,
           child: ListView(
-        children: _availablePlans.map((TrainingPlan t) {
-          return ListTile(
-            leading: _selectedPlan == t
-                ? InkWell(
-                    child: Icon(
-                      Icons.check,
-                      color: Colors.green,
+            children: _availablePlans.map((TrainingPlan t) {
+              return ListTile(
+                leading: _selectedPlan == t
+                    ? InkWell(
+                        child: Icon(
+                          Icons.check,
+                          color: Colors.green,
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _selectedPlan = null;
+                          });
+                        },
+                      )
+                    : InkWell(
+                        child: Icon(
+                          Icons.check,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _selectedPlan = t;
+                          });
+                        },
+                      ),
+                title: Row(
+                  children: <Widget>[
+                    Expanded(
+                      flex: 2,
+                      child: Text(t.name),
                     ),
-                    onTap: () {
-                      setState(() {
-                        _selectedPlan = null;
-                      });
-                    },
-                  )
-                : InkWell(
-                    child: Icon(
-                      Icons.check,
-                      color: Colors.grey,
-                    ),
-                    onTap: () {
-                      setState(() {
-                        _selectedPlan = t;
-                      });
-                    },
-                  ),
-            title: Row(
-              children: <Widget>[
-                Expanded(
-                  flex: 2,
-                  child: Text(t.name),
+                    Expanded(
+                      child: Text(t.planGoal),
+                    )
+                  ],
                 ),
-                Expanded(
-                  child: Text(t.planGoal),
-                )
-              ],
-            ),
-            subtitle: Text(t.extraNote),
-            trailing: Text(
-              "练" +
-                  t.sessionPerTrainingCycle.toString() +
-                  "休" +
-                  (t.trainingCycleDays - t.sessionPerTrainingCycle).toString(),
-              style: Typography.dense2018.caption,
-            ),
-            isThreeLine: t.extraNote.length > 20,
-            onTap: () {},
-          );
-        }).toList(growable: true),
-      )),
+                subtitle: Text(t.extraNote),
+                trailing: Text(
+                  "练" +
+                      t.sessionPerTrainingCycle.toString() +
+                      "休" +
+                      (t.trainingCycleDays - t.sessionPerTrainingCycle)
+                          .toString(),
+                  style: Typography.dense2018.caption,
+                ),
+                isThreeLine: t.extraNote.length > 20,
+                onTap: () {},
+              );
+            }).toList(growable: true),
+          )),
       bottomNavigationBar: BottomAppBar(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal:8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: FlatButton(
                 padding: EdgeInsets.all(0),
                 textColor: _selectedPlan == null
                     ? Colors.grey
                     : Theme.of(context).primaryColor,
                 child: Text(
-                  "应用计划",style: Typography.dense2018.caption,
+                  "应用计划",
+                  style: Typography.dense2018.caption,
                 ),
                 onPressed: () {
-                  User user = Provider.of<CurrentUserStore>(context).currentUser;
-                  _planService.applyPlanToUser(_selectedPlan, user.id);
+                  User user =
+                      Provider.of<CurrentUserStore>(context).currentUser;
+                  _planService
+                      .applyPlanToUser(_selectedPlan, user.id)
+                      .then((_) {
+                    Navigator.of(context).maybePop();
+                  });
                 },
               ),
             )

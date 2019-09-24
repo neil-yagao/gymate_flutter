@@ -3,6 +3,7 @@ import 'package:workout_helper/model/entities.dart';
 /// QuestionService
 ///
 /// currently only using constant questionnaire
+@deprecated
 class QuestionRepositoryService {
   List<Question> getQuestionOf(SupportedTrainingType type) {
     List<Question> questions = List();

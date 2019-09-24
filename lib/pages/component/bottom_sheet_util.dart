@@ -17,9 +17,12 @@ class MovementBottomSheetUtil {
             title: Text(suggestion.name, style: Typography.dense2018.caption));
       },
       itemFilter: (Movement suggestion, String query) =>
-          suggestion.name.indexOf(query) >= 0,
+          suggestion.name == query || suggestion.name.indexOf(query) >= 0,
       suggestions: suggestions,
       itemSorter: (Movement a, Movement b) {
+        if(a.name.length != b.name.length){
+          return a.name.length.compareTo(b.name.length);
+        }
         return a.name.compareTo(b.name);
       },
       clearOnSubmit: false,

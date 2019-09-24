@@ -17,18 +17,22 @@ class SessionMaterialsGrid extends StatefulWidget {
 }
 
 class SessionMaterialsGridState extends State<SessionMaterialsGrid> {
-  final SessionService srs = SessionService();
+  SessionService srs ;
   final String sessionId;
 
   List<SessionMaterial> _materials = List();
 
+
   SessionMaterialsGridState(this.sessionId);
+
+  GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
+
 
   @override
   void initState() {
     super.initState();
-    srs
-        .getSessionMaterialsBySessionId(sessionId)
+    srs = SessionService(_key);
+    srs.getSessionMaterialsBySessionId(sessionId)
         .then((sms) {
       setState(() {
         _materials = sms;
@@ -40,6 +44,7 @@ class SessionMaterialsGridState extends State<SessionMaterialsGrid> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
+      key: _key,
       appBar: AppBar(
         backgroundColor: Theme
             .of(context)
@@ -60,12 +65,12 @@ class SessionMaterialsGridState extends State<SessionMaterialsGrid> {
     return _materials.map((SessionMaterial sm) {
       if (sm.isVideo) {
         VideoPlayerController videoController =
-        VideoPlayerController.file(File(sm.filePath));
+        VideoPlayerController.file(File(sm.storeLocation));
         return AspectRatio(
             aspectRatio: videoController.value.aspectRatio,
             child: VideoPlayer(videoController));
       } else {
-        return Image.file(File(sm.filePath));
+        return Image.network(sm.storeLocation);
       }
     }).toList();
   }

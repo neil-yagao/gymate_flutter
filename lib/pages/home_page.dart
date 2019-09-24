@@ -11,8 +11,6 @@ import 'component/bottom_navigation_bar.dart';
 import 'component/home_calendar.dart';
 
 class HomePage extends StatefulWidget {
-  final bool hasLaunchPlan = false;
-
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -21,7 +19,9 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageNoPlanState extends State<HomePage> {
-  SessionService _sessionService = SessionService();
+  SessionService _sessionService;
+
+  GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   Session _todaySession;
 
   bool _showCalendar = false;
@@ -31,9 +31,10 @@ class HomePageNoPlanState extends State<HomePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _sessionService = SessionService(_key);
     _currentUser = Provider.of<CurrentUserStore>(context).currentUser;
     _sessionService.getTodaySession(_currentUser.id).then((Session session) {
-      if (session != null) {
+      if (session != null && this.mounted) {
         setState(() {
           _todaySession = session;
         });
@@ -44,6 +45,7 @@ class HomePageNoPlanState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: _key,
         body: SafeArea(
             child: ListView(
                 shrinkWrap: true,
@@ -135,7 +137,7 @@ class HomePageNoPlanState extends State<HomePage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom:16.0,top: 8),
+      padding: const EdgeInsets.only(bottom: 16.0, top: 8),
       child: Card(
           child: Column(children: <Widget>[
         Padding(
@@ -144,18 +146,22 @@ class HomePageNoPlanState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.only(left:28.0),
+                padding: const EdgeInsets.only(left: 28.0),
                 child: Text(
                   "今日训练",
-                  style: Typography.dense2018.title.merge(
-                      TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+                  style: Typography.dense2018.title.merge(TextStyle(
+                      color: Colors.grey, fontStyle: FontStyle.italic)),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(right:18.0),
+                padding: const EdgeInsets.only(right: 18.0),
                 child: InkWell(
-                  child: Icon(Icons.edit,size: 18,color:Colors.grey,),
-                  onTap: (){
+                  child: Icon(
+                    Icons.edit,
+                    size: 18,
+                    color: Colors.grey,
+                  ),
+                  onTap: () {
                     NavigationUtil.pushUsingDefaultFadingTransition(
                         context, TrainingPlanSelection());
                   },
@@ -168,15 +174,22 @@ class HomePageNoPlanState extends State<HomePage> {
           title: Text(todaySession.matchingExercise.name,
               style: Typography.dense2018.subtitle),
           subtitle: Text(todaySession.matchingExercise.description),
-          trailing: _todaySession.accomplishedTime == null ?IconButton(
-            onPressed: () {
-              goToTodaySession(context);
-            },
-            icon: Icon(Icons.chevron_right),
-          ):Icon(Icons.check,color: Colors.greenAccent,),
-          onTap: _todaySession.accomplishedTime == null? () {
-            goToTodaySession(context);
-          }:null,
+          trailing: _todaySession.accomplishedTime == null
+              ? IconButton(
+                  onPressed: () {
+                    goToTodaySession(context);
+                  },
+                  icon: Icon(Icons.chevron_right),
+                )
+              : Icon(
+                  Icons.check,
+                  color: Colors.greenAccent,
+                ),
+          onTap: _todaySession.accomplishedTime == null
+              ? () {
+                  goToTodaySession(context);
+                }
+              : null,
         )
       ])),
     );

@@ -21,16 +21,22 @@ class SaveTemplateState extends State<SaveTemplate> {
   TextEditingController description = TextEditingController();
   List<MuscleGroup> involvedGroup = List();
 
-  SessionService _sessionRepositoryService =
-  SessionService();
+  SessionService _sessionRepositoryService;
 
   bool _selectingMuscleGroup = false;
 
   bool _exerciseTemplate = true;
 
   final Exercise exerciseToSave;
+  GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
   SaveTemplateState(this.exerciseToSave);
+
+  @override
+  void initState(){
+    super.initState();
+    _sessionRepositoryService = SessionService(_key);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +48,8 @@ class SaveTemplateState extends State<SaveTemplate> {
         title: Text("保存模板"),
       ),
       body: SafeArea(
-        child: Card(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
                 padding:
@@ -86,7 +92,7 @@ class SaveTemplateState extends State<SaveTemplate> {
                         height: MediaQuery
                             .of(context)
                             .size
-                            .height * 0.3,
+                            .height * 0.16,
                         child: ListView(
                           children: movementMap.entries
                               .map((MapEntry<Movement, List<ExerciseSet>> me) {
@@ -103,7 +109,7 @@ class SaveTemplateState extends State<SaveTemplate> {
                           }).toList(),
                         ),
                       ),
-                      headerBuilder: (context, isExpaned) {
+                      headerBuilder: (context, isExpanded) {
                         return ListTile(
                           dense: true,
                           title: Text(
@@ -165,7 +171,6 @@ class SaveTemplateState extends State<SaveTemplate> {
               )
             ],
           ),
-        ),
       ),
       bottomNavigationBar: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

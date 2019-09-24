@@ -39,7 +39,7 @@ Map<String, String> metMap = {
 class CardioBottomSheetState extends State<CardioBottomSheet> {
   CardioSet _cs = CardioSet.empty();
 
-  ProfileService _profileService = ProfileService();
+  ProfileService _profileService = ProfileService(null);
 
   TextEditingController _distance = TextEditingController();
   TextEditingController _time = TextEditingController();
@@ -52,24 +52,29 @@ class CardioBottomSheetState extends State<CardioBottomSheet> {
   CardioBottomSheetState(this.logExercise);
 
   @override
-  void didChangeDependencies(){
+  void didChangeDependencies() {
     super.didChangeDependencies();
+    _cs.movement = CardioType.walking;
+    _cs.movementName = "走路";
     _profileService
         .loadUserIndexes(
-        Provider.of<CurrentUserStore>(context).currentUser.id.toString())
+            Provider.of<CurrentUserStore>(context).currentUser.id.toString())
         .then((List<UserBodyIndex> userBodyIndexes) {
       bodyWeightIndex = userBodyIndexes.firstWhere(
-              (UserBodyIndex index) => index.bodyIndex == BodyIndex.WEIGHT,
+          (UserBodyIndex index) => index.bodyIndex == BodyIndex.WEIGHT,
           orElse: null);
       setState(() {
-        _weight.text = bodyWeightIndex.value.toString();
+        if (bodyWeightIndex != null) {
+          _weight.text = bodyWeightIndex.value.toString();
+        } else {
+          _weight.text = '60';
+        }
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Center(
         child: Card(
             margin:

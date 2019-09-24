@@ -17,21 +17,24 @@ dependencies:
   dio: 2.1.13
   moor_flutter: ^1.6.0
   flutter_slidable: ^0.5.3
-  flutter_calendar_carousel: ^1.3.18
+  flutter_calendar_carousel: 1.3.18
   share: ^0.6.2
   password: ^1.0.0
   camera: ^0.5.2
   path_provider: ^0.5.0
-  video_player: ^0.10.0
+  auto_orientation: ^0.0.2
+  chewie: ^0.9.5
+  video_player: ^0.10.0+2
   flutter_speed_dial: ^1.2.1
   intl: ^0.15.7
-  build_runner: ^1.6.5
   badges: ^1.1.0
   charts_flutter: ^0.6.0
   fluwx: ^1.0.4
   image_picker: ^0.6.1
   image_crop: ^0.3.1
   provider: ^3.0.0+1
+  shared_preferences: ^0.4.2
+  carousel_slider: ^1.3.0
   flutter:
     sdk: flutter
   # The following adds the Cupertino Icons font to your application.
@@ -44,7 +47,7 @@ dev_dependencies:
   moor_generator: ^1.6.0
   json_serializable: ^2.0.0
   mobx_codegen: 0.3.3+1
-  build_runner: ^1.3.1
+  build_runner: ^1.6.5
 
 
 

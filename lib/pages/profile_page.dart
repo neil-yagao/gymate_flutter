@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:workout_helper/general/my_flutter_app_icons.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/component/profile_tile.dart';
 import 'package:workout_helper/pages/plan_generate.dart';
@@ -13,12 +15,13 @@ import 'package:workout_helper/service/profile_service.dart';
 import 'package:workout_helper/service/session_service.dart';
 import 'package:workout_helper/util/navigation_util.dart';
 
+import 'nutrition_record_list.dart';
+import 'user_training_groups.dart';
 import 'avatar_crop.dart';
 import 'component/body_index_detail.dart';
 import 'component/bottom_navigation_bar.dart';
 import 'component/movement_one_rep_max.dart';
 import 'component/session_histories.dart';
-import 'exercise_template_selection.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -29,17 +32,18 @@ class ProfilePage extends StatefulWidget {
 
 class ProfilePageState extends State<ProfilePage> {
   File _tempImage;
+
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
   List<UserBodyIndex> userBodyIndexes = List();
 
   Map<BodyIndex, BodyIndexSpecification> bodyIndexMap;
 
-  ProfileService _profileService = ProfileService();
+  ProfileService _profileService;
 
-  MovementService _movementService = MovementService();
+  MovementService _movementService;
 
-  SessionService _sessionService = SessionService();
+  SessionService _sessionService;
 
   int _movementAmount = 0;
 
@@ -48,6 +52,8 @@ class ProfilePageState extends State<ProfilePage> {
   int _exerciseTemplateAmount = 0;
 
   int _dietAmount = 0;
+
+  User _currentUser = User.empty();
 
   Widget profileHeader() => Container(
       height: MediaQuery.of(context).size.height / 4,
@@ -77,78 +83,18 @@ class ProfilePageState extends State<ProfilePage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                        value.currentUser.groupName == null
-                            ? "尚未加入任何小组"
-                            : value.currentUser.groupName,
-                        style: TextStyle(color: Colors.black),
-                      ),
                       InkWell(
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 6.0, bottom: 6, right: 6),
-                          child: Icon(
-                            Icons.mode_edit,
-                            size: 12,
-                            color: Colors.grey,
-                          ),
+                        child: Text(
+                          value.currentUser.groupName == null
+                              ? "尚未加入任何小组"
+                              : _currentUser.groupName,
+                          style: TextStyle(color: Colors.black),
                         ),
                         onTap: () {
-                          showDialog<String>(
-                              context: context,
-                              builder: (context) {
-                                String groupCode = '';
-                                return Center(
-                                  child: Card(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                            "请输入小组的编码",
-                                            style: Typography.dense2018.subhead
-                                                .merge(TextStyle(
-                                                    color: Colors.grey)),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8.0),
-                                          child: TextField(
-                                            onChanged: (val) {
-                                              groupCode = val;
-                                            },
-                                          ),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 8.0, bottom: 8),
-                                              child: FlatButton(
-                                                child: Text("确定"),
-                                                textColor: Theme.of(context)
-                                                    .primaryColor,
-                                                onPressed: () {
-                                                  Navigator.of(context)
-                                                      .maybePop(groupCode);
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).then((groupCode) {
-                            print("groupCode:" + groupCode);
-                          });
+                          NavigationUtil.pushUsingDefaultFadingTransition(
+                              context, UserTrainingGroups());
                         },
-                      )
+                      ),
                     ],
                   )
                 ],
@@ -249,7 +195,10 @@ class ProfilePageState extends State<ProfilePage> {
               child: ProfileTile(
                 title: _dietAmount.toString(),
                 subtitle: "饮食记录",
-                onTap: () {},
+                onTap: () {
+                  NavigationUtil.pushUsingDefaultFadingTransition(
+                      context, NutritionRecordList());
+                },
               ),
             )
           ],
@@ -273,16 +222,16 @@ class ProfilePageState extends State<ProfilePage> {
 
   @override
   void didChangeDependencies() {
-    String userId =
-        Provider.of<CurrentUserStore>(context).currentUser.id.toString();
     super.didChangeDependencies();
-    _profileService.loadUserIndexes(userId).then((List<UserBodyIndex> indexes) {
+    _currentUser =
+        Provider.of<CurrentUserStore>(context).currentUser;
+    _profileService.loadUserIndexes(_currentUser.id.toString()).then((List<UserBodyIndex> indexes) {
       setState(() {
         this.userBodyIndexes = indexes;
       });
     });
     _profileService
-        .loadUserTrainingService(userId)
+        .loadUserTrainingService(_currentUser.id.toString())
         .then((Map<String, dynamic> data) {
       setState(() {
         _sessionAmount = data["session_amount"];
@@ -296,16 +245,34 @@ class ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    _movementService = MovementService(_key);
+    _profileService = ProfileService(_key);
+    _sessionService = SessionService(_key);
     bodyIndexMap = mapBodyIndexInfo();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-//      appBar: AppBar(),
+      key: _key,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          InkWell(
+            child: Icon(CustomIcon.logout,color: Colors.white,),
+            onTap: (){
+              SharedPreferences.getInstance().then((prefs) {
+                prefs.remove("username");
+                prefs.remove("password");
+                Navigator.of(context).pushReplacementNamed("/");
+              });
+            },
+          )
+        ],
+      ),
       body: SafeArea(child: bodyData()),
       bottomNavigationBar: BottomNaviBar(
-        currentIndex: 2,
+        currentIndex: 3,
       ),
     );
   }

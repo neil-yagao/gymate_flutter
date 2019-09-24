@@ -57,10 +57,12 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     currentUser = Provider.of<CurrentUserStore>(context).currentUser;
+    fillWithRestExercise();
   }
 
   @override
   Widget build(BuildContext context) {
+    //fillWithRestExercise();
     // TODO: implement build
     int exerciseIndex = 0;
     return Scaffold(
@@ -86,6 +88,7 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
                 proposalTrainingPlan.planGoal = _planGoal.text;
                 proposalTrainingPlan.trainingCycleDays =
                     int.parse(_trainingCycleDays.text);
+                proposalTrainingPlan.name = _name.text;
                 planService
                     .createTrainingPlan(proposalTrainingPlan)
                     .then((json) {

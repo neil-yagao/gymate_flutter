@@ -48,25 +48,31 @@ class PlanService {
         .then((Response r) {
       Map<DateTime, UserPlannedExercise> appliedResult = Map();
       (r.data as List).forEach((d ){
-        Exercise exerciseToExecute = Exercise.empty();
-        if(d['exercise'] == null){
-          exerciseToExecute.id = "-1";
-         exerciseToExecute.name = "休息日";
-         exerciseToExecute.description = "休息是为了更好的训练，建议进行有氧恢复";
-        }else {
-          exerciseToExecute = Exercise.fromJson(d['exercise']);
-        }
-        UserPlannedExercise userPlannedExercise = UserPlannedExercise();
-        userPlannedExercise.id = d['id'];
-        userPlannedExercise.executeDate = DateFormat('yyyy-MM-dd').parse(d['plannedExecutionDate']);
-        userPlannedExercise.exercise = exerciseToExecute;
-        userPlannedExercise.hasBeenExecuted = d['hasBeenExecuted'];
-        userPlannedExercise.userId = d['user']['id'];
+
+        UserPlannedExercise userPlannedExercise = userPlannedExerciseFromJson(d);
         appliedResult[userPlannedExercise.executeDate] = userPlannedExercise;
       });
       db.savePlannedExercise(appliedResult, id);
       return appliedResult;
     });
+  }
+
+  UserPlannedExercise userPlannedExerciseFromJson(d) {
+    Exercise exerciseToExecute = Exercise.empty();
+    if(d['exercise'] == null){
+      exerciseToExecute.id = "-1";
+      exerciseToExecute.name = "休息日";
+      exerciseToExecute.description = "休息是为了更好的训练，建议进行有氧恢复";
+    }else {
+      exerciseToExecute = Exercise.fromJson(d['exercise']);
+    }
+    UserPlannedExercise userPlannedExercise = UserPlannedExercise();
+    userPlannedExercise.id = d['id'];
+    userPlannedExercise.executeDate = DateFormat('yyyy-MM-dd').parse(d['plannedExecutionDate']);
+    userPlannedExercise.exercise = exerciseToExecute;
+    userPlannedExercise.hasBeenExecuted = d['hasBeenExecuted'];
+    userPlannedExercise.userId = d['user']['id'];
+    return userPlannedExercise;
   }
 
 

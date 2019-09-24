@@ -1,10 +1,17 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:workout_helper/model/nutrition_preference.dart';
 
 import 'basic_dio.dart';
 
 class NutritionService {
+  Dio dio;
+
+  NutritionService(GlobalKey<ScaffoldState> _scaffoldKey){
+    dio = DioInstance.getInstance(_scaffoldKey);
+  }
+
   Dio instance = DioInstance.getInstance(null);
 
   Future<UserNutritionPreference> getUserNutritionPreference(int userId) async {
@@ -56,6 +63,18 @@ class NutritionService {
         return NutritionRecord.fromJson(t.data);
       }
       return null;
+    });
+  }
+
+  Future<List<NutritionRecord>> getUserNutritionRecord(int userId){
+    return instance.get('/nutrition/records/' + userId.toString()).then((res){
+      List<NutritionRecord> records = List();
+      if(res.data != null){
+        (res.data as List).forEach((val){
+          records.add(NutritionRecord.fromJson(val));
+        });
+      }
+      return records;
     });
   }
 }

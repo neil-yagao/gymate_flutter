@@ -9,12 +9,13 @@ import 'bottom_sheet_util.dart';
 class HIITBottomSheet extends StatefulWidget {
 
   final Function(List<ExerciseSet> newMovement) onSubmitted;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
-  const HIITBottomSheet({Key key, this.onSubmitted}) : super(key: key);
+  const HIITBottomSheet({Key key, this.onSubmitted, this.scaffoldKey}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return HIITBottomSheetState(onSubmitted);
+    return HIITBottomSheetState(onSubmitted,this.scaffoldKey);
   }
 }
 
@@ -34,7 +35,7 @@ class HIITBottomSheetState extends State<HIITBottomSheet> {
 
   SingleMovementSet _regularSet = SingleMovementSet.fromOther(null);
 
-  MovementService service = MovementService();
+  MovementService service = MovementService(null);
 
   MovementBottomSheetUtil movementBottomSheetUtil;
 
@@ -48,7 +49,10 @@ class HIITBottomSheetState extends State<HIITBottomSheet> {
 
   double ratio = 1.0;
 
-  HIITBottomSheetState(this.onSubmitted);
+  HIITBottomSheetState(this.onSubmitted, this.scaffoldKey);
+
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
 
   @override
   void initState() {
@@ -73,7 +77,6 @@ class HIITBottomSheetState extends State<HIITBottomSheet> {
     return Center(
         child: Card(
             child: ListView(
-
               shrinkWrap: true, children: <Widget>[
             Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -186,9 +189,15 @@ class HIITBottomSheetState extends State<HIITBottomSheet> {
                         .of(context)
                         .primaryColor,
                     onPressed: () {
+                      if (_regularSet.movement == null) {
+                        scaffoldKey.currentState
+                            .showSnackBar(SnackBar(content: Text("训练动作不能为空")));
+                        throw Error();
+                      }
                       setState(() {
                         _regularSet.expectingWeight =
                             double.parse(extraWeight.text);
+                        _regularSet.unit = "KG";
                         _regularSet.expectingRepeatsPerSet = -1;
                         _regularSet.sequence = _predefineRoutine.length + 1;
                         _predefineRoutine.add(_regularSet);

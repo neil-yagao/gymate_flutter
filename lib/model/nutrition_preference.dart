@@ -145,6 +145,7 @@ class NutritionRecord extends MacroNutrition {
 
   double carbohydrate;
 
+
   double fat;
 
   /**
@@ -152,8 +153,10 @@ class NutritionRecord extends MacroNutrition {
    */
   double estimateCals;
 
+  DateTime recordTime;
+
   NutritionRecord(this.id, this.materials, this.name, this.recorder, this.protein,
-      this.carbohydrate, this.fat, this.estimateCals);
+      this.carbohydrate, this.fat, this.estimateCals,this.recordTime);
 
   NutritionRecord.empty();
 

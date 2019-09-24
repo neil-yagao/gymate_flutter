@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:workout_helper/pages/component/bottom_navigation_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workout_helper/pages/home_page.dart';
 import 'package:workout_helper/pages/login.dart';
 import 'package:workout_helper/pages/nutrition_page.dart';
@@ -9,16 +9,55 @@ import 'package:workout_helper/pages/register_page.dart';
 import 'package:workout_helper/pages/session.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 
-import 'general/my_flutter_app_icons.dart';
+import 'model/entities.dart';
 
-void main() => runApp(MyApp());
+CurrentUserStore store = CurrentUserStore(null);
+
+void main() {
+  SharedPreferences.getInstance().then((prefs) {
+    String username = prefs.getString("username");
+    String password = prefs.getString("password");
+    if (username != null && password != null) {
+      runApp(FutureBuilder<User>(
+        future: store.doLogin(username, password),
+        builder: (context, user) {
+          if (user.data != null) {
+            if (user.data.id != null) {
+              return MyApp(
+                hasLoginIn: true,
+              );
+            } else {
+              return MyApp(
+                hasLoginIn: false,
+              );
+            }
+          } else {
+            return SizedBox(
+              height: 10,
+              width: 10,
+              child: Card(child: CircularProgressIndicator()),
+            );
+          }
+        },
+      ));
+    } else {
+      runApp(MyApp(
+        hasLoginIn: false,
+      ));
+    }
+  });
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+  final bool hasLoginIn;
+
+  const MyApp({Key key, this.hasLoginIn}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<CurrentUserStore>(
-        builder: (context) => CurrentUserStore(null),
+        builder: (context) => store,
         child: MaterialApp(
           title: 'Lifting.ren',
           theme: ThemeData(
@@ -42,11 +81,11 @@ class MyApp extends StatelessWidget {
             '/register': (context) => RegisterPage(),
             '/home': (BuildContext context) => HomePage(),
             '/quickExercise': (BuildContext context) => UserSession("randomId"),
-            '/nutrition':(BuildContext context) => NutritionPage(),
-            '/profile':(BuildContext context) => ProfilePage(),
+            '/nutrition': (BuildContext context) => NutritionPage(),
+            '/profile': (BuildContext context) => ProfilePage(),
             //'/camera': (context) => CameraExampleHome('none')
           },
-          initialRoute: '/',
+          initialRoute: hasLoginIn ? '/home' : '/',
         ));
   }
 }

@@ -14,18 +14,23 @@ const MovementTypeLabelMap = {
 class MovementBottomSheet extends StatefulWidget {
   final Function(List<ExerciseSet> newMovement) onSubmitted;
 
-  const MovementBottomSheet({Key key, this.onSubmitted}) : super(key: key);
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
+  const MovementBottomSheet({Key key, this.onSubmitted, this.scaffoldKey})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return MovementBottomSheetState(this.onSubmitted);
+    return MovementBottomSheetState(this.onSubmitted, this.scaffoldKey);
   }
 }
 
 class MovementBottomSheetState extends State<MovementBottomSheet> {
   MovementType _movementType = MovementType.SINGLE;
 
-  MovementService service = MovementService();
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
+  MovementService service;
 
   MovementBottomSheetUtil movementBottomSheetUtil;
 
@@ -36,13 +41,16 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
   SingleMovementSet _regularSet = SingleMovementSet.fromOther(null);
   ReduceSet _reduceSet = ReduceSet.fromObject(null);
 
+  String _currentWeight = "KG";
+
   final Function(List<ExerciseSet> newMovement) onSubmitted;
 
-  MovementBottomSheetState(this.onSubmitted);
+  MovementBottomSheetState(this.onSubmitted, this.scaffoldKey);
 
   @override
   void initState() {
     super.initState();
+    service = MovementService(null);
     service.getMovements(ExerciseType.lifting).then((List<Movement> movements) {
       setState(() {
         movementBottomSheetUtil = MovementBottomSheetUtil(movements);
@@ -51,11 +59,37 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
   }
 
   List<ExerciseSet> appendSets() {
+    if (expectingSetController.text.isEmpty) {
+      scaffoldKey.currentState
+          .showSnackBar(SnackBar(content: Text("训练组数不能为0")));
+      throw Error();
+    }
+    if (_regularSet.movement == null) {
+      scaffoldKey.currentState
+          .showSnackBar(SnackBar(content: Text("训练动作不能为空")));
+      throw Error();
+    }
+    if (_regularSet.expectingWeight == null || _regularSet.expectingWeight <= 0) {
+      scaffoldKey.currentState
+          .showSnackBar(SnackBar(content: Text("训练重量不正确")));
+      throw Error();
+    }
+    if(_reduceSet.expectingRepeatsPerSet == null || _reduceSet.expectingRepeatsPerSet <=0 ){
+      scaffoldKey.currentState
+          .showSnackBar(SnackBar(content: Text("每组重复次数不能为空")));
+      throw Error();
+    }
+    if (_reduceSet.expectingWeight >= _reduceSet.reduceTo) {
+      scaffoldKey.currentState
+          .showSnackBar(SnackBar(content: Text("递减组重量不正确")));
+      throw Error();
+    }
     switch (_movementType) {
       case MovementType.SINGLE:
         return List.generate(int.parse(expectingSetController.text),
             (int index) {
           var instance = SingleMovementSet.fromOther(_regularSet);
+          instance.unit = _currentWeight;
           return instance;
         });
       case MovementType.REDUCE:
@@ -64,6 +98,7 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
             (int index) {
           var instance = ReduceSet.fromObject(_reduceSet);
           instance.copyFromRegularSet(_regularSet);
+          instance.unit = _currentWeight;
           return instance;
         });
       case MovementType.GIANT:
@@ -143,7 +178,18 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
                     color: Theme.of(context).primaryColor,
                     child: Text("增加"),
                     onPressed: () {
+                      if (expectingSetController.text.isEmpty) {
+                        scaffoldKey.currentState
+                            .showSnackBar(SnackBar(content: Text("重复组数不能为0")));
+                        throw Error();
+                      }
+                      if (_regularSet.movement == null) {
+                        scaffoldKey.currentState
+                            .showSnackBar(SnackBar(content: Text("训练动作不能为空")));
+                        throw Error();
+                      }
                       setState(() {
+                        _regularSet.unit = _currentWeight;
                         this._giantSet.movements.add(_regularSet);
                         _regularSet = SingleMovementSet.fromOther(null);
                       });
@@ -204,11 +250,25 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
               padding: const EdgeInsets.only(left: 8.0, right: 8),
               child: TextField(
                 keyboardType: TextInputType.numberWithOptions(),
-                decoration:
-                    InputDecoration(labelText: '计划重量', suffixText: "KG"),
+                decoration: InputDecoration(
+                    labelText: '计划重量',
+                    suffix: InkWell(
+                      child: Text(_currentWeight),
+                      onTap: () {
+                        if (_currentWeight == "KG") {
+                          _currentWeight = "%1RM";
+                        } else if (_currentWeight == "%1RM") {
+                          _currentWeight = "自重";
+                        } else if (_currentWeight == "自重") {
+                          _currentWeight = "KG";
+                        }
+                        setState(() {});
+                      },
+                    )),
                 onChanged: (String value) {
                   setState(() {
                     this._regularSet.expectingWeight = double.parse(value);
+                    this._regularSet.unit = _currentWeight;
                   });
                 },
               ),
@@ -220,62 +280,68 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
   }
 
   Widget build(BuildContext buildContext) {
+    var mediaQuery = MediaQuery.of(context);
+
     return Center(
       child: Card(
         margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.1),
-        child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          shrinkWrap: true,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "训练动作",
-                  style: Typography.dense2018.headline,
-                )
-              ],
-            ),
-            Divider(),
-            Row(
-              children: <Widget>[
-                ...MovementType.values.map((MovementType t) => Expanded(
-                      child: LabeledRadio<MovementType>(
-                        value: t,
-                        padding: EdgeInsets.symmetric(horizontal: 4),
-                        label: Text(
-                          MovementTypeLabelMap[t],
-                          style: Typography.dense2018.body1,
-                        ),
-                        groupValue: _movementType,
-                        onChanged: (MovementType value) {
-                          setState(() {
-                            _movementType = value;
-                          });
-                        },
-                      ),
-                    ))
-              ],
-            ),
-            Divider(),
-            ...buildMovementDefinition(_movementType),
-            Divider(),
-            RaisedButton(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  '加入训练',
-                  style: Typography.dense2018.title,
-                ),
+        child: AnimatedContainer(
+          padding: mediaQuery.viewInsets,
+          duration: const Duration(milliseconds: 300),
+          child: ListView(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            shrinkWrap: true,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "训练动作",
+                    style: Typography.dense2018.headline,
+                  )
+                ],
               ),
-              color: Theme.of(context).primaryColor,
-              textColor: Colors.white,
-              onPressed: () {
-                this.onSubmitted(appendSets());
-                Navigator.of(context).pop();
-              },
-            )
-          ],
+              Divider(),
+              Row(
+                children: <Widget>[
+                  ...MovementType.values.map((MovementType t) => Expanded(
+                        child: LabeledRadio<MovementType>(
+                          value: t,
+                          padding: EdgeInsets.symmetric(horizontal: 4),
+                          label: Text(
+                            MovementTypeLabelMap[t],
+                            style: Typography.dense2018.body1,
+                          ),
+                          groupValue: _movementType,
+                          onChanged: (MovementType value) {
+                            setState(() {
+                              _movementType = value;
+                            });
+                          },
+                        ),
+                      ))
+                ],
+              ),
+              Divider(),
+              ...buildMovementDefinition(_movementType),
+              Divider(),
+              RaisedButton(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    '加入训练',
+                    style: Typography.dense2018.title,
+                  ),
+                ),
+                color: Theme.of(context).primaryColor,
+                textColor: Colors.white,
+                onPressed: () {
+                  this.onSubmitted(appendSets());
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          ),
         ),
       ),
     );

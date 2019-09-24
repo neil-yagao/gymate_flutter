@@ -204,6 +204,11 @@ class SessionReport extends StatelessWidget {
     Movement movement,
     List<CompletedExerciseSet> completedSets,
   ) {
+    completedSets.sort((a,b){
+      return a.completedTime.compareTo(b.completedTime);
+    });
+    int sequence = 0;
+    completedSets.forEach((c)=>c.accomplishedSet.sequence = sequence++);
     return charts.Series<CompletedExerciseSet, String>(
         id: '训练容量',
         colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,

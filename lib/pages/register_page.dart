@@ -33,10 +33,18 @@ class RegisterPageState extends State<RegisterPage> {
   Dio dio;
 
   String cellPhone = "";
+
+  Timer t;
   @override
   void initState() {
     super.initState();
     dio = DioInstance.getInstance(_globalKey);
+  }
+
+  @override
+  void dispose(){
+    t?.cancel();
+    super.dispose();
   }
 
   GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
@@ -57,8 +65,8 @@ class RegisterPageState extends State<RegisterPage> {
                 controller: cell,
                 hint: "手机号",
                 inputType: TextInputType.phone,
-                onChanged: (String cell){
-                    setState(() {
+                onChanged: (String cell) {
+                  setState(() {
                     this.cellPhone = cell;
                   });
                 },
@@ -99,14 +107,18 @@ class RegisterPageState extends State<RegisterPage> {
                       child: RaisedButton(
                     color: Theme.of(context).primaryColor,
                     textColor: Colors.white,
-                    onPressed: cellPhone.trim().length == 11 && verifyButton == '发送验证码'
+                    onPressed: cellPhone.trim().length == 11 &&
+                            verifyButton == '发送验证码'
                         ? () async {
+                            if (!this.mounted) {
+                              return;
+                            }
                             dio
                                 .get('/user/verify-code/' + cell.text)
                                 .then((value) {
                               setState(() {
                                 verifyButton = 60.toString();
-                                Timer t =
+                                t =
                                     Timer.periodic(Duration(seconds: 1), (t) {
                                   if (int.parse(verifyButton) <= 0) {
                                     setState(() {
@@ -159,7 +171,7 @@ class RegisterPageState extends State<RegisterPage> {
                       .then((User _) {
                     Navigator.of(context)
                         .pushNamedAndRemoveUntil("/home", (_) => false);
-                  });
+                  }).catchError((_) {});
                 },
                 padding: EdgeInsets.all(12),
                 color: Colors.redAccent[200],
@@ -171,4 +183,5 @@ class RegisterPageState extends State<RegisterPage> {
   void showSnackBar(String content) {
     _globalKey.currentState.showSnackBar(SnackBar(content: Text(content)));
   }
+
 }

@@ -1,15 +1,21 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/model/enum_to_string.dart';
 import 'package:workout_helper/service/basic_dio.dart';
 
 class MovementService {
 
-  Dio dio = DioInstance.getInstance(null);
+  Dio dio;
+
+  MovementService(GlobalKey<ScaffoldState> _scaffoldKey){
+    dio = DioInstance.getInstance(_scaffoldKey);
+  }
 
   Future<List<Movement>> getMovements(ExerciseType exerciseType) async {
     return dio.get('/movements',queryParameters:{
-      "exerciseType": EnumToString.parse(exerciseType)
+      "exerciseType": exerciseType == null?"all":
+      EnumToString.parse(exerciseType)
     }).then((Response rs){
       List<Movement> movements = List();
       (rs.data as List).forEach((value){
