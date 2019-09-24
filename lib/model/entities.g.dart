@@ -172,6 +172,7 @@ Map<String, dynamic> _$ReduceSetToJson(ReduceSet instance) => <String, dynamic>{
       'movement': instance.movement,
       'expectingRepeatsPerSet': instance.expectingRepeatsPerSet,
       'expectingWeight': instance.expectingWeight,
+      'unit': instance.unit,
       'reduceWeight': instance.reduceWeight,
       'reduceTo': instance.reduceTo,
       'intervalTime': instance.intervalTime
@@ -296,6 +297,19 @@ Map<String, dynamic> _$TrainingPlanToJson(TrainingPlan instance) =>
       'trainingCycleDays': instance.trainingCycleDays,
       'extraNote': instance.extraNote,
       'createdBy': instance.createdBy
+    };
+
+SessionMaterial _$SessionMaterialFromJson(Map<String, dynamic> json) {
+  return SessionMaterial(json['id'], json['storeLocation'] as String,
+      json['isVideo'] as bool, json['sessionId'] as String);
+}
+
+Map<String, dynamic> _$SessionMaterialToJson(SessionMaterial instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'storeLocation': instance.storeLocation,
+      'isVideo': instance.isVideo,
+      'sessionId': instance.sessionId
     };
 
 MovementOneRepMax _$MovementOneRepMaxFromJson(Map<String, dynamic> json) {

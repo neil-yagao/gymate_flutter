@@ -59,9 +59,8 @@ enum MuscleGroup {
   CALVES
 }
 
-String muscleGroupToChinese(MuscleGroup g){
+String muscleGroupToChinese(MuscleGroup g) {
   switch (g) {
-
     case MuscleGroup.SHOULDER:
       return "肩部";
     case MuscleGroup.CHEST:
@@ -88,10 +87,10 @@ String muscleGroupToChinese(MuscleGroup g){
       return "腿部";
     case MuscleGroup.QUADS:
       return "肱四头肌";
-      // TODO: Handle this case.
+    // TODO: Handle this case.
     case MuscleGroup.GLUTES:
       return "臀部";
-      // TODO: Handle this case.
+    // TODO: Handle this case.
     case MuscleGroup.HAMSTRING:
       return "股二头肌";
     case MuscleGroup.CALVES:
@@ -147,7 +146,6 @@ enum BodyIndex {
       单位：cm
    */
   CHEST_RADIUS,
-
   AGE
 }
 
@@ -203,7 +201,7 @@ class SingleMovementSet extends ExerciseSet {
   Map<String, dynamic> toJson() => _$SingleMovementSetToJson(this);
 
   SingleMovementSet(String id, int sequence, this.movement,
-      this.expectingRepeatsPerSet, this.expectingWeight,this.unit) {
+      this.expectingRepeatsPerSet, this.expectingWeight, this.unit) {
     this.id = id;
     this.sequence = sequence;
   }
@@ -318,7 +316,8 @@ class ReduceSet extends SingleMovementSet {
       this.reduceWeight,
       this.reduceTo,
       this.intervalTime)
-      : super(id, sequence, movement, expectingRepeatsPerSet, expectingWeight,unit);
+      : super(id, sequence, movement, expectingRepeatsPerSet, expectingWeight,
+            unit);
 
   ReduceSet.fromObject(ReduceSet set) : super.fromOther(null) {
     if (set != null) {
@@ -370,6 +369,13 @@ class GiantSet extends ExerciseSet {
         movements.map((SingleMovementSet m) => m.movement.id).join('/');
     combinedMovement.name = "超级组：" +
         movements.map((SingleMovementSet m) => m.movement.name).join('/');
+    if (combinedMovement.name.length > 15) {
+      combinedMovement.name = "超级组：" +
+          movements.elementAt(0).movement.name +
+          "等" +
+          movements.length.toString() +
+          "个动作";
+    }
     combinedMovement.exerciseType = ExerciseType.lifting;
     return combinedMovement;
   }
@@ -431,7 +437,7 @@ class CardioSet extends ExerciseSet {
 enum CardioType { walking, running, cycle, swimming, rowing }
 
 ///单次训练模板
-@JsonSerializable()
+///@JsonSerializable()
 class Exercise {
   String id;
 
@@ -444,7 +450,6 @@ class Exercise {
   List<ExerciseSet> plannedSets;
 
   int recommendRestingTimeBetweenMovement;
-
 
   Exercise(this.id, this.muscleTarget, this.name, this.description,
       this.recommendRestingTimeBetweenMovement);
@@ -478,9 +483,14 @@ class TrainingPlan {
 
   User createdBy;
 
-
-  TrainingPlan(this.id, this.name, this.planGoal, this.totalTrainingCycle,
-      this.sessionPerTrainingCycle, this.trainingCycleDays, this.extraNote,
+  TrainingPlan(
+      this.id,
+      this.name,
+      this.planGoal,
+      this.totalTrainingCycle,
+      this.sessionPerTrainingCycle,
+      this.trainingCycleDays,
+      this.extraNote,
       this.createdBy);
 
   TrainingPlan.empty();
@@ -559,18 +569,25 @@ class CompletedExerciseSet {
   CompletedExerciseSet.empty();
 }
 
+@JsonSerializable()
 class SessionMaterial {
-  String id;
+  int id;
 
-  String filePath;
+  String storeLocation;
 
   bool isVideo;
 
   String sessionId;
 
-  SessionMaterial() {
-    id = uuid.v4().toString();
-  }
+  SessionMaterial(this.id, this.storeLocation, this.isVideo, this.sessionId);
+
+  SessionMaterial.empty();
+
+  factory SessionMaterial.fromJson(Map<String, dynamic> json) =>
+      _$SessionMaterialFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SessionMaterialToJson(this);
+
 }
 
 Map<BodyIndex, BodyIndexSpecification> mapBodyIndexInfo() {
@@ -635,8 +652,7 @@ class MovementOneRepMax {
   Map<String, dynamic> toJson() => _$MovementOneRepMaxToJson(this);
 }
 
-class UserPlannedExercise{
-
+class UserPlannedExercise {
   int id;
 
   DateTime executeDate;

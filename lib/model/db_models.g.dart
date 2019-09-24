@@ -948,8 +948,7 @@ class $LocalPlannedExerciseTable extends LocalPlannedExercise
   @override
   GeneratedTextColumn get id => _id ??= _constructId();
   GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn('id', $tableName, false,
-        minTextLength: 0, maxTextLength: 64);
+    return GeneratedTextColumn('id', $tableName, false, maxTextLength: 64);
   }
 
   final VerificationMeta _executeDateMeta =

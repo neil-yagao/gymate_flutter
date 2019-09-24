@@ -197,10 +197,10 @@ class ExerciseDatabase extends _$ExerciseDatabase {
         .then((List<LocalSessionMaterial> result) {
       List<SessionMaterial> sessionMaterials = List();
       result.forEach((LocalSessionMaterial lsm) {
-        SessionMaterial sm = SessionMaterial();
-        sm.id = lsm.id;
+        SessionMaterial sm = SessionMaterial.empty();
+        sm.id = int.parse(lsm.id);
         sm.sessionId = lsm.sessionId;
-        sm.filePath = lsm.filePath;
+        sm.storeLocation = lsm.filePath;
         sm.isVideo = lsm.isVideo;
         sessionMaterials.add(sm);
       });
@@ -294,6 +294,9 @@ class ExerciseDatabase extends _$ExerciseDatabase {
   UserPlannedExercise parseToUserPlannedExercise(
       LocalPlannedExerciseData localPlannedExercise, int userId) {
     UserPlannedExercise planned = UserPlannedExercise();
+    if(localPlannedExercise == null){
+      return planned;
+    }
     planned.id = int.parse(localPlannedExercise.id);
     planned.exercise = Exercise.empty();
     planned.exercise.id = localPlannedExercise.exerciseTemplateId.toString();
