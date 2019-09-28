@@ -1,14 +1,16 @@
 import 'dart:io';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/service/session_service.dart';
 
 class SessionMaterialsGrid extends StatefulWidget {
-  final String sessionId ;
+  final String sessionId;
 
   const SessionMaterialsGrid({Key key, this.sessionId}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -17,23 +19,21 @@ class SessionMaterialsGrid extends StatefulWidget {
 }
 
 class SessionMaterialsGridState extends State<SessionMaterialsGrid> {
-  SessionService srs ;
+  SessionService srs;
+
   final String sessionId;
 
   List<SessionMaterial> _materials = List();
-
 
   SessionMaterialsGridState(this.sessionId);
 
   GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
-
   @override
   void initState() {
     super.initState();
     srs = SessionService(_key);
-    srs.getSessionMaterialsBySessionId(sessionId)
-        .then((sms) {
+    srs.getSessionMaterialsBySessionId(sessionId).then((sms) {
       setState(() {
         _materials = sms;
       });
@@ -46,9 +46,7 @@ class SessionMaterialsGridState extends State<SessionMaterialsGrid> {
     return Scaffold(
       key: _key,
       appBar: AppBar(
-        backgroundColor: Theme
-            .of(context)
-            .primaryColor,
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text('训练速览'),
       ),
       body: GridView.count(
@@ -65,12 +63,34 @@ class SessionMaterialsGridState extends State<SessionMaterialsGrid> {
     return _materials.map((SessionMaterial sm) {
       if (sm.isVideo) {
         VideoPlayerController videoController =
-        VideoPlayerController.file(File(sm.storeLocation));
+            VideoPlayerController.file(File(sm.storeLocation));
         return AspectRatio(
             aspectRatio: videoController.value.aspectRatio,
             child: VideoPlayer(videoController));
       } else {
-        return Image.network(sm.storeLocation);
+        return InkWell(
+          child: Image.network(sm.storeLocation),
+          onTap: () {
+            showDialog(
+                context: context,
+                builder: (context) {
+                  return Center(
+                    child: CarouselSlider(
+                      enableInfiniteScroll: false,
+                      height: MediaQuery.of(context).size.height * 0.8,
+                      items: <Widget>[
+                        ..._materials.map((image) {
+                          return Padding(
+                            padding: EdgeInsets.all(9),
+                            child: Image.network(image.storeLocation),
+                          );
+                        })
+                      ],
+                    ),
+                  );
+                });
+          },
+        );
       }
     }).toList();
   }

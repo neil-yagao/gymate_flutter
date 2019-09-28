@@ -46,6 +46,7 @@ class MovementListPageState extends State<MovementListPage> {
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text("训练动作"),
         ),
         body: SafeArea(

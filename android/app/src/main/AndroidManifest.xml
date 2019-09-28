@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ren.lifting.workouthelper">
+    package="ren.lifting.gymate">
 
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application
@@ -15,7 +15,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="GyMate"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher">
         <activity
             android:name="com.example.workouthelper.MainActivity"
             android:launchMode="singleTop"

@@ -7,7 +7,6 @@ import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/util/navigation_util.dart';
 
 import 'component/rounded_input.dart';
-import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -104,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
             RoundedInput(
               controller: password,
               hint: "密码",
-              inputType: TextInputType.url,
+              inputType: TextInputType.visiblePassword,
             ),
             SizedBox(height: 16.0),
             loginButton,
@@ -124,14 +123,17 @@ class _LoginPageState extends State<LoginPage> {
     if (!this.mounted) {
       return;
     }
+    NavigationUtil.showLoading(context, content: "正在登陆...");
     User currentUser = await Provider.of<CurrentUserStore>(context)
         .doLogin(username, password);
+    Navigator.of(context).pop();
     if (currentUser != null && currentUser.id != null) {
-      print('before switch');
-      NavigationUtil.replaceUsingDefaultFadingTransition( context, HomePage());
+      Navigator.of(context).pushNamedAndRemoveUntil("/home", (_) => false);
     } else {
       _scaffoldKey.currentState
           .showSnackBar(SnackBar(content: Text("登录失败，请检查网络或者用户名密码是否正确。")));
     }
   }
+
+
 }

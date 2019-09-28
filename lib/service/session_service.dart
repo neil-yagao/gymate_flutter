@@ -25,16 +25,7 @@ class SessionService {
     return dio
         .post("/session/" + userId, data: generateExerciseTemplate(exercise))
         .then((Response t) {
-      Session session = Session();
-      session.accomplishedSets = List();
-      Exercise matchingExercise =
-          toExercise((t.data as Map<String, dynamic>)['matchingExercise']);
-      session.matchingExercise = matchingExercise;
-      if (session.matchingExercise.plannedSets == null) {
-        session.matchingExercise.plannedSets = List();
-      }
-      session.id = (t.data as Map<String, dynamic>)['id'].toString();
-      return session;
+      return extraToSession(t);
     });
   }
 
@@ -81,16 +72,29 @@ class SessionService {
     return session;
   }
 
-  void saveCompletedSet(Session session, CompletedExerciseSet ces) {
+  Future saveCompletedSet(Session session, CompletedExerciseSet ces) async {
     if (session.accomplishedSets == null) {
       session.accomplishedSets = List();
     }
     ces.completedTime = DateTime.now();
-    session.accomplishedSets.add(ces);
+    CompletedExerciseSet previous = session.accomplishedSets.firstWhere(
+        (set) => set.accomplishedSet.id == ces.accomplishedSet.id,
+        orElse: () => CompletedExerciseSet.empty());
+    if (previous.id == null) {
+      session.accomplishedSets.add(ces);
+    } else {
+      int index = session.accomplishedSets.indexOf(previous);
+      session.accomplishedSets[index] = ces;
+    }
+    return dio.post('/session/' + session.id + "/exerciseSet",
+        data: cesToJson(ces));
   }
 
   Future<SessionMaterial> addSessionMaterial(SessionMaterial material) {
-    return dio.post('/session/' + material.sessionId + "/material",data:material.toJson()).then((r) {
+    return dio
+        .post('/session/' + material.sessionId + "/material",
+            data: material.toJson())
+        .then((r) {
       if (r.data != null) {
         return SessionMaterial.fromJson(r.data);
       }
@@ -153,21 +157,19 @@ class SessionService {
     return maps;
   }
 
-  Future completedSession(Session currentSession, String userId) {
+  Future completeSessionExercise(String sessionId, CompletedExerciseSet set) {
+    return dio.post("/session/" + sessionId + "/exerciseSet",
+        data: cesToJson(set));
+  }
+
+  Future completedSession(Session currentSession) {
     Map<String, dynamic> data = {
       'id': currentSession.id,
       'matchingExerciseTemplateId': currentSession.matchingExercise.id,
       'matchingExerciseTemplate': {'id': currentSession.matchingExercise.id},
       'accomplishedSets':
           currentSession.accomplishedSets.map((CompletedExerciseSet ces) {
-        return {
-          'accomplishedSetId': ces.accomplishedSet.id,
-          'accomplishedSetType': ces.accomplishedSet.runtimeType.toString(),
-          'repeats': ces.repeats,
-          'restAfterAccomplished': ces.restAfterAccomplished,
-          'weight': ces.weight,
-          'completedTime': ces.completedTime.toIso8601String() + "Z"
-        };
+        return cesToJson(ces);
       }).toList(),
       'accomplishedTime': DateTime.now().toIso8601String() + "Z",
       'matchingPlannedExerciseId': currentSession.matchingPlannedExerciseId
@@ -175,7 +177,32 @@ class SessionService {
     if (currentSession.matchingPlannedExerciseId != null) {
       db.updateUserPlannedExercise(currentSession.matchingPlannedExerciseId);
     }
-    return dio.put("/session/" + userId, data: data);
+    return dio.put("/session/" + currentSession.id, data: data);
+  }
+
+  Map<String, Object> cesToJson(CompletedExerciseSet ces) {
+    return {
+      'accomplishedSetId': ces.accomplishedSet.id,
+      'accomplishedSetType': ces.accomplishedSet.runtimeType.toString(),
+      'repeats': ces.repeats,
+      'restAfterAccomplished': ces.restAfterAccomplished,
+      'weight': ces.weight,
+      'completedTime': ces.completedTime.toIso8601String() + "Z"
+    };
+  }
+
+  CompletedExerciseSet fromJsonToPartial(Map<String, Object> json) {
+    CompletedExerciseSet ces = CompletedExerciseSet(
+        json['id'],
+        null,
+        json['repeats'],
+        json['weight'],
+        json['restAfterAccomplished'],
+        DateTime.parse(json['completedTime']));
+    ///since we only need the id of the accomplish set
+      ces.accomplishedSet = SingleMovementSet.empty();
+      ces.accomplishedSet.id = json['accomplishedSetId'];
+      return  ces;
   }
 
   ///      'description': exercise.description,
@@ -238,5 +265,32 @@ class SessionService {
       }
       return List();
     });
+  }
+
+  Future<Session> recoverSession(int currentSessionId) {
+    return dio.get('/session/' + currentSessionId.toString()).then((r) {
+      Session session = extraToSession(r);
+
+      return session;
+    });
+  }
+
+  Session extraToSession(Response t) {
+    Session session = Session();
+    session.accomplishedSets = List();
+    Exercise matchingExercise =
+        toExercise((t.data as Map<String, dynamic>)['matchingExercise']);
+    session.matchingExercise = matchingExercise;
+    if (session.matchingExercise.plannedSets == null) {
+      session.matchingExercise.plannedSets = List();
+    }
+    var sets = (t.data as Map<String, dynamic>)['accomplishedSets'];
+    if(sets is List && sets.isNotEmpty){
+      sets.forEach((set){
+        session.accomplishedSets.add(fromJsonToPartial(set));
+      });
+    }
+    session.id = (t.data as Map<String, dynamic>)['id'].toString();
+    return session;
   }
 }

@@ -41,8 +41,8 @@ class PlanService {
     });
   }
 
-  Future<Map<DateTime, UserPlannedExercise>> applyPlanToUser(
-      TrainingPlan selectedPlan, int id) {
+  Future<Map<DateTime, UserPlannedExercise>> applyPlanToUser (
+      TrainingPlan selectedPlan, int id) async {
     return instance
         .post('/plan/' + selectedPlan.id.toString() + "/apply/" + id.toString())
         .then((Response r) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:workout_helper/model/nutrition_preference.dart';
 
+// ignore: must_be_immutable
 class MacroNutritionPanel extends StatelessWidget {
   final MacroNutrition userNutritionPreference;
 
@@ -9,6 +10,8 @@ class MacroNutritionPanel extends StatelessWidget {
   MacroNutritionPanel(this.userNutritionPreference, List<Widget> widgets){
     if(widgets == null){
       this._extraWidget = List();
+    }else{
+      this._extraWidget = widgets;
     }
   }
 
@@ -56,7 +59,7 @@ class MacroNutritionPanel extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 16.0, bottom: 20, right: 16),
+          padding: const EdgeInsets.only(left: 16.0, bottom: 5, right: 16),
           child: Row(
             children: <Widget>[
               Expanded(

@@ -215,7 +215,7 @@ class SingleMovementSet extends ExerciseSet {
     }
   }
 
-  SingleMovementSet.defaultZero();
+  SingleMovementSet.empty();
 
   @override
   bool operator ==(Object other) {
@@ -338,6 +338,7 @@ class ReduceSet extends SingleMovementSet {
     this.expectingWeight = regularSet.expectingWeight;
     this.movement = regularSet.movement;
   }
+
 }
 
 ///巨人组
@@ -557,6 +558,7 @@ class CompletedExerciseSet {
   int repeats;
 
   ///default using KG
+  ///for giant set the weight is total volume
   double weight;
 
   int restAfterAccomplished;

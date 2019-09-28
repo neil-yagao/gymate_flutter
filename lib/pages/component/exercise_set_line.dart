@@ -6,19 +6,21 @@ class ExerciseSetLine extends StatefulWidget {
   final ExerciseSet workingSet;
   final Function(String) onDeletedClicked;
   final Function(ExerciseSet) onCompletedClicked;
+  final bool hasCompleted;
 
   const ExerciseSetLine(
       {Key key,
       @required this.workingSet,
       this.onDeletedClicked,
-      this.onCompletedClicked})
+      this.onCompletedClicked,
+      this.hasCompleted = false})
       : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
     return ExerciseSetLineState(
-        workingSet, onDeletedClicked, onCompletedClicked);
+        workingSet, onDeletedClicked, onCompletedClicked,this.hasCompleted);
   }
 }
 
@@ -30,7 +32,7 @@ class ExerciseSetLineState extends State<ExerciseSetLine> {
   final Function(ExerciseSet) onCompletedClicked;
 
   ExerciseSetLineState(
-      this.workingSet, this.onDeletedClicked, this.onCompletedClicked);
+      this.workingSet, this.onDeletedClicked, this.onCompletedClicked, this.completed);
 
   @override
   Widget build(BuildContext context) {

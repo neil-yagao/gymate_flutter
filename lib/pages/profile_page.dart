@@ -258,15 +258,18 @@ class ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         actions: <Widget>[
-          InkWell(
-            child: Icon(CustomIcon.logout,color: Colors.white,),
-            onTap: (){
-              SharedPreferences.getInstance().then((prefs) {
-                prefs.remove("username");
-                prefs.remove("password");
-                Navigator.of(context).pushReplacementNamed("/");
-              });
-            },
+          Padding(
+            padding: const EdgeInsets.only(right:12.0),
+            child: InkWell(
+              child: Icon(CustomIcon.logout,color: Colors.white,),
+              onTap: (){
+                SharedPreferences.getInstance().then((prefs) {
+                  prefs.remove("username");
+                  prefs.remove("password");
+                  Navigator.of(context).pushReplacementNamed("/");
+                });
+              },
+            ),
           )
         ],
       ),

@@ -32,10 +32,11 @@ void main() {
               );
             }
           } else {
-            return SizedBox(
-              height: 10,
-              width: 10,
-              child: Card(child: CircularProgressIndicator()),
+            return Card(
+              child: SizedBox(
+                  height: 10,
+                  width: 10,
+                  child: CircularProgressIndicator()),
             );
           }
         },

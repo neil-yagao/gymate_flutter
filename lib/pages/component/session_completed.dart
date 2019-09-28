@@ -7,17 +7,14 @@ const int MAX_RESTING_MINS = 20;
 class SessionCompleted extends StatefulWidget {
   final ExerciseSet finishedSet;
 
-  final Function(CompletedExerciseSet ces) updateCompletedInfo;
   SessionCompletedState scs;
 
-  SessionCompleted(
-      {Key key, this.finishedSet, @required this.updateCompletedInfo})
-      : super(key: key) {
-    scs = SessionCompletedState(finishedSet, updateCompletedInfo);
+  SessionCompleted({Key key, this.finishedSet}) : super(key: key) {
+    scs = SessionCompletedState(finishedSet);
   }
 
-  void emitCompletedInfo() {
-    scs.emittingCompletedInfo();
+  CompletedExerciseSet emitCompletedInfo() {
+    return scs.emittingCompletedInfo();
   }
 
   @override
@@ -30,16 +27,17 @@ class SessionCompleted extends StatefulWidget {
 class SessionCompletedState extends State<SessionCompleted> {
   final ExerciseSet finishedSet;
 
-  final Function(CompletedExerciseSet ces) updateCompletedInfo;
-
   bool countdownEnds = false;
 
   TextEditingController number;
   TextEditingController weight;
 
+  List<TextEditingController> giantSetNumbers = new List();
+  List<TextEditingController> giantSetWeights = new List();
+
   DateTime createTime;
 
-  SessionCompletedState(this.finishedSet, this.updateCompletedInfo);
+  SessionCompletedState(this.finishedSet);
 
   @override
   void initState() {
@@ -53,24 +51,15 @@ class SessionCompletedState extends State<SessionCompleted> {
           text: (finishedSet as SingleMovementSet).expectingWeight.toString());
     } else {
       // giant set
-      number = new TextEditingController(
-          text: (finishedSet as GiantSet)
-              .movements
-              .fold(
-                  0,
-                  (int previousValue, SingleMovementSet sms) =>
-                      previousValue + sms.expectingRepeatsPerSet)
-              .toString());
-      weight = new TextEditingController(
-          text: (finishedSet as GiantSet)
-              .movements
-              .fold(
-                  0.0,
-                  (double previous, SingleMovementSet sms) =>
-                      previous + sms.expectingWeight)
-              .toString());
+      (finishedSet as GiantSet).movements.forEach((sms) {
+        TextEditingController giantSetNumber = new TextEditingController(
+            text: sms.expectingRepeatsPerSet.toString());
+        giantSetNumbers.add(giantSetNumber);
+        TextEditingController giantSetWeight =
+            new TextEditingController(text: sms.expectingWeight.toString());
+        giantSetWeights.add(giantSetWeight);
+      });
     }
-
     createTime = DateTime.now();
   }
 
@@ -93,14 +82,32 @@ class SessionCompletedState extends State<SessionCompleted> {
     return restingCount;
   }
 
-  void emittingCompletedInfo() {
+  CompletedExerciseSet emittingCompletedInfo() {
     CompletedExerciseSet set = CompletedExerciseSet.empty();
     set.accomplishedSet = this.finishedSet;
     set.id = DateTime.now().millisecondsSinceEpoch;
-    set.weight = double.parse(weight.text);
-    set.repeats = int.parse(number.text);
-    set.restAfterAccomplished = createTime.difference(DateTime.now()).inSeconds;
-    this.updateCompletedInfo(set);
+    if (finishedSet is GiantSet) {
+      double totalVolume = 0;
+      int totalRepeats = 0;
+
+      for (int i = 0; i < giantSetNumbers.length; i++) {
+        SingleMovementSet sms =
+            (finishedSet as GiantSet).movements.elementAt(i);
+        int finishedRepeats = int.parse(giantSetNumbers.elementAt(i).text);
+        double finishedWeight = double.parse(giantSetWeights.elementAt(i).text);
+        sms.expectingRepeatsPerSet = finishedRepeats;
+        sms.expectingWeight = finishedWeight;
+        totalVolume += finishedRepeats * finishedWeight;
+        totalRepeats += finishedRepeats;
+      }
+      set.weight = totalVolume;
+      set.repeats = totalRepeats;
+    } else {
+      set.weight = double.parse(weight.text);
+      set.repeats = int.parse(number.text);
+    }
+    set.restAfterAccomplished = DateTime.now().difference(createTime).inSeconds;
+    return set;
   }
 
   @override
@@ -110,150 +117,7 @@ class SessionCompletedState extends State<SessionCompleted> {
             child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Row(
-          children: <Widget>[
-            Expanded(
-                child: FlatButton(
-              padding: EdgeInsets.symmetric(horizontal: 1),
-              child: Text(
-                '-5',
-                style: Typography.dense2018.button,
-              ),
-              onPressed: () {
-                if (double.parse(number.text) >= 5) {
-                  number.text = (int.parse(number.text) - 5).toString();
-                  this.emittingCompletedInfo();
-                }
-              },
-            )),
-            Expanded(
-                child: FlatButton(
-                  padding: EdgeInsets.symmetric(horizontal: 1),
-                  child:Text(
-                    '-1',
-                    style: Typography.dense2018.button,
-                  ),
-              onPressed: () {
-                if (int.parse(number.text) > 0) {
-                  number.text = (int.parse(number.text) - 1).toString();
-                  this.emittingCompletedInfo();
-                }
-              },
-            )),
-            Expanded(
-                flex: 2,
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  controller: number,
-                  keyboardType: TextInputType.numberWithOptions(),
-                  decoration: InputDecoration(suffixText: "个"),
-                )),
-            Expanded(
-                child: FlatButton(
-                  padding: EdgeInsets.symmetric(horizontal: 1),
-                  child:Text(
-                    '+1',
-                    style: Typography.dense2018.button,
-                  ),
-              onPressed: () {
-                number.text = (int.parse(number.text) + 1).toString();
-                this.emittingCompletedInfo();
-              },
-            )),
-            Expanded(
-                child: FlatButton(
-              child: Text(
-                '+5',
-                style: Typography.dense2018.button,
-              ),
-              onPressed: () {
-                number.text = (int.parse(number.text) + 5).toString();
-                this.emittingCompletedInfo();
-              },
-            )),
-          ],
-        ),
-        Row(
-          children: <Widget>[
-            Expanded(
-                child: FlatButton(
-              padding: EdgeInsets.symmetric(horizontal: 1),
-              child: Text(
-                '-10',
-                style: Typography.dense2018.button,
-              ),
-              onPressed: () {
-                if (double.parse(weight.text) > 10) {
-                  weight.text = (double.parse(weight.text) - 10).toString();
-                  this.emittingCompletedInfo();
-                }
-              },
-            )),
-            Expanded(
-                child: FlatButton(
-              padding: EdgeInsets.symmetric(horizontal: 1),
-              child: Text(
-                '-5',
-                style: Typography.dense2018.button,
-              ),
-              onPressed: () {
-                if (double.parse(weight.text) > 5) {
-                  weight.text = (double.parse(weight.text) - 5).toString();
-                  this.emittingCompletedInfo();
-                }
-              },
-            )),
-            Expanded(
-                child: FlatButton(
-              padding: EdgeInsets.symmetric(horizontal: 1),
-              child: Text(
-                '-2.5',
-                style: Typography.dense2018.button,
-              ),
-              onPressed: () {
-                if (double.parse(weight.text) > 2.5) {
-                  weight.text = (double.parse(weight.text) - 2.5).toString();
-                  this.emittingCompletedInfo();
-                }
-              },
-            )),
-            Expanded(
-                flex: 2,
-                child: TextField(
-                  controller: weight,
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.numberWithOptions(),
-                  decoration: InputDecoration(isDense: true, suffixText: 'KG'),
-                )),
-            Expanded(
-                child: FlatButton(
-              padding: EdgeInsets.symmetric(horizontal: 1),
-              child: Text('+2.5', style: Typography.dense2018.button),
-              onPressed: () {
-                weight.text = (double.parse(weight.text) + 2.5).toString();
-                this.emittingCompletedInfo();
-              },
-            )),
-            Expanded(
-                child: FlatButton(
-              padding: EdgeInsets.symmetric(horizontal: 1),
-              child: Text('+5', style: Typography.dense2018.button),
-              onPressed: () {
-                weight.text = (double.parse(weight.text) + 5).toString();
-                this.emittingCompletedInfo();
-              },
-            )),
-            Expanded(
-                child: FlatButton(
-              padding: EdgeInsets.symmetric(horizontal: 1),
-              child: Text('+10', style: Typography.dense2018.button),
-              onPressed: () {
-                weight.text = (double.parse(weight.text) + 10).toString();
-                this.emittingCompletedInfo();
-              },
-            )),
-          ],
-        ),
+        ...getCompletedList(),
         Row(
           children: <Widget>[
             Expanded(
@@ -270,5 +134,172 @@ class SessionCompletedState extends State<SessionCompleted> {
         ),
       ]),
     )));
+  }
+
+  List<Widget> getCompletedList() {
+    if (finishedSet is SingleMovementSet)
+      return [
+        countRow(number),
+        weightRow(weight),
+      ];
+    else {
+      List<Widget> widgets = [];
+      int index = 0;
+      (finishedSet as GiantSet).movements.forEach((sms) {
+        widgets.add(Text(
+          sms.movement.name,
+          style: Typography.dense2018.subtitle,
+        ));
+        widgets.add(countRow(giantSetNumbers.elementAt(index)));
+        widgets.add(weightRow(giantSetWeights.elementAt(index)));
+        index++;
+      });
+      return widgets;
+    }
+  }
+
+  Row weightRow(TextEditingController weight) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+            child: FlatButton(
+          padding: EdgeInsets.symmetric(horizontal: 1),
+          child: Text(
+            '-10',
+            style: Typography.dense2018.button,
+          ),
+          onPressed: () {
+            if (double.parse(weight.text) > 10) {
+              weight.text = (double.parse(weight.text) - 10).toString();
+            }
+          },
+        )),
+        Expanded(
+            child: FlatButton(
+          padding: EdgeInsets.symmetric(horizontal: 1),
+          child: Text(
+            '-5',
+            style: Typography.dense2018.button,
+          ),
+          onPressed: () {
+            if (double.parse(weight.text) > 5) {
+              weight.text = (double.parse(weight.text) - 5).toString();
+            }
+          },
+        )),
+        Expanded(
+            child: FlatButton(
+          padding: EdgeInsets.symmetric(horizontal: 1),
+          child: Text(
+            '-2.5',
+            style: Typography.dense2018.button,
+          ),
+          onPressed: () {
+            if (double.parse(weight.text) > 2.5) {
+              weight.text = (double.parse(weight.text) - 2.5).toString();
+            }
+          },
+        )),
+        Expanded(
+            flex: 2,
+            child: TextField(
+              controller: weight,
+              onTap: () {
+                weight.selection = TextSelection(
+                    baseOffset: 0, extentOffset: weight.text.length);
+              },
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.numberWithOptions(),
+              decoration: InputDecoration(isDense: true, suffixText: 'KG'),
+            )),
+        Expanded(
+            child: FlatButton(
+          padding: EdgeInsets.symmetric(horizontal: 1),
+          child: Text('+2.5', style: Typography.dense2018.button),
+          onPressed: () {
+            weight.text = (double.parse(weight.text) + 2.5).toString();
+            this.emittingCompletedInfo();
+          },
+        )),
+        Expanded(
+            child: FlatButton(
+          padding: EdgeInsets.symmetric(horizontal: 1),
+          child: Text('+5', style: Typography.dense2018.button),
+          onPressed: () {
+            weight.text = (double.parse(weight.text) + 5).toString();
+          },
+        )),
+        Expanded(
+            child: FlatButton(
+          padding: EdgeInsets.symmetric(horizontal: 1),
+          child: Text('+10', style: Typography.dense2018.button),
+          onPressed: () {
+            weight.text = (double.parse(weight.text) + 10).toString();
+          },
+        )),
+      ],
+    );
+  }
+
+  Row countRow(TextEditingController number) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+            child: FlatButton(
+          padding: EdgeInsets.symmetric(horizontal: 1),
+          child: Text(
+            '-5',
+            style: Typography.dense2018.button,
+          ),
+          onPressed: () {
+            if (double.parse(number.text) >= 5) {
+              number.text = (int.parse(number.text) - 5).toString();
+            }
+          },
+        )),
+        Expanded(
+            child: FlatButton(
+          padding: EdgeInsets.symmetric(horizontal: 1),
+          child: Text(
+            '-1',
+            style: Typography.dense2018.button,
+          ),
+          onPressed: () {
+            if (int.parse(number.text) > 0) {
+              number.text = (int.parse(number.text) - 1).toString();
+            }
+          },
+        )),
+        Expanded(
+            flex: 2,
+            child: TextField(
+              textAlign: TextAlign.center,
+              controller: number,
+              keyboardType: TextInputType.numberWithOptions(),
+              decoration: InputDecoration(suffixText: "个"),
+            )),
+        Expanded(
+            child: FlatButton(
+          padding: EdgeInsets.symmetric(horizontal: 1),
+          child: Text(
+            '+1',
+            style: Typography.dense2018.button,
+          ),
+          onPressed: () {
+            number.text = (int.parse(number.text) + 1).toString();
+          },
+        )),
+        Expanded(
+            child: FlatButton(
+          child: Text(
+            '+5',
+            style: Typography.dense2018.button,
+          ),
+          onPressed: () {
+            number.text = (int.parse(number.text) + 5).toString();
+          },
+        )),
+      ],
+    );
   }
 }

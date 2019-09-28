@@ -6,7 +6,7 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workout_helper/general/my_flutter_app_icons.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/camera_page.dart';
@@ -17,8 +17,10 @@ import 'package:workout_helper/pages/session_report.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/exercise_service.dart';
 import 'package:workout_helper/service/session_service.dart';
+import 'package:workout_helper/util/navigation_util.dart';
 
 import 'component/cardio_bottom_sheet.dart';
+import 'component/chewie_network_item.dart';
 import 'component/hiit_bottom_sheet.dart';
 import 'component/hiit_clock.dart';
 import 'component/hiit_exercise_line.dart';
@@ -26,6 +28,9 @@ import 'component/session_action_menu.dart';
 import 'component/session_completed.dart';
 import 'component/session_materials_grid.dart';
 import 'exercise_template_selection.dart';
+import 'home_page.dart';
+
+const String CURRENT_SESSION_KEY = "current_session";
 
 class UserSession extends StatefulWidget {
   UserSession(this.exerciseId);
@@ -67,8 +72,9 @@ class UserSessionState extends State<UserSession> {
 
   bool _isClockShow = false;
 
-  List<VideoPlayerController> controllers = List();
+  List<ChewieController> controllers = List();
 
+  SharedPreferences _preferences;
 
   Timer t;
 
@@ -142,10 +148,49 @@ class UserSessionState extends State<UserSession> {
   }
 
   void leaveSession(BuildContext context) {
-    Navigator.of(context).pushReplacementNamed('/home');
-    if (_currentSession.accomplishedSets.length == 0) {
-      sessionRepositoryService.removeSession(_currentSession);
-    }
+    showDialog<String>(
+        context: context,
+        builder: (context) {
+          return Center(
+            child: Card(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 28.0),
+                    child: Text(
+                      "退出将删除本次所有的训练记录，是否确定?",
+                      style: Typography.dense2018.subhead,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      FlatButton(
+                        textColor: Colors.grey,
+                        child: Text("返回"),
+                        onPressed: () {
+                          Navigator.of(context).maybePop("cancel");
+                        },
+                      ),
+                      FlatButton(
+                        textColor: Colors.redAccent,
+                        child: Text("确定退出"),
+                        onPressed: () {
+                          _preferences.remove(CURRENT_SESSION_KEY);
+                          sessionRepositoryService
+                              .removeSession(_currentSession);
+                          NavigationUtil.replaceUsingDefaultFadingTransition(
+                              context, HomePage());
+                        },
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+          );
+        });
   }
 
   @override
@@ -172,16 +217,84 @@ class UserSessionState extends State<UserSession> {
     if (_currentSession != null) {
       return;
     }
-    sessionRepositoryService
-        .createNewSessionFromExercise(exercise,
-            Provider.of<CurrentUserStore>(context).currentUser.id.toString())
-        .then((Session session) {
-      setState(() {
-        _currentSession = session;
-      });
-    }).catchError((error) {
-      print("error in session:" + error.toString());
-      Navigator.maybePop(context);
+    SharedPreferences.getInstance().then((prefs) {
+      _preferences = prefs;
+      int currentSessionId = prefs.getInt(CURRENT_SESSION_KEY);
+      if (currentSessionId == null) {
+        sessionRepositoryService
+            .createNewSessionFromExercise(
+                exercise,
+                Provider.of<CurrentUserStore>(context)
+                    .currentUser
+                    .id
+                    .toString())
+            .then((Session session) {
+          setState(() {
+            _currentSession = session;
+          });
+        }).catchError((error) {
+          print("error in session:" + error.toString());
+          Navigator.maybePop(context);
+        });
+      } else {
+        sessionRepositoryService
+            .recoverSession(currentSessionId)
+            .then((session) {
+          if (session.accomplishedSets.isNotEmpty) {
+            showDialog<String>(
+                context: context,
+                builder: (context) {
+                  return Center(
+                    child: Card(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "检测到上次未结束的训练，是否继续上次的训练？",
+                              style: Typography.dense2018.subtitle,
+                            ),
+                          ),
+                          Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              FlatButton(
+                                onPressed: () {
+                                  Navigator.of(context).maybePop("Cancel");
+                                },
+                                textColor: Theme.of(context).primaryColor,
+                                child: Text("忽略上次训练"),
+                              ),
+                              FlatButton(
+                                onPressed: () {
+                                  Navigator.of(context).maybePop("OK");
+                                },
+                                child: Text("恢复"),
+                                textColor: Colors.green,
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }).then((action) {
+              if (action == "OK") {
+                setState(() {
+                  session.accomplishedSets.forEach((ces) {
+                    completedExercise.add(ces.accomplishedSet.id);
+                  });
+                  _currentSession = session;
+                });
+              } else {
+                prefs.remove(CURRENT_SESSION_KEY);
+              }
+            });
+          }
+        });
+      }
     });
   }
 
@@ -263,43 +376,82 @@ class UserSessionState extends State<UserSession> {
         headerBuilder: (BuildContext context, bool isExpanded) {
           return expansionPanelHeader(movement, sets);
         },
-        body: Column(
-            children: sets.map((ExerciseSet es) {
-          es.sequence = index;
-          index++;
-          return ExerciseSetLine(
-              workingSet: es,
-              onDeletedClicked: (String id) {
-                int findIndex = _currentSession.matchingExercise.plannedSets
-                    .indexWhere((ExerciseSet e) => e.id == id);
-                if (findIndex >= 0) {
+        body: Column(children: [
+          ...sets.map((ExerciseSet es) {
+            es.sequence = index;
+            index++;
+            return ExerciseSetLine(
+                workingSet: es,
+                hasCompleted: completedExercise.contains(es.id),
+                onDeletedClicked: (String id) {
+                  int findIndex = _currentSession.matchingExercise.plannedSets
+                      .indexWhere((ExerciseSet e) => e.id == id);
+                  if (findIndex >= 0) {
+                    setState(() {
+                      _currentSession.matchingExercise.plannedSets
+                          .removeAt(findIndex);
+                      _currentPanel = -1;
+                    });
+                  }
+                },
+                onCompletedClicked: (ExerciseSet es) {
                   setState(() {
-                    _currentSession.matchingExercise.plannedSets
-                        .removeAt(findIndex);
-                    _currentPanel = -1;
+                    this.completedExercise.add(es.id);
                   });
-                }
-              },
-              onCompletedClicked: (ExerciseSet es) {
-                setState(() {
-                  this.completedExercise.add(es.id);
-                });
-                SessionCompleted sc = SessionCompleted(
-                  finishedSet: es,
-                  updateCompletedInfo: (CompletedExerciseSet ces) {
+                  SessionCompleted sc = SessionCompleted(
+                    finishedSet: es,
+                  );
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext c) {
+                        return sc;
+                      }).then((value) {
+                    CompletedExerciseSet ces = sc.emitCompletedInfo();
+                    _preferences.setInt(
+                        CURRENT_SESSION_KEY, int.parse(_currentSession.id));
                     sessionRepositoryService.saveCompletedSet(
                         _currentSession, ces);
-                  },
-                );
-                showDialog(
-                    context: context,
-                    builder: (BuildContext c) {
-                      return sc;
-                    }).then((value) {
-                  sc.emitCompletedInfo();
+                    sets.forEach((s) {
+                      if (s is SingleMovementSet) {
+                        s.expectingWeight = ces.weight;
+                        s.expectingRepeatsPerSet = ces.repeats;
+                        s.unit = "KG";
+                      } else if (s is GiantSet) {
+                        for (int i = 0; i < s.movements.length; i++) {
+                          SingleMovementSet nonFinishedSet =
+                              s.movements.elementAt(i);
+                          SingleMovementSet finishedSet =
+                              (ces.accomplishedSet as GiantSet)
+                                  .movements
+                                  .elementAt(i);
+                          nonFinishedSet.expectingWeight =
+                              finishedSet.expectingWeight;
+                          nonFinishedSet.expectingRepeatsPerSet =
+                              finishedSet.expectingRepeatsPerSet;
+                          nonFinishedSet.unit = "KG";
+                        }
+                      }
+                    });
+
+                    setState(() {});
+                  });
                 });
-              });
-        }).toList()));
+          }),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              FlatButton(
+                textColor: Theme.of(context).primaryColor,
+                child: Text(
+                  "再来一组",
+                ),
+                onPressed: () {
+                  appendToCurrentSession([sets.elementAt(0)], remainOpen: true);
+                },
+              )
+            ],
+          )
+        ]));
   }
 
   ListTile expansionPanelHeader(Movement movement, List<ExerciseSet> sets) {
@@ -380,7 +532,7 @@ class UserSessionState extends State<UserSession> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       ...set.movements.map((SingleMovementSet s) {
-                        return showMovementVedio(s.movement);
+                        return showMovementVideo(s.movement);
                       })
                     ],
                   );
@@ -389,42 +541,26 @@ class UserSessionState extends State<UserSession> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       ...set.movements.map((SingleMovementSet s) {
-                        return showMovementVedio(s.movement);
+                        return showMovementVideo(s.movement);
                       })
                     ],
                   );
                 } else if (!(set is CardioSet)) {
-                  dialogWidget = showMovementVedio(movement);
+                  dialogWidget = showMovementVideo(movement);
                 }
                 showDialog(
                     context: context,
                     barrierDismissible: true,
                     builder: (context) {
                       return dialogWidget;
-                    });
+                    }).then((_) {});
               },
             )),
         trailing: tailingIcon);
   }
 
-  Widget showMovementVedio(Movement movement) {
-    VideoPlayerController _videoPlayerController;
-    ChewieController _chewieController;
-    _videoPlayerController =
-        VideoPlayerController.network(movement.videoReference);
-    _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController,
-      autoPlay: true,
-      looping: false,
-    );
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Chewie(
-          controller: _chewieController,
-        ),
-      ),
-    );
+  Widget showMovementVideo(Movement movement) {
+    return ChewieNetworkItem(url: movement.videoReference);
   }
 
   Icon partialCompletedIcon() {
@@ -543,11 +679,15 @@ class UserSessionState extends State<UserSession> {
           );
   }
 
-  Future<void> appendToCurrentSession(List<ExerciseSet> sets) async {
+  Future<void> appendToCurrentSession(List<ExerciseSet> sets,
+      {bool remainOpen = false}) async {
     return exerciseService
         .appendToExercise(_currentSession.matchingExercise, sets)
         .then((List<ExerciseSet> es) {
       setState(() {
+        if (remainOpen) {
+          return;
+        }
         _currentPanel = -1;
       });
     });
@@ -566,23 +706,22 @@ class UserSessionState extends State<UserSession> {
                   ),
                   Expanded(
                     child: FlatButton(
-                        onPressed: () {
+                        onPressed: () async {
                           setState(() {
                             _editing = false;
+                            NavigationUtil.showLoading(context);
                             sessionRepositoryService
-                                .completedSession(
-                                    _currentSession,
-                                    Provider.of<CurrentUserStore>(context)
-                                        .currentUser
-                                        .id
-                                        .toString())
+                                .completedSession(_currentSession)
                                 .then((_) {
-                              Navigator.of(context)
-                                  .pushReplacement(MaterialPageRoute(
-                                      builder: (context) => SessionReport(
-                                            completedSession: _currentSession,
-                                            canGoBack: true,
-                                          )));
+                              Navigator.of(context).maybePop().then((_) {
+                                _preferences.remove(CURRENT_SESSION_KEY);
+                                Navigator.of(context)
+                                    .pushReplacement(MaterialPageRoute(
+                                        builder: (context) => SessionReport(
+                                              completedSession: _currentSession,
+                                              canGoBack: false,
+                                            )));
+                              });
                             });
                           });
                         },
@@ -654,20 +793,23 @@ class UserSessionState extends State<UserSession> {
       return cameraButton;
     } else {
       return FutureBuilder<List<SessionMaterial>>(
-        future: sessionRepositoryService.getSessionMaterialsBySessionId(_currentSession.id),
-        builder: (context, sessionMaterials){
+        future: sessionRepositoryService
+            .getSessionMaterialsBySessionId(_currentSession.id),
+        builder: (context, sessionMaterials) {
           return Row(
             children: <Widget>[
               Expanded(flex: 2, child: cameraButton),
               Expanded(
                 child: Badge(
-                  badgeContent: Text(sessionMaterials.data.length.toString()),
+                  badgeContent: Text(sessionMaterials.data == null
+                      ? '0'
+                      : sessionMaterials.data.length.toString()),
                   child: FlatButton(
                       onPressed: () {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => SessionMaterialsGrid(
-                              sessionId: _currentSession.id,
-                            )));
+                                  sessionId: _currentSession.id,
+                                )));
                       },
                       child: Icon(
                         Icons.remove_red_eye,
@@ -679,8 +821,6 @@ class UserSessionState extends State<UserSession> {
           );
         },
       );
-
-
     }
   }
 
@@ -706,7 +846,6 @@ class UserSessionState extends State<UserSession> {
     });
     return result;
   }
-
 
   void startHiitSession() {
     HIITSet hiitSet =

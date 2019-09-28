@@ -17,10 +17,10 @@ class RoundedInput extends StatelessWidget {
 
     // TODO: implement build1
     return TextField(
-      keyboardType: TextInputType.url == inputType? TextInputType.text:inputType,
+      keyboardType: inputType,
       controller: controller,
       autofocus: false,
-      obscureText: inputType == TextInputType.url,
+      obscureText: inputType == TextInputType.visiblePassword,
       decoration: InputDecoration(
         hintText: hint,
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),

@@ -83,12 +83,12 @@ class ExerciseTemplateSelectionState extends State<ExerciseTemplateSelection> {
               ],
             ),
             subtitle: Text(e.description),
-            trailing: _selectedExercise != null && _selectedExercise.id == e.id
+            leading: _selectedExercise != null && _selectedExercise.id == e.id
                 ? Icon(
                     Icons.check,
                     color: Colors.green,
                   )
-                : null,
+                : Text(""),
             onTap: () {
               setState(() {
                 _selectedExercise = e;

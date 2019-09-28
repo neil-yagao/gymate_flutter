@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/plan_service.dart';
+import 'package:workout_helper/util/navigation_util.dart';
+
+import 'home_page.dart';
 
 class TrainingPlanSelection extends StatefulWidget {
   @override
@@ -111,12 +114,14 @@ class TrainingPlanSelectionState extends State<TrainingPlanSelection> {
                   style: Typography.dense2018.caption,
                 ),
                 onPressed: () {
+                  NavigationUtil.showLoading(context, content: "正在为您应用计划...");
                   User user =
                       Provider.of<CurrentUserStore>(context).currentUser;
                   _planService
                       .applyPlanToUser(_selectedPlan, user.id)
                       .then((_) {
-                    Navigator.of(context).maybePop();
+                        NavigationUtil.replaceUsingDefaultFadingTransition(context, HomePage());
+                   /// Navigator.of(context).maybePop();
                   });
                 },
               ),

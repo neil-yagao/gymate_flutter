@@ -100,6 +100,9 @@ class SessionReport extends StatelessWidget {
                 '总容量:' +
                     ces
                         .map((CompletedExerciseSet ces) {
+                          if(ces.accomplishedSet is GiantSet){
+                            return ces.weight;
+                          }
                           return ces.weight * ces.repeats;
                         })
                         .reduce((a, b) {
@@ -116,8 +119,8 @@ class SessionReport extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                "1RM:" +
-                    ces
+                 m.name.contains("超级组") ? "":"1RM:" +
+                     ces
                         .map((CompletedExerciseSet ces) {
                           return (ces.weight /
                               repeatsToPercentage(ces.repeats));
@@ -137,6 +140,7 @@ class SessionReport extends StatelessWidget {
           )
         ],
       ));
+      listViewChildren.add(Divider());
     });
     listViewChildren.add(Row(
       children: [
@@ -156,10 +160,11 @@ class SessionReport extends StatelessWidget {
         title: Text("本次运动报告"),
         automaticallyImplyLeading: canGoBack == null ? false : canGoBack,
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.share),
-            onPressed: () {},
-          )
+          ///can be shared after using website
+//          IconButton(
+//            icon: Icon(Icons.share),
+//            onPressed: () {},
+//          )
         ],
       ),
       body: SafeArea(
@@ -214,7 +219,12 @@ class SessionReport extends StatelessWidget {
         colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
         domainFn: (CompletedExerciseSet ces, _) =>
             '第' + (ces.accomplishedSet.sequence + 1).toString() + '组',
-        measureFn: (CompletedExerciseSet ces, _) => ces.weight * ces.repeats,
+        measureFn: (CompletedExerciseSet ces, _){
+          if(ces.accomplishedSet is GiantSet){
+            return ces.weight;
+          }
+          return ces.weight * ces.repeats;
+        },
         data: completedSets,
         labelAccessorFn: (CompletedExerciseSet ces, _) =>
             '训练体量' + (ces.weight * ces.repeats).toString() + 'KG');

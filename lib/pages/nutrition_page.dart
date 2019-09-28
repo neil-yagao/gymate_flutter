@@ -8,6 +8,7 @@ import 'package:workout_helper/service/nutrition_service.dart';
 import 'package:workout_helper/service/profile_service.dart';
 
 import 'camera_page.dart';
+import 'component/sample_meal.dart';
 import 'component/bottom_navigation_bar.dart';
 import 'component/diet_pattern.dart';
 import 'component/label_radio.dart';
@@ -25,8 +26,7 @@ class NutritionPageState extends State<NutritionPage> {
 
   UserNutritionPreference _userNutritionPreference;
 
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState> ();
-
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   NutritionService nutritionService;
 
@@ -55,7 +55,7 @@ class NutritionPageState extends State<NutritionPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     user = Provider.of<CurrentUserStore>(context).currentUser;
-    nutritionService =  NutritionService(_scaffoldKey);
+    nutritionService = NutritionService(_scaffoldKey);
     profileService = ProfileService(_scaffoldKey);
     Future.wait([
       nutritionService.getUserNutritionPreference(user.id),
@@ -79,6 +79,9 @@ class NutritionPageState extends State<NutritionPage> {
           _weight.text = weight.value.toString();
         }
         UserNutritionPreference preference = result[0];
+        if (_editing) {
+          return;
+        }
         if (preference != null && preference.user != null) {
           _userNutritionPreference = preference;
           nutritionService
@@ -172,7 +175,7 @@ class NutritionPageState extends State<NutritionPage> {
                   ],
                 ),
               ),
-              body: MacroNutritionPanel(nr, null),
+              body: MacroNutritionPanel(nr, [SampleMeal(nutritionRecord: nr)]),
             );
           })
         ],
@@ -375,25 +378,23 @@ class NutritionPageState extends State<NutritionPage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        backgroundColor: _userNutritionPreference != null
-            ? Colors.white
-            : Theme.of(context).primaryColor,
+        automaticallyImplyLeading: false,
         elevation: 0,
         title: _userNutritionPreference == null
             ? Text("定制私人营养计划",
-                style: Typography.dense2018.title.merge(TextStyle(
-                  fontStyle: FontStyle.italic,
-                  //    color: Theme.of(context).primaryColor
-                )))
+                style: Typography.dense2018.title.merge(
+                    TextStyle(fontStyle: FontStyle.italic, color: Colors.white
+                        //    color: Theme.of(context).primaryColor
+                        )))
             : Text(
                 DateFormat('yyyy-MM-dd').format(DateTime.now()),
-                style: TextStyle(color: Theme.of(context).primaryColor),
+                style: TextStyle(color: Colors.white),
               ),
         actions: <Widget>[
           IconButton(
             icon: Icon(
               Icons.edit,
-              color: Theme.of(context).primaryColor,
+              color: Colors.white,
             ),
             onPressed: () {
               setState(() {
@@ -429,12 +430,13 @@ class NutritionPageState extends State<NutritionPage> {
                             matchingRecord.materials = List();
                           }
                           matchingRecord.materials.add(uploadedFile);
-                          nutritionService.saveNutritionRecord(
-                              user.id, matchingRecord).then((nutritionRecord){
-                                setState(() {
-                                  todayRecords.replaceRange(_expandingPanel - 1,
-                                      _expandingPanel, [nutritionRecord]);
-                                });
+                          nutritionService
+                              .saveNutritionRecord(user.id, matchingRecord)
+                              .then((nutritionRecord) {
+                            setState(() {
+                              todayRecords.replaceRange(_expandingPanel - 1,
+                                  _expandingPanel, [nutritionRecord]);
+                            });
                           });
                         })));
               },

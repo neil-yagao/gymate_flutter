@@ -2,10 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 BaseOptions _options = new BaseOptions(
-//  baseUrl: "http://localhost:9090/api",
-  baseUrl: 'https://www.lifting.ren/api',
-  connectTimeout: 5000,
-  receiveTimeout: 6000,
+  baseUrl: "http://192.168.3.180:9090/api",
+//  baseUrl: 'https://www.lifting.ren/api',
+  connectTimeout: 20000,
+  receiveTimeout: 20000,
 );
 
 class DioInstance {

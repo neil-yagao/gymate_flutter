@@ -21,4 +21,26 @@ class NavigationUtil {
         ),
         transitionDuration: Duration(milliseconds: 500)));
   }
+
+  static Future showLoading(BuildContext context, {String content}) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      child: new Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              new CircularProgressIndicator(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: new Text(content == null ? "请稍后..." : content),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
