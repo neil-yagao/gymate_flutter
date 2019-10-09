@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
+const String BASE_URL = "https://www.lifting.ren";
 BaseOptions _options = new BaseOptions(
-  baseUrl: "http://192.168.3.180:9090/api",
+  baseUrl: BASE_URL + "/api",
 //  baseUrl: 'https://www.lifting.ren/api',
   connectTimeout: 20000,
   receiveTimeout: 20000,

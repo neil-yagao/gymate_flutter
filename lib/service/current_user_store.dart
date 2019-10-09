@@ -119,6 +119,8 @@ class CurrentUserStore extends ChangeNotifier {
         return group;
       }
       throw NullThrownError();
+    }).catchError((error){
+      throw error;
     });
   }
 

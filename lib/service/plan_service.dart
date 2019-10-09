@@ -80,4 +80,10 @@ class PlanService {
     return db.queryForPlannedExercise(userId);
   }
 
+  Future switchPlannedExerciseWithTodayExercise(int userId,UserPlannedExercise exercise) async {
+    String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    UserPlannedExercise todayExercise = await db.queryForPlannedExerciseByUserAndDate(userId, today);
+    return db.switchUserPlannedExerciseExecutionDate(exercise, todayExercise);
+  }
+
 }

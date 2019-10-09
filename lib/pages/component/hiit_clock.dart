@@ -108,6 +108,18 @@ class HiitClockState extends State<HiitClock> {
                     ))
                   ]),
                 ),
+                Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                    children:[
+                  FlatButton(
+                    onPressed: (){
+                      Navigator.of(context).maybePop();
+                    },
+                    textColor: Colors.grey,
+                    child: Text("取消训练"),
+                  )
+                ])
               ]),
         ),
       ),

@@ -22,9 +22,10 @@ class SessionService {
     if (exercise != null && exercise.id == 'today') {
       return getTodaySession(int.parse(userId));
     }
-    return dio
-        .post("/session/" + userId, data: generateExerciseTemplate(exercise))
-        .then((Response t) {
+    String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    return dio.post("/session/user/" + userId,
+        data: generateExerciseTemplate(exercise),
+        queryParameters: {'session_date': date}).then((Response t) {
       return extraToSession(t);
     });
   }
@@ -56,7 +57,7 @@ class SessionService {
     return result;
   }
 
-  Future<Session> getTodaySession(int userId) async {
+  Future<Session> getTodaySession(int userId, {bool createNew = true}) async {
     String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
     UserPlannedExercise plannedExercise =
         await db.queryForPlannedExerciseByUserAndDate(userId, date);
@@ -199,10 +200,11 @@ class SessionService {
         json['weight'],
         json['restAfterAccomplished'],
         DateTime.parse(json['completedTime']));
+
     ///since we only need the id of the accomplish set
-      ces.accomplishedSet = SingleMovementSet.empty();
-      ces.accomplishedSet.id = json['accomplishedSetId'];
-      return  ces;
+    ces.accomplishedSet = SingleMovementSet.empty();
+    ces.accomplishedSet.id = json['accomplishedSetId'];
+    return ces;
   }
 
   ///      'description': exercise.description,
@@ -285,12 +287,26 @@ class SessionService {
       session.matchingExercise.plannedSets = List();
     }
     var sets = (t.data as Map<String, dynamic>)['accomplishedSets'];
-    if(sets is List && sets.isNotEmpty){
-      sets.forEach((set){
+    if (sets is List && sets.isNotEmpty) {
+      sets.forEach((set) {
         session.accomplishedSets.add(fromJsonToPartial(set));
       });
     }
     session.id = (t.data as Map<String, dynamic>)['id'].toString();
     return session;
+  }
+
+  Future<List<Map<String,dynamic>>> getGroupSessionReport(String userIds,
+      DateTime startTime, DateTime endTime) async{
+    return dio.get("/session/group-summary",queryParameters: {
+      'userIds':userIds,
+      'startTime':startTime.toIso8601String()+ "Z",
+      'endTime':endTime.toIso8601String()+ "Z"
+    }).then((res){
+      if(res.data != null){
+        return (res.data as List).map((v)=> v as Map<String,dynamic>).toList();
+      }
+      return [];
+    });
   }
 }

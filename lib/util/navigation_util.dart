@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class NavigationUtil {
 
   static Future replaceUsingDefaultFadingTransition( context,Widget widget ){
-    return Navigator.of(context).pushReplacement(PageRouteBuilder(
+    return Navigator.of(context).pushAndRemoveUntil(PageRouteBuilder(
         pageBuilder: (context, a1, a2) => widget ,
         transitionsBuilder: (context, animate, a2, child) => FadeTransition(
           opacity: animate,
           child: child,
         ),
-        transitionDuration: Duration(milliseconds: 500)));
+        transitionDuration: Duration(milliseconds: 500)),(_) => false);
   }
 
   static Future pushUsingDefaultFadingTransition( context,Widget widget ){

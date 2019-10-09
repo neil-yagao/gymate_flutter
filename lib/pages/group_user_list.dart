@@ -6,6 +6,7 @@ import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/session_service.dart';
 import 'package:workout_helper/util/navigation_util.dart';
 
+import 'component/group_report.dart';
 import 'component/session_histories.dart';
 
 class GroupUserList extends StatefulWidget {
@@ -53,16 +54,22 @@ class GroupUserListState extends State<GroupUserList> {
       return users;
     }).then((users) {
       _sessionSerivce.getUserLatestExerciseDate(users).then((List userTime) {
-        for (Map<String, dynamic> entry in userTime) {
+        userTime.forEach((d){
+          Map<String,dynamic> entry = d as Map<String,dynamic>;
           lastSessionTime[entry['user_id']] = DateFormat('yyyy-MM-dd')
               .format(DateTime.parse(entry["latest_exercise_time"]));
-        }
+        });
         setState(() {});
       });
     });
   }
 
-  showYesterdaySummary() {}
+  showGroupReport() {
+    NavigationUtil.pushUsingDefaultFadingTransition(context, GroupReport(
+      group: group,
+      users: groupUsers,
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +81,7 @@ class GroupUserListState extends State<GroupUserList> {
           InkWell(
             child: Icon(Icons.insert_chart),
             onTap: () {
-              showYesterdaySummary();
+              showGroupReport();
             },
           )
 //          PopupMenuButton<GroupOption>(
@@ -93,12 +100,12 @@ class GroupUserListState extends State<GroupUserList> {
           ...groupUsers.map((user) {
             return ListTile(
               title: Text(user.name),
-              subtitle: Text("上次锻炼时间:" +
+              subtitle: Text(
                   (lastSessionTime.containsKey(user.id)
-                      ? lastSessionTime[user.id]
+                      ? "上次锻炼时间:" + lastSessionTime[user.id]
                       : "未能找到记录")),
-              trailing: Text("锻炼记录"),
-              onTap: () {
+              trailing: (lastSessionTime.containsKey(user.id))?Text("锻炼记录"):null,
+              onTap:  (lastSessionTime.containsKey(user.id))?() {
                 _sessionSerivce
                     .getUserCompletedSessions(user.id)
                     .then((List<Session> sessions) {
@@ -109,7 +116,7 @@ class GroupUserListState extends State<GroupUserList> {
                         sessionPractiseName: user.name + "的",
                       ));
                 });
-              },
+              }:null,
             );
           })
         ],

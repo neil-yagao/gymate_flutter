@@ -7,7 +7,9 @@ class ExerciseCalendar extends StatelessWidget {
   final Map<DateTime,
   List<UserPlannedExercise>> markedDatesMap;
 
-  const ExerciseCalendar({Key key, this.markedDatesMap}) : super(key: key);
+  final Function(List<UserPlannedExercise>) onDateSelect;
+
+  const ExerciseCalendar({Key key, this.markedDatesMap, this.onDateSelect}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +24,9 @@ class ExerciseCalendar extends StatelessWidget {
       onDayPressed: (DateTime date, List<UserPlannedExercise> events) {
         //this.setState(() => _currentDate = date);
         events.forEach((event) => print(event));
+        if(this.onDateSelect != null){
+          this.onDateSelect(events);
+        }
       },
       weekDayMargin: EdgeInsets.all(0),
       dayPadding: 0,
@@ -68,7 +73,7 @@ class ExerciseCalendar extends StatelessWidget {
         } else if (defaultFormat.format(DateTime.now()) ==
             defaultFormat.format(event.executeDate) &&
             !event.hasBeenExecuted) {
-          return Icon(Icons.play_circle_outline, color: Colors.lightBlueAccent);
+          return Icon(Icons.play_circle_outline, color: Color.fromRGBO(101, 85, 153, 0.9),);
         } else if (defaultFormat
             .format(DateTime.now())
             .compareTo(defaultFormat.format(event.executeDate)) >= 0

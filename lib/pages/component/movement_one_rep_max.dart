@@ -14,20 +14,11 @@ class MovementOneRepMaxPage extends StatelessWidget {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        title: Text("动作总结"),
+        title: Text("最大重量"),
       ),
       body: SafeArea(
           child: ListView(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text("1 Rep Max",style: Typography.dense2018.headline,),
-              ],
-            ),
-          ),
           ...movementOneRepMax.map((MovementOneRepMax morm) {
             return ListTile(
               title: Text(morm.movement.name),

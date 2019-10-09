@@ -36,7 +36,7 @@ void main() {
               child: SizedBox(
                   height: 10,
                   width: 10,
-                  child: CircularProgressIndicator()),
+                  child: Center(child: CircularProgressIndicator())),
             );
           }
         },
@@ -63,17 +63,17 @@ class MyApp extends StatelessWidget {
           title: 'Lifting.ren',
           theme: ThemeData(
             //009FF2
-            primarySwatch: MaterialColor(0xFFF44336, <int, Color>{
-              50: Color(0xFFFFEBEE),
-              100: Color(0xFFFFCDD2),
-              200: Color(0xFFEF9A9A),
-              300: Color(0xFFE57373),
-              500: Color(0xFFF44336),
-              400: Color(0xFFEF5350),
-              600: Color(0xFFE53935),
-              700: Color(0xFFD32F2F),
-              800: Color(0xFFC62828),
-              900: Color(0xFFB71C1C),
+            primarySwatch: MaterialColor(0xFF655599, <int, Color>{
+              50: Color(0xFFF3E5F5),
+              100: Color(0xFFE1BEE7),
+              200: Color(0xFFCE93D8),
+              300: Color(0xFFBA68C8),
+              400: Color(0xFFAB47BC),
+              500: Color(0xFF655599),
+              600: Color(0xFF8E24AA),
+              700: Color(0xFF7B1FA2),
+              800: Color(0xFF6A1B9A),
+              900: Color(0xFF4A148C),
             }),
             fontFamily: " Tahoma, Helvetica, Arial, sans-serif",
           ),

@@ -267,6 +267,9 @@ class _CameraCaptureState extends State<CameraCapture>
               filePath: filePath,
               remoteStoreLocation:  remoteStoreLocation,
             ))).then((String filePath){
+              if(filePath == null){
+                return;
+              }
               print('uploaded, stored @' + filePath);
               this.fileUploaded(filePath);
         });

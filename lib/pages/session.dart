@@ -13,7 +13,7 @@ import 'package:workout_helper/pages/camera_page.dart';
 import 'package:workout_helper/pages/component/exercise_set_line.dart';
 import 'package:workout_helper/pages/component/movement_bottom_sheet.dart';
 import 'package:workout_helper/pages/save_template.dart';
-import 'package:workout_helper/pages/session_report.dart';
+import 'package:workout_helper/pages/session_report_webview.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/exercise_service.dart';
 import 'package:workout_helper/service/session_service.dart';
@@ -382,7 +382,7 @@ class UserSessionState extends State<UserSession> {
             index++;
             return ExerciseSetLine(
                 workingSet: es,
-                hasCompleted: completedExercise.contains(es.id),
+                completed: completedExercise.contains(es.id),
                 onDeletedClicked: (String id) {
                   int findIndex = _currentSession.matchingExercise.plannedSets
                       .indexWhere((ExerciseSet e) => e.id == id);
@@ -412,6 +412,10 @@ class UserSessionState extends State<UserSession> {
                     sessionRepositoryService.saveCompletedSet(
                         _currentSession, ces);
                     sets.forEach((s) {
+                      if (this.completedExercise.contains(s.id) &&
+                          s.id != es.id) {
+                        return;
+                      }
                       if (s is SingleMovementSet) {
                         s.expectingWeight = ces.weight;
                         s.expectingRepeatsPerSet = ces.repeats;
@@ -432,7 +436,6 @@ class UserSessionState extends State<UserSession> {
                         }
                       }
                     });
-
                     setState(() {});
                   });
                 });
@@ -446,7 +449,16 @@ class UserSessionState extends State<UserSession> {
                   "再来一组",
                 ),
                 onPressed: () {
-                  appendToCurrentSession([sets.elementAt(0)], remainOpen: true);
+                  ExerciseSet originSet = sets.elementAt(0);
+                  ExerciseSet extraSet;
+                  if (originSet is SingleMovementSet) {
+                    extraSet = SingleMovementSet.fromJson(originSet.toJson());
+                  } else if (originSet is ReduceSet) {
+                    extraSet = ReduceSet.fromJson(originSet.toJson());
+                  } else if (originSet is GiantSet) {
+                    extraSet = GiantSet.fromJson(originSet.toJson());
+                  }
+                  appendToCurrentSession([extraSet], remainOpen: true);
                 },
               )
             ],
@@ -590,7 +602,7 @@ class UserSessionState extends State<UserSession> {
   }
 
   Widget buildActionButton() {
-    return _editing
+    return _editing || _currentPanel != -1
         ? Text(
             'invisible',
             style: TextStyle(color: Colors.transparent),
@@ -715,9 +727,10 @@ class UserSessionState extends State<UserSession> {
                                 .then((_) {
                               Navigator.of(context).maybePop().then((_) {
                                 _preferences.remove(CURRENT_SESSION_KEY);
-                                Navigator.of(context)
-                                    .pushReplacement(MaterialPageRoute(
-                                        builder: (context) => SessionReport(
+                                Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            SessionReportWebView(
                                               completedSession: _currentSession,
                                               canGoBack: false,
                                             )));

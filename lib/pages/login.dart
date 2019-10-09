@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
           doLogin(email.text, password.text);
         },
         padding: EdgeInsets.all(12),
-        color: Colors.lightBlueAccent,
+        color:  Color.fromRGBO(101, 85, 153, 0.6),
         child: Text('登录', style: TextStyle(color: Colors.white)),
       ),
     );
@@ -64,6 +64,8 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () async {
+          //appid:wx0ba2504cc150b3f6
+          //appsecret:9ee453e2039ae45a82269956e5de101f
           //userPersistenceService.doLogin(email.text, password.text);
         },
         padding: EdgeInsets.all(12),
@@ -80,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.of(context).pushNamed('/register');
       },
       padding: EdgeInsets.all(12),
-      color: Colors.redAccent[200],
+      color: Colors.transparent,
       child: Text('注册', style: TextStyle(color: Colors.white)),
     );
 

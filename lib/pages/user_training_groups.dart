@@ -245,6 +245,13 @@ class UserTrainingGroupsState extends State<UserTrainingGroups> {
         setState(() {
           groups.add(joinedGroup);
         });
+      }).catchError((_){
+        showDialog(context:context,builder: (context){
+          return AlertDialog(
+            title: Text("加入小组失败，请检查小组：" + groupCode + "是否存在。"),
+          );
+        });
+
       });
     });
   }

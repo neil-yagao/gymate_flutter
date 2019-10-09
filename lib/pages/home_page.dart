@@ -6,6 +6,7 @@ import 'package:workout_helper/pages/training_plan_selection.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/session_service.dart';
 import 'package:workout_helper/util/navigation_util.dart';
+import 'package:fluwx/fluwx.dart' as fluwx;
 
 import 'component/bottom_navigation_bar.dart';
 import 'component/home_calendar.dart';

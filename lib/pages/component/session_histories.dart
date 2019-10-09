@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:workout_helper/model/entities.dart';
-import 'package:workout_helper/pages/session_report.dart';
+
+import '../session_report_webview.dart';
 
 class SessionHistory extends StatelessWidget {
   final List<Session> sessions;
 
   final String sessionPractiseName;
 
-  const SessionHistory({Key key, @required this.sessions, this.sessionPractiseName}) : super(key: key);
+  const SessionHistory(
+      {Key key, @required this.sessions, this.sessionPractiseName})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        title: Text(sessionPractiseName == null?"":sessionPractiseName + "训练记录"),
+        title: Text(sessionPractiseName == null
+            ? "训练记录"
+            : sessionPractiseName + "训练记录"),
       ),
       body: SafeArea(
           child: ListView(
@@ -26,11 +31,13 @@ class SessionHistory extends StatelessWidget {
                   "一共" + session.accomplishedSets.length.toString() + "组动作"),
               trailing: Icon(Icons.keyboard_arrow_right),
               subtitle: Text(DateFormat('yyyy-MM-dd HH:mm')
-                  .format(session.accomplishedTime)),
+                  .format(session.accomplishedTime.add(Duration(hours: 8)))),
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        SessionReport(completedSession: session,canGoBack: true,)));
+                    builder: (context) => SessionReportWebView(
+                          completedSession: session,
+                          canGoBack: true,
+                        )));
               },
             );
           })

@@ -38,6 +38,7 @@ const Map<int, double> OneRepMaxMap = {
   10: 0.75,
 };
 
+@deprecated
 class SessionReport extends StatelessWidget {
   final Session completedSession;
   final bool canGoBack;
@@ -187,7 +188,7 @@ class SessionReport extends StatelessWidget {
           ),
           FlatButton(
             child: Text("返回首页"),
-            textColor: Colors.lightBlueAccent,
+            textColor: Color.fromRGBO(101, 85, 153, 0.9),
             onPressed: () {
               Navigator.of(context).popAndPushNamed('/home');
             },

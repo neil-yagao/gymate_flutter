@@ -10,6 +10,7 @@ import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/util/navigation_util.dart';
 
 import 'component/logo.dart';
+import 'login.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -36,6 +37,7 @@ class RegisterPageState extends State<RegisterPage> {
   String cellPhone = "";
 
   Timer t;
+
   @override
   void initState() {
     super.initState();
@@ -43,7 +45,7 @@ class RegisterPageState extends State<RegisterPage> {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     t?.cancel();
     super.dispose();
   }
@@ -54,6 +56,17 @@ class RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _globalKey,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+              icon: Icon(Icons.chevron_left),
+              color: Theme.of(context).primaryColor,
+              onPressed: () {
+                NavigationUtil.replaceUsingDefaultFadingTransition(
+                    context, LoginPage());
+              }),
+        ),
         backgroundColor: Colors.white,
         body: SafeArea(
           child: Center(
@@ -120,8 +133,7 @@ class RegisterPageState extends State<RegisterPage> {
                                   .then((value) {
                                 setState(() {
                                   verifyButton = 60.toString();
-                                  t =
-                                      Timer.periodic(Duration(seconds: 1), (t) {
+                                  t = Timer.periodic(Duration(seconds: 1), (t) {
                                     if (int.parse(verifyButton) <= 0) {
                                       setState(() {
                                         verifyButton = '发送验证码';
@@ -167,18 +179,21 @@ class RegisterPageState extends State<RegisterPage> {
                       showSnackBar("验证码未填写");
                       return;
                     }
-                    NavigationUtil.showLoading(context,content:"正在为您注册...");
+                    NavigationUtil.showLoading(context, content: "正在为您注册...");
                     Provider.of<CurrentUserStore>(context)
-                        .register(
-                            name.text, password.text, cell.text, verifyCode.text)
+                        .register(name.text, password.text, cell.text,
+                            verifyCode.text)
                         .then((User _) {
-                          Navigator.of(context).maybePop();
-                      Navigator.of(context)
-                          .pushNamedAndRemoveUntil("/home", (_) => false);
-                    }).catchError((_) {});
+                      Navigator.of(context).maybePop().then((_) {
+                        Navigator.of(context)
+                            .pushNamedAndRemoveUntil("/home", (_) => false);
+                      });
+                    }).catchError((_) {
+                      Navigator.of(context).maybePop();
+                    });
                   },
                   padding: EdgeInsets.all(12),
-                  color: Colors.redAccent[200],
+                  color: Color.fromRGBO(101, 85, 153, 0.6),
                   child: Text('注册', style: TextStyle(color: Colors.white)),
                 )
               ])),
@@ -188,5 +203,4 @@ class RegisterPageState extends State<RegisterPage> {
   void showSnackBar(String content) {
     _globalKey.currentState.showSnackBar(SnackBar(content: Text(content)));
   }
-
 }

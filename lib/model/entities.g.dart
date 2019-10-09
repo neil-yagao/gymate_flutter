@@ -93,7 +93,7 @@ Map<String, dynamic> _$SingleMovementSetToJson(SingleMovementSet instance) =>
     <String, dynamic>{
       'id': instance.id,
       'sequence': instance.sequence,
-      'movement': instance.movement,
+      'movement': instance.movement.toJson(),
       'unit':instance.unit,
       'expectingRepeatsPerSet': instance.expectingRepeatsPerSet,
       'expectingWeight': instance.expectingWeight
@@ -314,20 +314,22 @@ Map<String, dynamic> _$SessionMaterialToJson(SessionMaterial instance) =>
 
 MovementOneRepMax _$MovementOneRepMaxFromJson(Map<String, dynamic> json) {
   return MovementOneRepMax(
-      json['userId'] as String,
+      json['user'] == null? null: User.fromJson(json['user']).id.toString(),
       json['movement'] == null
           ? null
           : Movement.fromJson(json['movement'] as Map<String, dynamic>),
-      (json['oneRepMax'] as num)?.toDouble(),
-      json['practiseTime'] == null
+      (json['record'] as num)?.toDouble(),
+      json['achievedTime'] == null
           ? null
-          : DateTime.parse(json['practiseTime'] as String));
+          : DateTime.parse(json['achievedTime'] as String));
 }
 
 Map<String, dynamic> _$MovementOneRepMaxToJson(MovementOneRepMax instance) =>
     <String, dynamic>{
-      'userId': instance.userId,
+      'user': {
+        'id':instance.userId
+      },
       'movement': instance.movement,
-      'oneRepMax': instance.oneRepMax,
-      'practiseTime': instance.practiseTime?.toIso8601String()
+      'record': instance.oneRepMax,
+      'achievedTime': instance.practiseTime?.toIso8601String()
     };

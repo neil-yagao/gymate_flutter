@@ -74,12 +74,12 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
           .showSnackBar(SnackBar(content: Text("训练重量不正确")));
       throw Error();
     }
-    if(_reduceSet.expectingRepeatsPerSet == null || _reduceSet.expectingRepeatsPerSet <=0 ){
+    if(_regularSet.expectingRepeatsPerSet == null || _regularSet.expectingRepeatsPerSet <=0 ){
       scaffoldKey.currentState
           .showSnackBar(SnackBar(content: Text("每组重复次数不能为空")));
       throw Error();
     }
-    if (_reduceSet.expectingWeight >= _reduceSet.reduceTo) {
+    if (_reduceSet.expectingWeight != null && _reduceSet.expectingWeight >= _reduceSet.reduceTo) {
       scaffoldKey.currentState
           .showSnackBar(SnackBar(content: Text("递减组重量不正确")));
       throw Error();

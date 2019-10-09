@@ -31,6 +31,7 @@ class AutoCompleteTextField<T> extends StatefulWidget {
   final TextCapitalization textCapitalization;
   final TextEditingController controller;
   final FocusNode focusNode;
+  final T emptySelection;
 
   AutoCompleteTextField(
       {@required
@@ -61,7 +62,8 @@ class AutoCompleteTextField<T> extends StatefulWidget {
       this.textCapitalization: TextCapitalization.sentences,
       this.minLength = 1,
       this.controller,
-      this.focusNode})
+      this.focusNode,
+      this.emptySelection})
       : super(key: key);
 
   void clear() => key.currentState.clear();
@@ -110,11 +112,13 @@ class AutoCompleteTextField<T> extends StatefulWidget {
       keyboardType,
       textInputAction,
       controller,
-      focusNode);
+      focusNode,this.emptySelection);
 }
 
 class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
   final LayerLink _layerLink = LayerLink();
+
+  T emptySelection;
 
   TextField textField;
   List<T> suggestions;
@@ -161,7 +165,8 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
       this.keyboardType,
       this.textInputAction,
       this.controller,
-      this.focusNode) {
+      this.focusNode,
+      this.emptySelection) {
     textField =  TextField(
       inputFormatters: inputFormatters,
       textCapitalization: textCapitalization,
@@ -317,6 +322,9 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
                               child:  InkWell(
                                   child: itemBuilder(context, suggestion),
                                   onTap: () {
+                                    if(suggestion == emptySelection){
+                                      return;
+                                    }
                                     setState(() {
                                       if (submitOnSuggestionTap) {
                                         String newText = suggestion.toString();
@@ -356,6 +364,11 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
     suggestions.sort(sorter);
     if (suggestions.length > maxAmount) {
       suggestions = suggestions.sublist(0, maxAmount);
+    }
+    if(suggestions.isEmpty){
+      if(this.emptySelection != null){
+        return [this.emptySelection];
+      }
     }
     return suggestions;
   }
@@ -445,5 +458,6 @@ class SimpleAutoCompleteTextField extends AutoCompleteTextField<String> {
           keyboardType,
           textInputAction,
           controller,
-          focusNode);
+          focusNode,
+      this.emptySelection);
 }

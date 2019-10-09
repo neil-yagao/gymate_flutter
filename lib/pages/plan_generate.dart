@@ -104,15 +104,15 @@ class PlanGenerateState extends State<PlanGenerate> {
                     TrainingPlanDetail(exerciseTemplate: _selectedExercises));
               },
             ),
-            FlatButton(
-              textColor: _selectedExercises.length > 0
-                  ? Colors.lightBlueAccent
-                  : Colors.grey,
-              child: Text("分享给朋友"),
-              onPressed: () {
-                showSharingAlert();
-              },
-            )
+//            FlatButton(
+//              textColor: _selectedExercises.length > 0
+//                  ? Colors.lightBlueAccent
+//                  : Colors.grey,
+//              child: Text("分享给朋友"),
+//              onPressed: () {
+//                showSharingAlert();
+//              },
+//            )
           ],
         ),
       ),
@@ -123,7 +123,6 @@ class PlanGenerateState extends State<PlanGenerate> {
     showDialog<String>(
         context: context,
         builder: (context) {
-          String groupCode = '';
           return Center(
             child: Card(
               child: Column(

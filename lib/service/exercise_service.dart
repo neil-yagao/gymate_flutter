@@ -209,4 +209,13 @@ class ExerciseService {
       'id':exercise.id
     });
   }
+
+  Future<Exercise> getExercise(String exerciseId){
+    return dio.get('/exercise/' + exerciseId).then((r){
+      if(r.data != null){
+        return parseExercise(r.data);
+      }
+      return Exercise.empty();
+    });
+  }
 }

@@ -1,14 +1,13 @@
 import 'dart:core';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_calendar_carousel/classes/event.dart';
-import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/service/current_user_store.dart';
+import 'package:workout_helper/service/exercise_service.dart';
 import 'package:workout_helper/service/plan_service.dart';
 
+import '../execise_info.dart';
 import 'exercise_calendar.dart';
 
 class HomeCalendar extends StatefulWidget {
@@ -23,6 +22,7 @@ class HomeCalendarState extends State<HomeCalendar> {
 
   PlanService _planService = PlanService(null);
   User _currentUser;
+  ExerciseService _exerciseService = ExerciseService(null);
 
   @override
   void didChangeDependencies() {
@@ -42,6 +42,15 @@ class HomeCalendarState extends State<HomeCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    return ExerciseCalendar(markedDatesMap: _markedDatesMap);
+    return ExerciseCalendar(
+      markedDatesMap: _markedDatesMap,
+      onDateSelect: (List<UserPlannedExercise> exercises) {
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+          return ExerciseInfo(
+            plannedExercise: exercises,
+          );
+        }));
+      },
+    );
   }
 }

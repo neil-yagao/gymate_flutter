@@ -10,12 +10,16 @@ class MovementBottomSheetUtil {
   AutoCompleteTextField<Movement> buildMovementSearchBar(
       InputEventCallback<Movement> itemSubmitted,TextEditingController controller) {
     //assert(suggestions.length != 0);
+    Movement emptySelection = Movement.empty();
+    emptySelection.id = "-1";
+    emptySelection.name = "未找到相应的动作，请联系我们添加";
     return AutoCompleteTextField<Movement>(
       itemBuilder: (BuildContext context, Movement suggestion) {
         return ListTile(
             dense: true,
             title: Text(suggestion.name, style: Typography.dense2018.caption));
       },
+      emptySelection: emptySelection,
       itemFilter: (Movement suggestion, String query) =>
           suggestion.name == query || suggestion.name.indexOf(query) >= 0,
       suggestions: suggestions,
