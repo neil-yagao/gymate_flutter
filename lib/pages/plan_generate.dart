@@ -72,7 +72,7 @@ class PlanGenerateState extends State<PlanGenerate> {
                     child: Text(e.name),
                   ),
                   Expanded(
-                    child: Text(e.plannedSets.length.toString() + "个动作"),
+                    child: Text(e.plannedSets.length.toString() + "组训练"),
                   )
                 ],
               ),
@@ -104,15 +104,15 @@ class PlanGenerateState extends State<PlanGenerate> {
                     TrainingPlanDetail(exerciseTemplate: _selectedExercises));
               },
             ),
-//            FlatButton(
-//              textColor: _selectedExercises.length > 0
-//                  ? Colors.lightBlueAccent
-//                  : Colors.grey,
-//              child: Text("分享给朋友"),
-//              onPressed: () {
-//                showSharingAlert();
-//              },
-//            )
+            FlatButton(
+              textColor: _selectedExercises.length > 0
+                  ? Colors.lightBlueAccent
+                  : Colors.grey,
+              child: Text("分享给朋友"),
+              onPressed: () {
+                showSharingAlert();
+              },
+            )
           ],
         ),
       ),

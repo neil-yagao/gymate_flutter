@@ -3,11 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/exercise_service.dart';
+import 'package:workout_helper/util/navigation_util.dart';
 
 class ExerciseTemplateSelection extends StatefulWidget {
   final String title;
+  final List<Exercise> templates;
 
-  const ExerciseTemplateSelection({Key key, this.title}) : super(key: key);
+  const ExerciseTemplateSelection({Key key, this.title, this.templates}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -17,9 +19,6 @@ class ExerciseTemplateSelection extends StatefulWidget {
 }
 
 class ExerciseTemplateSelectionState extends State<ExerciseTemplateSelection> {
-  ExerciseService _service;
-
-  List<Exercise> _template = List();
 
   Exercise _selectedExercise;
 
@@ -31,20 +30,6 @@ class ExerciseTemplateSelectionState extends State<ExerciseTemplateSelection> {
     if (title == null) {
       this.title = "选择已保存的模板";
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _service = ExerciseService(_scaffoldKey);
-    _service
-        .getUserExerciseTemplate(
-            Provider.of<CurrentUserStore>(context).currentUser.id)
-        .then((List<Exercise> exercises) {
-      setState(() {
-        _template = exercises;
-      });
-    });
   }
 
   @override
@@ -67,7 +52,7 @@ class ExerciseTemplateSelectionState extends State<ExerciseTemplateSelection> {
       body: SafeArea(
           child: ListView(
         children:
-            _template.where((Exercise e) => e.name != null).map((Exercise e) {
+            widget.templates.where((Exercise e) => e.name != null).map((Exercise e) {
           return ListTile(
             dense: true,
             title: Row(
@@ -78,7 +63,7 @@ class ExerciseTemplateSelectionState extends State<ExerciseTemplateSelection> {
                   child: Text(e.name),
                 ),
                 Expanded(
-                  child: Text(e.plannedSets.length.toString() + "个动作"),
+                  child: Text(e.plannedSets.length.toString() + "组训练"),
                 )
               ],
             ),

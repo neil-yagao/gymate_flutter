@@ -41,7 +41,7 @@ class ExerciseSetLine extends StatelessWidget {
                       completed ? Colors.green : Color.fromRGBO(0, 0, 0, 0.2),
                 ),
                 onPressed: () {
-                  if (onCompletedClicked != null) {
+                  if (onCompletedClicked != null && !completed) {
                     onCompletedClicked(workingSet);
                   }
                 }),
@@ -52,7 +52,9 @@ class ExerciseSetLine extends StatelessWidget {
           color: Colors.red,
           icon: Icons.delete,
           onTap: () {
-            onDeletedClicked(workingSet.id);
+            if (onDeletedClicked != null && !completed) {
+              onDeletedClicked(workingSet.id);
+            }
           },
         ),
       ],

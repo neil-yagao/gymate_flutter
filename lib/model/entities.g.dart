@@ -282,7 +282,7 @@ TrainingPlan _$TrainingPlanFromJson(Map<String, dynamic> json) {
           : User.fromJson(json['createdBy'] as Map<String, dynamic>))
     ..schedule = (json['schedule'] as List)
         ?.map((e) =>
-            e == null ? null : Exercise.fromJson(e as Map<String, dynamic>))
+            e == null ? null : ExerciseService.parseExercise(e as Map<String, dynamic>))
         ?.toList();
 }
 

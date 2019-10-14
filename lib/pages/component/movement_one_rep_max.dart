@@ -22,9 +22,9 @@ class MovementOneRepMaxPage extends StatelessWidget {
           ...movementOneRepMax.map((MovementOneRepMax morm) {
             return ListTile(
               title: Text(morm.movement.name),
-              trailing: Text(morm.oneRepMax.toString() + "KG"),
+              trailing: Text(morm.oneRepMax.floor().toString() + "KG"),
               subtitle: Text(
-                  DateFormat('yyyy-MM-dd HH:mm').format(morm.practiseTime)),
+                  DateFormat('yyyy-MM-dd HH:mm').format(morm.practiseTime.add(Duration(hours: 8)))),
             );
           })
         ],

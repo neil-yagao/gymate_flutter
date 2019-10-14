@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
+import 'package:workout_helper/service/exercise_service.dart';
 
 part 'entities.g.dart';
 
@@ -162,6 +163,8 @@ class UserBodyIndex {
       _$UserBodyIndexFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserBodyIndexToJson(this);
+
+  UserBodyIndex.empty();
 }
 
 abstract class ExerciseSet {
@@ -375,7 +378,7 @@ class GiantSet extends ExerciseSet {
           movements.elementAt(0).movement.name +
           "等" +
           movements.length.toString() +
-          "个动作";
+          "组训练";
     }
     combinedMovement.exerciseType = ExerciseType.lifting;
     return combinedMovement;
@@ -532,18 +535,18 @@ class Session {
       set.weight = ces['weight'];
       set.restAfterAccomplished = ces['restAfterAccomplished'];
       set.completedTime = DateTime.parse(ces['completedTime']);
-      if (ces['accomplishedSetType'] == 'SingleMovementSet') {
-        set.accomplishedSet =
-            SingleMovementSet.fromJson(ces['accomplishedSet']);
-      } else if (ces['accomplishedSetType'] == 'ReduceSet') {
-        set.accomplishedSet = ReduceSet.fromJson(ces['accomplishedSet']);
-      } else if (ces['accomplishedSetType'] == 'SingleMovementSet') {
-        set.accomplishedSet = GiantSet.fromJson(ces['accomplishedSet']);
-      } else if (ces['accomplishedSetType'] == 'SingleMovementSet') {
-        set.accomplishedSet = CardioSet.fromJson(ces['accomplishedSet']);
-      } else if (ces['accomplishedSetType'] == 'SingleMovementSet') {
-        set.accomplishedSet = HIITSet.fromJson(ces['accomplishedSet']);
-      }
+//      if (ces['accomplishedSetType'] == 'SingleMovementSet') {
+//        set.accomplishedSet =
+//            SingleMovementSet.fromJson(ces['accomplishedSet']);
+//      } else if (ces['accomplishedSetType'] == 'ReduceSet') {
+//        set.accomplishedSet = ReduceSet.fromJson(ces['accomplishedSet']);
+//      } else if (ces['accomplishedSetType'] == 'SingleMovementSet') {
+//        set.accomplishedSet = GiantSet.fromJson(ces['accomplishedSet']);
+//      } else if (ces['accomplishedSetType'] == 'SingleMovementSet') {
+//        set.accomplishedSet = CardioSet.fromJson(ces['accomplishedSet']);
+//      } else if (ces['accomplishedSetType'] == 'SingleMovementSet') {
+//        set.accomplishedSet = HIITSet.fromJson(ces['accomplishedSet']);
+//      }
       this.accomplishedSets.add(set);
     });
   }

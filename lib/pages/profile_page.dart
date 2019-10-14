@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workout_helper/general/my_flutter_app_icons.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/component/profile_tile.dart';
+import 'package:workout_helper/pages/plan_generate.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/movement_service.dart';
 import 'package:workout_helper/service/profile_service.dart';
@@ -181,16 +182,16 @@ class ProfilePageState extends State<ProfilePage> {
                 },
               ),
             ),
-//            Expanded(
-//              child: ProfileTile(
-//                title: _exerciseTemplateAmount.toString(),
-//                subtitle: "训练模板",
-//                onTap: () async {
-//                  NavigationUtil.pushUsingDefaultFadingTransition(
-//                      context, PlanGenerate());
-//                },
-//              ),
-//            ),
+            Expanded(
+              child: ProfileTile(
+                title: _exerciseTemplateAmount.toString(),
+                subtitle: "训练模板",
+                onTap: () async {
+                  NavigationUtil.pushUsingDefaultFadingTransition(
+                      context, PlanGenerate());
+                },
+              ),
+            ),
             Expanded(
               child: ProfileTile(
                 title: _dietAmount.toString(),

@@ -25,8 +25,7 @@ class NavigationUtil {
   static Future showLoading(BuildContext context, {String content}) {
     return showDialog(
       context: context,
-      barrierDismissible: false,
-      child: new Dialog(
+      builder:(context)=> new Dialog(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: new Row(

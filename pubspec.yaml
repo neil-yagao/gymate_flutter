@@ -67,6 +67,7 @@ flutter:
   uses-material-design: true
 
   assets:
+  - assets/body_image.png
   - assets/logo.png
   - assets/crossfit.jpeg
   - assets/fitness.jpeg

@@ -5,6 +5,7 @@ import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/plan_service.dart';
 import 'package:workout_helper/util/navigation_util.dart';
 
+import 'component/plan_schedule.dart';
 import 'home_page.dart';
 
 class TrainingPlanSelection extends StatefulWidget {
@@ -17,7 +18,7 @@ class TrainingPlanSelection extends StatefulWidget {
 class TrainingPlanSelectionState extends State<TrainingPlanSelection> {
   PlanService _planService;
 
-  GlobalKey<ScaffoldState> defaultState = GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
   List<TrainingPlan> _availablePlans = List();
 
@@ -26,7 +27,7 @@ class TrainingPlanSelectionState extends State<TrainingPlanSelection> {
   @override
   void initState() {
     super.initState();
-    _planService = PlanService(defaultState);
+    _planService = PlanService(_key);
   }
 
   @override
@@ -42,11 +43,11 @@ class TrainingPlanSelectionState extends State<TrainingPlanSelection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _key,
       appBar: AppBar(
         title: Text("训练计划选择"),
       ),
       body: SafeArea(
-          key: defaultState,
           child: ListView(
             children: _availablePlans.map((TrainingPlan t) {
               return ListTile(
@@ -94,7 +95,38 @@ class TrainingPlanSelectionState extends State<TrainingPlanSelection> {
                   style: Typography.dense2018.caption,
                 ),
                 isThreeLine: t.extraNote.length > 20,
-                onTap: () {},
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => Center(
+                        child: Card(
+                            child: SingleChildScrollView(
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                          SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.7,
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              child: PlanSchedule(
+                                schedule: t.schedule,
+                                totalCycleDay: t.trainingCycleDays,
+                                isEditable: false,
+                              )),
+                          Divider(),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                FlatButton(
+                                  textColor: Theme.of(context).primaryColor,
+                                  onPressed: () {
+                                    Navigator.of(context).maybePop();
+                                  },
+                                  child: Text("关闭"),
+                                )
+                              ])
+                        ])))),
+                  );
+                },
               );
             }).toList(growable: true),
           )),
@@ -120,8 +152,10 @@ class TrainingPlanSelectionState extends State<TrainingPlanSelection> {
                   _planService
                       .applyPlanToUser(_selectedPlan, user.id)
                       .then((_) {
-                        NavigationUtil.replaceUsingDefaultFadingTransition(context, HomePage());
-                   /// Navigator.of(context).maybePop();
+                    NavigationUtil.replaceUsingDefaultFadingTransition(
+                        context, HomePage());
+
+                    /// Navigator.of(context).maybePop();
                   });
                 },
               ),

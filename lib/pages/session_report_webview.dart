@@ -31,24 +31,24 @@ class SessionReportWebView extends StatelessWidget {
           icon: Icon(Icons.share),
           color: Colors.white,
           onPressed: () {
-            if(Platform.isAndroid) {
-              fluwx.register(
+//            if(Platform.isAndroid) {
+              fluwx.registerWxApi(
                   appId: "wx0ba2504cc150b3f6",
-                  universalLink: "http://www.lifting.ren/").then((val) {
+                  universalLink: "https://www.lifting.ren/").then((val) {
                 fluwx.share(fluwx.WeChatShareWebPageModel(
                     webPage: reportUrl,
                     title: "我的健身报告",
                     scene: fluwx.WeChatScene.TIMELINE,
-                    thumbnail: "assets://assets/logo.jpg")).catchError((error) {
+                    thumbnail: "assets://assets/logo.png")).catchError((error) {
                   showDialog(context: context, builder: (context) =>
                       Card(
                         child: Text(error.toString()),
                       ));
                 });
               });
-            }else {
-              Share.share(reportUrl,subject: "我的健身报告" );
-            }
+//            }else {
+//              Share.share(reportUrl,subject: "我的健身报告" );
+//            }
           },
         )
       ],

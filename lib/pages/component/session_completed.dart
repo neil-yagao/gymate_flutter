@@ -2,14 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:workout_helper/general/flip_panel.dart';
 import 'package:workout_helper/model/entities.dart';
 
+import 'flip_count_down_util.dart';
+
 const int MAX_RESTING_MINS = 20;
 
 class SessionCompleted extends StatefulWidget {
   final ExerciseSet finishedSet;
 
+  final int startSecond;
+  double savedWeight;
+  int savedRepeat;
+
   SessionCompletedState scs;
 
-  SessionCompleted({Key key, this.finishedSet}) : super(key: key) {
+  SessionCompleted({
+    Key key,
+    this.finishedSet,
+    this.startSecond,
+    this.savedWeight,
+    this.savedRepeat,
+  }) : super(key: key) {
     scs = SessionCompletedState(finishedSet);
   }
 
@@ -42,13 +54,18 @@ class SessionCompletedState extends State<SessionCompleted> {
   @override
   void initState() {
     super.initState();
+
     if (finishedSet is SingleMovementSet) {
       number = new TextEditingController(
-          text: (finishedSet as SingleMovementSet)
-              .expectingRepeatsPerSet
-              .toString());
+          text: widget.savedRepeat == null
+              ? (finishedSet as SingleMovementSet)
+                  .expectingRepeatsPerSet
+                  .toString()
+              : widget.savedRepeat.toString());
       weight = new TextEditingController(
-          text: (finishedSet as SingleMovementSet).expectingWeight.toString());
+          text: widget.savedWeight == null
+              ? (finishedSet as SingleMovementSet).expectingWeight.toString()
+              : widget.savedWeight.toString());
     } else {
       // giant set
       (finishedSet as GiantSet).movements.forEach((sms) {
@@ -65,21 +82,16 @@ class SessionCompletedState extends State<SessionCompleted> {
 
   FlipClock restingCount;
 
-  FlipClock buildRestingCount() {
-    restingCount = FlipClock.simple(
-      startTime: DateTime(2018, 0, 0, 0, 0),
-      timeLeft: Duration(minutes: MAX_RESTING_MINS),
-      digitColor: Colors.white,
-      backgroundColor: Theme.of(context).primaryColor,
-      digitSize: 60,
-      borderRadius: const BorderRadius.all(Radius.circular(3.0)),
-      onCountDownEnd: () {
-        setState(() {
-          Navigator.of(context).maybePop();
-        });
-      },
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    restingCount = FlipCountDownUtil.buildRestingCount(
+      widget.startSecond,
+      () => setState(() {
+        Navigator.of(context).maybePop();
+      }),
+      context,
     );
-    return restingCount;
   }
 
   CompletedExerciseSet emittingCompletedInfo() {
@@ -106,34 +118,57 @@ class SessionCompletedState extends State<SessionCompleted> {
       set.weight = double.parse(weight.text);
       set.repeats = int.parse(number.text);
     }
-    set.restAfterAccomplished = DateTime.now().difference(createTime).inSeconds;
+    set.restAfterAccomplished =
+        DateTime.now().difference(createTime).inSeconds + widget.startSecond;
     return set;
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-        child: Card(
-            child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        ...getCompletedList(),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 18.0),
-                child: Text(
-                  "休息间隔：",
-                  style: Typography.dense2018.subtitle,
+      child: Card(
+          child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ...getCompletedList(),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 18.0),
+                  child: Text(
+                    "休息间隔：",
+                    style: Typography.dense2018.subtitle,
+                  ),
                 ),
               ),
-            ),
-            Expanded(flex: 2, child: buildRestingCount()),
-          ],
-        ),
-      ]),
-    )));
+              Expanded(flex: 2, child: restingCount),
+            ],
+          ),
+          Divider(),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: FlatButton(
+                  child: Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                  onPressed: () {
+                    Navigator.of(context).maybePop("minimize");
+                  },
+                ),
+              ),
+              Expanded(
+                child: FlatButton(
+                  child: Icon(Icons.check, color: Colors.greenAccent),
+                  onPressed: () {
+                    Navigator.of(context).maybePop();
+                  },
+                ),
+              ),
+            ],
+          )
+        ]),
+      )),
+    );
   }
 
   List<Widget> getCompletedList() {

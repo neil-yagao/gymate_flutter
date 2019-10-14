@@ -284,7 +284,6 @@ class MovementBottomSheetState extends State<MovementBottomSheet> {
 
     return Center(
       child: Card(
-        margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.1),
         child: AnimatedContainer(
           padding: mediaQuery.viewInsets,
           duration: const Duration(milliseconds: 300),

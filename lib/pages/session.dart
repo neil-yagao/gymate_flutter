@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:badges/badges.dart';
-import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:workout_helper/general/flip_panel.dart';
 import 'package:workout_helper/general/my_flutter_app_icons.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/pages/camera_page.dart';
@@ -21,6 +21,7 @@ import 'package:workout_helper/util/navigation_util.dart';
 
 import 'component/cardio_bottom_sheet.dart';
 import 'component/chewie_network_item.dart';
+import 'component/flip_count_down_util.dart';
 import 'component/hiit_bottom_sheet.dart';
 import 'component/hiit_clock.dart';
 import 'component/hiit_exercise_line.dart';
@@ -58,7 +59,7 @@ class UserSessionState extends State<UserSession> {
 
   Set<String> completedExercise = Set();
 
-  int _currentPanel;
+  int _currentPanel = -1;
 
   bool _editing = false;
 
@@ -68,13 +69,23 @@ class UserSessionState extends State<UserSession> {
 
   List<SessionMaterial> sessionMaterials = List();
 
+  bool _showMinizeCountDown = false;
+
+  SessionCompleted sc;
+
+  Widget minimizeCountDown;
+
+  CompletedExerciseSet _preSetCes;
+
   int _currentExerciseIndex = 0;
 
-  bool _isClockShow = false;
+  bool _isHiiTClockShow = false;
 
-  List<ChewieController> controllers = List();
+  TextEditingController walkingSteps = TextEditingController();
 
   SharedPreferences _preferences;
+
+  ExerciseService _service;
 
   Timer t;
 
@@ -113,24 +124,40 @@ class UserSessionState extends State<UserSession> {
 //                  Share.share('check out my website https://example.com');
 //                  break;
                 case SessionOption.CREATE_FROM_TEMPLATE:
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
-                    return ExerciseTemplateSelection();
-                  })).then((e) {
-                    if (e != null) {
-                      sessionRepositoryService
-                          .createNewSessionFromExercise(
-                              e,
-                              Provider.of<CurrentUserStore>(context)
-                                  .currentUser
-                                  .id
-                                  .toString())
-                          .then((Session session) {
-                        setState(() {
-                          _currentSession = session;
+                  _service = ExerciseService(_scaffoldKey);
+                  NavigationUtil.showLoading(context);
+                  _service
+                      .getUserExerciseTemplate(
+                          Provider.of<CurrentUserStore>(context).currentUser.id)
+                      .then((List<Exercise> exercises) async {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return ExerciseTemplateSelection(
+                        templates: exercises,
+                      );
+                    })).then((e) {
+                      if (e != null) {
+                        sessionRepositoryService
+                            .createNewSessionFromExercise(
+                                e,
+                                Provider.of<CurrentUserStore>(context)
+                                    .currentUser
+                                    .id
+                                    .toString())
+                            .then((Session session) {
+                          setState(() {
+                            _currentSession = session;
+                          });
+                          Navigator.of(context).maybePop();
                         });
-                      });
-                    }
+                      }else{
+                        Navigator.of(context).maybePop();
+
+                      }
+                    });
+                  }).catchError((e) {
+                    print(e);
+                    Navigator.of(context).maybePop();
                   });
                   break;
               }
@@ -284,7 +311,9 @@ class UserSessionState extends State<UserSession> {
               if (action == "OK") {
                 setState(() {
                   session.accomplishedSets.forEach((ces) {
-                    completedExercise.add(ces.accomplishedSet.id);
+                    completedExercise.add(
+                        ces.accomplishedSet.runtimeType.toString() +
+                            ces.accomplishedSet.id);
                   });
                   _currentSession = session;
                 });
@@ -301,7 +330,7 @@ class UserSessionState extends State<UserSession> {
   int completedLiftingSetsCount(List<ExerciseSet> set) {
     int count = 0;
     set.forEach((ExerciseSet es) {
-      if (completedExercise.contains(es.id)) {
+      if (completedExercise.contains(es.runtimeType.toString() + es.id)) {
         count++;
       }
     });
@@ -382,7 +411,8 @@ class UserSessionState extends State<UserSession> {
             index++;
             return ExerciseSetLine(
                 workingSet: es,
-                completed: completedExercise.contains(es.id),
+                completed: completedExercise
+                    .contains(es.runtimeType.toString() + es.id),
                 onDeletedClicked: (String id) {
                   int findIndex = _currentSession.matchingExercise.plannedSets
                       .indexWhere((ExerciseSet e) => e.id == id);
@@ -396,48 +426,11 @@ class UserSessionState extends State<UserSession> {
                 },
                 onCompletedClicked: (ExerciseSet es) {
                   setState(() {
-                    this.completedExercise.add(es.id);
+                    this
+                        .completedExercise
+                        .add(es.runtimeType.toString() + es.id);
                   });
-                  SessionCompleted sc = SessionCompleted(
-                    finishedSet: es,
-                  );
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext c) {
-                        return sc;
-                      }).then((value) {
-                    CompletedExerciseSet ces = sc.emitCompletedInfo();
-                    _preferences.setInt(
-                        CURRENT_SESSION_KEY, int.parse(_currentSession.id));
-                    sessionRepositoryService.saveCompletedSet(
-                        _currentSession, ces);
-                    sets.forEach((s) {
-                      if (this.completedExercise.contains(s.id) &&
-                          s.id != es.id) {
-                        return;
-                      }
-                      if (s is SingleMovementSet) {
-                        s.expectingWeight = ces.weight;
-                        s.expectingRepeatsPerSet = ces.repeats;
-                        s.unit = "KG";
-                      } else if (s is GiantSet) {
-                        for (int i = 0; i < s.movements.length; i++) {
-                          SingleMovementSet nonFinishedSet =
-                              s.movements.elementAt(i);
-                          SingleMovementSet finishedSet =
-                              (ces.accomplishedSet as GiantSet)
-                                  .movements
-                                  .elementAt(i);
-                          nonFinishedSet.expectingWeight =
-                              finishedSet.expectingWeight;
-                          nonFinishedSet.expectingRepeatsPerSet =
-                              finishedSet.expectingRepeatsPerSet;
-                          nonFinishedSet.unit = "KG";
-                        }
-                      }
-                    });
-                    setState(() {});
-                  });
+                  handleExerciseComplete(es, sets);
                 });
           }),
           Row(
@@ -466,6 +459,60 @@ class UserSessionState extends State<UserSession> {
         ]));
   }
 
+  void handleExerciseComplete(ExerciseSet es, List<ExerciseSet> sets,
+      {int startSecond = 0}) {
+    SessionCompleted sc = SessionCompleted(
+      finishedSet: es,
+      startSecond: startSecond,
+      savedRepeat: _preSetCes == null ? null : _preSetCes.repeats,
+      savedWeight: _preSetCes == null ? null : _preSetCes.weight,
+    );
+
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext c) {
+          return sc;
+        }).then((value) {
+      _preSetCes = sc.emitCompletedInfo();
+      if (value != null && value == "minimize") {
+        _showMinizeCountDown = true;
+        createMinimizeCountDownBottomBar(context, sets, es);
+        setState(() {});
+        return;
+      }
+      doSubmitSetCompleted(sets, es);
+    });
+  }
+
+  void doSubmitSetCompleted(List<ExerciseSet> sets, ExerciseSet es) {
+    _preferences.setInt(CURRENT_SESSION_KEY, int.parse(_currentSession.id));
+    sessionRepositoryService.saveCompletedSet(_currentSession, _preSetCes);
+
+    /// set rest of sets in the movement weight & repeat
+    sets.forEach((s) {
+      if (this.completedExercise.contains(es.runtimeType.toString() + s.id) &&
+          s.id != es.id) {
+        return;
+      }
+      if (s is SingleMovementSet) {
+        s.expectingWeight = _preSetCes.weight;
+        s.expectingRepeatsPerSet = _preSetCes.repeats;
+        s.unit = "KG";
+      } else if (s is GiantSet) {
+        for (int i = 0; i < s.movements.length; i++) {
+          SingleMovementSet nonFinishedSet = s.movements.elementAt(i);
+          SingleMovementSet finishedSet =
+              (_preSetCes.accomplishedSet as GiantSet).movements.elementAt(i);
+          nonFinishedSet.expectingWeight = finishedSet.expectingWeight;
+          nonFinishedSet.expectingRepeatsPerSet =
+              finishedSet.expectingRepeatsPerSet;
+          nonFinishedSet.unit = "KG";
+        }
+      }
+    });
+    setState(() {});
+  }
+
   ListTile expansionPanelHeader(Movement movement, List<ExerciseSet> sets) {
     int movementCompletedSet = 0;
     Icon tailingIcon;
@@ -481,7 +528,7 @@ class UserSessionState extends State<UserSession> {
       }
     } else if (movement.exerciseType == ExerciseType.hiit) {
       (sets.elementAt(0) as HIITSet).movements.forEach((SingleMovementSet sms) {
-        if (completedExercise.contains(sms.id)) {
+        if (completedExercise.contains(sms.runtimeType.toString() + sms.id)) {
           movementCompletedSet++;
         }
         if (movementCompletedSet == 0) {
@@ -529,10 +576,12 @@ class UserSessionState extends State<UserSession> {
             child: InkWell(
               child: Row(
                 children: <Widget>[
-                  Icon(
-                    Icons.play_circle_outline,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                  sets.elementAt(0) is CardioSet
+                      ? Text("")
+                      : Icon(
+                          Icons.play_circle_outline,
+                          color: Theme.of(context).primaryColor,
+                        ),
                   Text(movement.name)
                 ],
               ),
@@ -624,7 +673,7 @@ class UserSessionState extends State<UserSession> {
             tooltip: '添加运动',
             children: [
               SpeedDialChild(
-                  child: Icon(CustomIcon.leak_remove, color: Colors.red[400]),
+                  child: Icon(CustomIcon.leak_remove, color: Theme.of(context).primaryColor),
                   backgroundColor: Colors.white,
                   label: '力量训练',
                   labelStyle: Typography.dense2018.subhead,
@@ -643,7 +692,7 @@ class UserSessionState extends State<UserSession> {
               SpeedDialChild(
                 child: Icon(
                   CustomIcon.heartbeat,
-                  color: Colors.red[400],
+                  color: Theme.of(context).primaryColor,
                 ),
                 backgroundColor: Colors.white,
                 label: 'HIIT',
@@ -665,7 +714,7 @@ class UserSessionState extends State<UserSession> {
               SpeedDialChild(
                 child: Icon(
                   Icons.directions_run,
-                  color: Colors.red[400],
+                  color:Theme.of(context).primaryColor,
                 ),
                 backgroundColor: Colors.white,
                 label: '有氧运动',
@@ -676,7 +725,7 @@ class UserSessionState extends State<UserSession> {
                       builder: (context) {
                         return CardioBottomSheet(logExercise: (ExerciseSet es) {
                           appendToCurrentSession([es]).then((_) {
-                            completedExercise.add(es.id);
+                            completedExercise.add(es.runtimeType.toString() + es.id);
                             CompletedExerciseSet ces =
                                 CompletedExerciseSet.empty();
                             ces.accomplishedSet = es;
@@ -690,6 +739,7 @@ class UserSessionState extends State<UserSession> {
             ],
           );
   }
+
 
   Future<void> appendToCurrentSession(List<ExerciseSet> sets,
       {bool remainOpen = false}) async {
@@ -708,6 +758,9 @@ class UserSessionState extends State<UserSession> {
   Row buildBottomNavigationBar() {
     bool allCompleted =
         completedExercise.length > 0 && completedExercise.length != 0;
+    if (_showMinizeCountDown) {
+      return minimizeCountDown;
+    }
     return _editing
         ? editingNavigatorBar()
         : allCompleted
@@ -853,8 +906,13 @@ class UserSessionState extends State<UserSession> {
     sets.forEach((ExerciseSet es) {
       HIITSet set = es as HIITSet;
       set.movements.forEach((SingleMovementSet sms) {
-        result.add(HIITExerciseLine(sms, ++index, set.exerciseTime,
-            this.completedExercise.contains(sms.id)));
+        result.add(HIITExerciseLine(
+            sms,
+            ++index,
+            set.exerciseTime,
+            this
+                .completedExercise
+                .contains(es.runtimeType.toString() + sms.id)));
       });
     });
     return result;
@@ -879,11 +937,11 @@ class UserSessionState extends State<UserSession> {
           _currentSession.matchingExercise.plannedSets[_currentPanel];
       SingleMovementSet currentMovement =
           newHiitSet.movements.elementAt(_currentExerciseIndex);
-      if (_isClockShow) {
+      if (_isHiiTClockShow) {
         return;
       }
       setState(() {
-        _isClockShow = true;
+        _isHiiTClockShow = true;
       });
       showHiitClock(currentMovement, hiitSet);
     });
@@ -902,16 +960,17 @@ class UserSessionState extends State<UserSession> {
               if (_currentExerciseIndex < hiitSet.movements.length - 1) {
                 setState(() {
                   _currentExerciseIndex++;
-                  _isClockShow = false;
+                  _isHiiTClockShow = false;
                 });
               } else {
                 setState(() {
                   _currentPanel++;
                   _currentExerciseIndex = 0;
-                  _isClockShow = false;
+                  _isHiiTClockShow = false;
                 });
               }
-              this.completedExercise.add(currentMovement.id);
+              this.completedExercise.add(
+                  currentMovement.runtimeType.toString() + currentMovement.id);
               CompletedExerciseSet ces = CompletedExerciseSet.empty();
               ces.accomplishedSet = hiitSet;
               ces.completedTime = DateTime.now();
@@ -955,22 +1014,72 @@ class UserSessionState extends State<UserSession> {
                   title: Row(
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.ideographic,
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(cs.movementName),
-                      ),
-                      Expanded(
-                        child: Text(cs.exerciseDistance.toString() + "KM"),
-                      ),
-                      Expanded(
-                        child: Text(cs.exerciseTime.toString() + "分钟"),
-                      ),
-                      Expanded(
-                        child: Text(
-                            "约" + cs.exerciseCals.floor().toString() + "kCal"),
-                      ),
-                    ],
+                    children: cs.exerciseTime == null || cs.exerciseTime == 0
+                        ? [
+                            Expanded(
+                              child: Text(cs.movementName),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(cs.exerciseDistance.toString() + "步"),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text("约" +
+                                  cs.exerciseCals.floor().toString() +
+                                  "kCal"),
+                            ),
+                          ]
+                        : <Widget>[
+                            Expanded(
+                              child: Text(cs.movementName),
+                            ),
+                            Expanded(
+                              child:
+                                  Text(cs.exerciseDistance.toString() + "KM"),
+                            ),
+                            Expanded(
+                              child: Text(cs.exerciseTime.toString() + "分钟"),
+                            ),
+                            Expanded(
+                              child: Text("约" +
+                                  cs.exerciseCals.floor().toString() +
+                                  "kCal"),
+                            ),
+                          ],
                   ));
             }).toList()));
+  }
+
+  void createMinimizeCountDownBottomBar(
+      BuildContext context, List<ExerciseSet> sets, ExerciseSet es) {
+    FlipClock instance = FlipCountDownUtil.buildRestingCount(
+        _preSetCes.restAfterAccomplished, () {
+      ///do nothing
+    }, context, digitSize: 20);
+    DateTime createTime = DateTime.now();
+    minimizeCountDown = Row(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Text("休息时间"),
+        ),
+        Container(
+          height: 40,
+          margin: EdgeInsets.only(left: 12),
+          child: instance,
+        ),
+        FlatButton(
+          child: Text("恢复"),
+          onPressed: () {
+            _showMinizeCountDown = false;
+            handleExerciseComplete(es, sets,
+                startSecond: DateTime.now().difference(createTime).inSeconds +
+                    _preSetCes.restAfterAccomplished);
+            setState(() {});
+          },
+        )
+      ],
+    );
   }
 }

@@ -27,6 +27,8 @@ class SaveTemplateState extends State<SaveTemplate> {
 
   bool _exerciseTemplate = true;
 
+  bool _isPrivateTemplate = true;
+
   final Exercise exerciseToSave;
   GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
@@ -71,6 +73,22 @@ class SaveTemplateState extends State<SaveTemplate> {
                     isDense: true,
                     labelText: "模板说明",
                   ),
+                ),
+              ),
+              Padding(
+                padding:    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
+                child: Row(
+                  children: <Widget>[
+                    Text("公开模板？"),
+                    Switch(
+                      value: !_isPrivateTemplate,
+                      onChanged: (toVal){
+                        setState(() {
+                          _isPrivateTemplate = toVal;
+                        });
+                      },
+                    ),
+                  ],
                 ),
               ),
               ExpansionPanelList(
@@ -136,7 +154,7 @@ class SaveTemplateState extends State<SaveTemplate> {
                             return CheckboxListTile(
                               dense: true,
                               value: involvedGroup.contains(mg),
-                              title: Text(mg.toString()),
+                              title: Text(muscleGroupToChinese(mg)),
                               onChanged: (bool add) {
                                 if (add) {
                                   setState(() {
@@ -193,7 +211,7 @@ class SaveTemplateState extends State<SaveTemplate> {
                     exerciseToSave, Provider
                     .of<CurrentUserStore>(context)
                     .currentUser
-                    .id.toString()).then((_){
+                    .id.toString(),_isPrivateTemplate).then((_){
                   Navigator.of(context).pop();
                 });
               }),

@@ -37,6 +37,13 @@ class _LoginPageState extends State<LoginPage> {
     super.didChangeDependencies();
     SharedPreferences.getInstance().then((prefs) {
       _preferences = prefs;
+      String username = prefs.getString("username");
+      String pwd = prefs.getString("password");
+      if (username != null && pwd != null) {
+
+        email.text = username;
+        password.text = pwd;
+      }
     });
   }
 

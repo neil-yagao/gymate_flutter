@@ -6,6 +6,7 @@ import 'package:workout_helper/service/plan_service.dart';
 import 'package:workout_helper/util/navigation_util.dart';
 
 import '../home_page.dart';
+import 'plan_schedule.dart';
 
 class TrainingPlanDetailState extends State<TrainingPlanDetail> {
   /**
@@ -47,6 +48,8 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
 
   User currentUser;
 
+  PlanSchedule schedule;
+
   @override
   void initState() {
     super.initState();
@@ -57,14 +60,17 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     currentUser = Provider.of<CurrentUserStore>(context).currentUser;
-    fillWithRestExercise();
   }
 
   @override
   Widget build(BuildContext context) {
     //fillWithRestExercise();
     // TODO: implement build
-    int exerciseIndex = 0;
+    schedule = PlanSchedule(
+      totalCycleDay: int.parse(_trainingCycleDays.text),
+      schedule: exerciseTemplate,
+      isEditable: true,
+    );
     return Scaffold(
         key: defaultState,
         appBar: AppBar(
@@ -131,31 +137,23 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
                       top: 2, left: 8, right: 4, bottom: 2),
                   child: TextField(
                     onChanged: (val) async {
+                      if (val.isEmpty) {
+                        return;
+                      }
                       if (int.parse(val) < exerciseTemplate.length) {
                         _trainingCycleDays.text =
                             exerciseTemplate.length.toString();
                       }
-                      fillWithRestExercise();
+                      setState(() {
+                        schedule.fileRestExercise(
+                            int.parse(_trainingCycleDays.text));
+                      });
                     },
                     textAlign: TextAlign.center,
                     controller: _trainingCycleDays,
                     keyboardType: TextInputType.numberWithOptions(),
                     decoration: InputDecoration(
                         isDense: true, labelText: "训练周期", suffixText: "天"),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      top: 2, left: 4, right: 4, bottom: 2),
-                  child: TextFormField(
-                    textAlign: TextAlign.center,
-                    controller: _sessionPerTrainingCycle,
-                    keyboardType: TextInputType.numberWithOptions(),
-                    readOnly: true,
-                    decoration: InputDecoration(
-                        isDense: true, labelText: "每周期训练", suffixText: "天"),
                   ),
                 ),
               ),
@@ -186,83 +184,10 @@ class TrainingPlanDetailState extends State<TrainingPlanDetail> {
             padding: const EdgeInsets.all(8.0),
             child: SizedBox(
               height: MediaQuery.of(context).size.height * 0.6,
-              child: ReorderableListView(
-                header: Text(
-                  "包含的模板",
-                  style: Typography.dense2018.subhead,
-                ),
-                onReorder: (oldIndex, newIndex) {
-                  Exercise old = filedExerciseTemplate[oldIndex];
-                  if (oldIndex > newIndex) {
-                    for (int i = oldIndex; i > newIndex; i--) {
-                      filedExerciseTemplate[i] = filedExerciseTemplate[i - 1];
-                    }
-                    filedExerciseTemplate[newIndex] = old;
-                  } else {
-                    for (int i = oldIndex; i < newIndex - 1; i++) {
-                      filedExerciseTemplate[i] = filedExerciseTemplate[i + 1];
-                    }
-                    filedExerciseTemplate[newIndex - 1] = old;
-                  }
-                  setState(() {});
-                },
-                children: <Widget>[
-                  ...this.filedExerciseTemplate.map((Exercise e) {
-                    return ListTile(
-                      key: Key(e.id),
-                      leading: Text("第" + (++exerciseIndex).toString() + "天"),
-                      dense: true,
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Expanded(
-                            flex: 2,
-                            child: Text(e.name),
-                          ),
-                          Expanded(
-                            child:
-                                Text(e.plannedSets.length.toString() + "个动作"),
-                          )
-                        ],
-                      ),
-                      subtitle: Text(e.description),
-                      trailing: IconButton(
-                          icon: Icon(Icons.content_copy),
-                          onPressed: () {
-                            /// only duplicate when exercise is not rest
-                            /// and still not filling trainingCycles
-                            if (e.plannedSets.length > 0 &&
-                                exerciseTemplate.length <
-                                    int.parse(_trainingCycleDays.text)) {
-                              exerciseTemplate.add(e);
-                              fillWithRestExercise();
-                            }
-                          }),
-                    );
-                  }),
-                ],
-              ),
+              child: schedule,
             ),
           )
         ])));
-  }
-
-  void fillWithRestExercise() {
-    List<Exercise> filledExercises = List();
-    filledExercises.addAll(exerciseTemplate);
-    for (int i = 0;
-        i < int.parse(_trainingCycleDays.text) - exerciseTemplate.length;
-        i++) {
-      Exercise restingExercise = Exercise.empty();
-      restingExercise.id = (0 - i).toString();
-      restingExercise.name = "休息";
-      restingExercise.plannedSets = List();
-      restingExercise.description = "休息是为了更好的训练";
-      filledExercises.add(restingExercise);
-    }
-    setState(() {
-      filedExerciseTemplate = filledExercises;
-    });
   }
 }
 

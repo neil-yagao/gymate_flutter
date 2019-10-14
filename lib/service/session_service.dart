@@ -24,7 +24,7 @@ class SessionService {
     }
     String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
     return dio.post("/session/user/" + userId,
-        data: generateExerciseTemplate(exercise),
+        data: generateExerciseTemplate(exercise, type: "SESSION"),
         queryParameters: {'session_date': date}).then((Response t) {
       return extraToSession(t);
     });
@@ -114,8 +114,10 @@ class SessionService {
     });
   }
 
-  Future saveSessionAsTemplate(Exercise exercise, String userId) {
-    var exerciseDate = generateExerciseTemplate(exercise);
+  Future saveSessionAsTemplate(
+      Exercise exercise, String userId, bool isPrivate) {
+    var exerciseDate = generateExerciseTemplate(exercise,
+        type: isPrivate ? 'PRIVATE-TEMPLATE' : 'TEMPLATE');
     return dio.post("/exercise/template/" + userId, data: exerciseDate);
   }
 
@@ -224,7 +226,8 @@ class SessionService {
   ///      'cardioSets': exercise.plannedSets
   ///          ?.where((ExerciseSet es) => es is CardioSet)
   ///          ?.toList(),
-  static Map<String, dynamic> generateExerciseTemplate(Exercise exercise) {
+  static Map<String, dynamic> generateExerciseTemplate(Exercise exercise,
+      {String type}) {
     Map<String, dynamic> data = {
       'muscleTarget': exercise.muscleTarget
           ?.map((MuscleGroup mg) => mg.toString())
@@ -232,6 +235,7 @@ class SessionService {
       'name': exercise.name,
       'description': exercise.description,
       'recommendRestingTimeBetweenMovement': 45,
+      'exerciseType': type == null ? 'TEMPLATE' : type
     };
     if (exercise.id != null &&
         exercise.id != 'today' &&
@@ -296,17 +300,27 @@ class SessionService {
     return session;
   }
 
-  Future<List<Map<String,dynamic>>> getGroupSessionReport(String userIds,
-      DateTime startTime, DateTime endTime) async{
-    return dio.get("/session/group-summary",queryParameters: {
-      'userIds':userIds,
-      'startTime':startTime.toIso8601String()+ "Z",
-      'endTime':endTime.toIso8601String()+ "Z"
-    }).then((res){
-      if(res.data != null){
-        return (res.data as List).map((v)=> v as Map<String,dynamic>).toList();
+  Future<List<Map<String, dynamic>>> getGroupSessionReport(
+      String userIds, DateTime startTime, DateTime endTime) async {
+    return dio.get("/session/group-summary", queryParameters: {
+      'userIds': userIds,
+      'startTime': startTime.toIso8601String() + "Z",
+      'endTime': endTime.toIso8601String() + "Z"
+    }).then((res) {
+      if (res.data != null) {
+        return (res.data as List)
+            .map((v) => v as Map<String, dynamic>)
+            .toList();
       }
       return [];
     });
+  }
+
+  Future<dynamic> completeCardioOnlySession(ExerciseSet es, int userId) async {
+    if (!(es is CardioSet)) {
+      return null;
+    }
+    es.id = '';
+    return dio.post("/session/cardio/" + userId.toString(), data: es.toJson());
   }
 }
