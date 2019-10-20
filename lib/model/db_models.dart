@@ -100,14 +100,18 @@ class LocalPlannedExercise extends Table {
 //  IntColumn get recommendRestingTimeBetweenSet => integer().nullable()();
 //}
 //
-//class LocalCompletedSessions extends Table {
-//  TextColumn get id => text().withLength(min: 32, max: 64)();
-//
-//  TextColumn get trainingExerciseId => text().withLength(min: 32, max: 64)();
-//
-//  DateTimeColumn get completedDate =>
-//      dateTime().withDefault(currentDateAndTime)();
-//}
+
+class LocalCompletedSessions extends Table {
+  IntColumn get sessionId => integer()();
+
+  IntColumn get userId => integer()();
+
+  IntColumn get exerciseId => integer()();
+
+  IntColumn get plannedExerciseId => integer()();
+
+  TextColumn get completedDate => text().withLength(max: 24)();
+}
 //
 //class LocalCompletedExerciseSets extends Table {
 //  TextColumn get id => text().withLength(min: 32, max: 64)();
@@ -161,7 +165,8 @@ class LocalUserBodyIndex extends Table {
 //  LocalTrainingExercises,
   LocalSessionMaterials,
   LocalUserBodyIndex,
-  LocalPlannedExercise
+  LocalPlannedExercise,
+  LocalCompletedSessions
 ])
 class ExerciseDatabase extends _$ExerciseDatabase {
   ExerciseDatabase()
@@ -169,7 +174,7 @@ class ExerciseDatabase extends _$ExerciseDatabase {
             path: 'db.sqlite', logStatements: true));
 
   @override
-  int get schemaVersion => 2; // bump because the tables have changed
+  int get schemaVersion => 3; // bump because the tables have changed
 
   @override
   MigrationStrategy get migration => MigrationStrategy(onCreate: (Migrator m) {
@@ -178,6 +183,9 @@ class ExerciseDatabase extends _$ExerciseDatabase {
         if (from == 1) {
           // we added the dueDate property in the change from version 1
           await m.createTable(localPlannedExercise);
+          await m.createTable(localCompletedSessions);
+        }else if(from == 2){
+          await m.createTable(localCompletedSessions);
         }
       });
 
@@ -328,5 +336,29 @@ class ExerciseDatabase extends _$ExerciseDatabase {
             ..where((p) => p.id.equals(to.id.toString())))
           .write(LocalPlannedExerciseCompanion(executeDate: Value(fromDate)))
     ]);
+  }
+
+  Future insertSessionCompleted(Session completed, int userId) {
+    LocalCompletedSession completedSession = LocalCompletedSession(
+        sessionId: int.parse(completed.id),
+        exerciseId: int.parse(completed.matchingExercise.id),
+        userId: userId,
+        completedDate:
+            DateFormat('yyyy-MM-dd').format(completed.accomplishedTime),
+        plannedExerciseId: completed.matchingPlannedExerciseId);
+    return into(localCompletedSessions).insert(completedSession);
+  }
+
+  Future<LocalCompletedSession> getCompletedInfo(String date, int userId) {
+    return (select(localCompletedSessions)
+          ..where((e) =>
+              and(e.completedDate.equals(date), e.userId.equals(userId))))
+        .getSingle();
+  }
+
+  Future<List<LocalCompletedSession>> getUserCompletedInfo(int userId) {
+    return (select(localCompletedSessions)
+          ..where((e) => e.userId.equals(userId)))
+        .get();
   }
 }

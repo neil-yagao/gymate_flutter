@@ -1090,6 +1090,307 @@ class $LocalPlannedExerciseTable extends LocalPlannedExercise
   }
 }
 
+class LocalCompletedSession extends DataClass
+    implements Insertable<LocalCompletedSession> {
+  final int sessionId;
+  final int userId;
+  final int exerciseId;
+  final int plannedExerciseId;
+  final String completedDate;
+  LocalCompletedSession(
+      {@required this.sessionId,
+      @required this.userId,
+      @required this.exerciseId,
+      @required this.plannedExerciseId,
+      @required this.completedDate});
+  factory LocalCompletedSession.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final intType = db.typeSystem.forDartType<int>();
+    final stringType = db.typeSystem.forDartType<String>();
+    return LocalCompletedSession(
+      sessionId:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}session_id']),
+      userId:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      exerciseId: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}exercise_id']),
+      plannedExerciseId: intType.mapFromDatabaseResponse(
+          data['${effectivePrefix}planned_exercise_id']),
+      completedDate: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}completed_date']),
+    );
+  }
+  factory LocalCompletedSession.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer = const ValueSerializer.defaults()}) {
+    return LocalCompletedSession(
+      sessionId: serializer.fromJson<int>(json['sessionId']),
+      userId: serializer.fromJson<int>(json['userId']),
+      exerciseId: serializer.fromJson<int>(json['exerciseId']),
+      plannedExerciseId: serializer.fromJson<int>(json['plannedExerciseId']),
+      completedDate: serializer.fromJson<String>(json['completedDate']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson(
+      {ValueSerializer serializer = const ValueSerializer.defaults()}) {
+    return {
+      'sessionId': serializer.toJson<int>(sessionId),
+      'userId': serializer.toJson<int>(userId),
+      'exerciseId': serializer.toJson<int>(exerciseId),
+      'plannedExerciseId': serializer.toJson<int>(plannedExerciseId),
+      'completedDate': serializer.toJson<String>(completedDate),
+    };
+  }
+
+  @override
+  T createCompanion<T extends UpdateCompanion<LocalCompletedSession>>(
+      bool nullToAbsent) {
+    return LocalCompletedSessionsCompanion(
+      sessionId: sessionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sessionId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      exerciseId: exerciseId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(exerciseId),
+      plannedExerciseId: plannedExerciseId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(plannedExerciseId),
+      completedDate: completedDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedDate),
+    ) as T;
+  }
+
+  LocalCompletedSession copyWith(
+          {int sessionId,
+          int userId,
+          int exerciseId,
+          int plannedExerciseId,
+          String completedDate}) =>
+      LocalCompletedSession(
+        sessionId: sessionId ?? this.sessionId,
+        userId: userId ?? this.userId,
+        exerciseId: exerciseId ?? this.exerciseId,
+        plannedExerciseId: plannedExerciseId ?? this.plannedExerciseId,
+        completedDate: completedDate ?? this.completedDate,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('LocalCompletedSession(')
+          ..write('sessionId: $sessionId, ')
+          ..write('userId: $userId, ')
+          ..write('exerciseId: $exerciseId, ')
+          ..write('plannedExerciseId: $plannedExerciseId, ')
+          ..write('completedDate: $completedDate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      sessionId.hashCode,
+      $mrjc(
+          userId.hashCode,
+          $mrjc(exerciseId.hashCode,
+              $mrjc(plannedExerciseId.hashCode, completedDate.hashCode)))));
+  @override
+  bool operator ==(other) =>
+      identical(this, other) ||
+      (other is LocalCompletedSession &&
+          other.sessionId == sessionId &&
+          other.userId == userId &&
+          other.exerciseId == exerciseId &&
+          other.plannedExerciseId == plannedExerciseId &&
+          other.completedDate == completedDate);
+}
+
+class LocalCompletedSessionsCompanion
+    extends UpdateCompanion<LocalCompletedSession> {
+  final Value<int> sessionId;
+  final Value<int> userId;
+  final Value<int> exerciseId;
+  final Value<int> plannedExerciseId;
+  final Value<String> completedDate;
+  const LocalCompletedSessionsCompanion({
+    this.sessionId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.exerciseId = const Value.absent(),
+    this.plannedExerciseId = const Value.absent(),
+    this.completedDate = const Value.absent(),
+  });
+  LocalCompletedSessionsCompanion copyWith(
+      {Value<int> sessionId,
+      Value<int> userId,
+      Value<int> exerciseId,
+      Value<int> plannedExerciseId,
+      Value<String> completedDate}) {
+    return LocalCompletedSessionsCompanion(
+      sessionId: sessionId ?? this.sessionId,
+      userId: userId ?? this.userId,
+      exerciseId: exerciseId ?? this.exerciseId,
+      plannedExerciseId: plannedExerciseId ?? this.plannedExerciseId,
+      completedDate: completedDate ?? this.completedDate,
+    );
+  }
+}
+
+class $LocalCompletedSessionsTable extends LocalCompletedSessions
+    with TableInfo<$LocalCompletedSessionsTable, LocalCompletedSession> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $LocalCompletedSessionsTable(this._db, [this._alias]);
+  final VerificationMeta _sessionIdMeta = const VerificationMeta('sessionId');
+  GeneratedIntColumn _sessionId;
+  @override
+  GeneratedIntColumn get sessionId => _sessionId ??= _constructSessionId();
+  GeneratedIntColumn _constructSessionId() {
+    return GeneratedIntColumn(
+      'session_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  GeneratedIntColumn _userId;
+  @override
+  GeneratedIntColumn get userId => _userId ??= _constructUserId();
+  GeneratedIntColumn _constructUserId() {
+    return GeneratedIntColumn(
+      'user_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _exerciseIdMeta = const VerificationMeta('exerciseId');
+  GeneratedIntColumn _exerciseId;
+  @override
+  GeneratedIntColumn get exerciseId => _exerciseId ??= _constructExerciseId();
+  GeneratedIntColumn _constructExerciseId() {
+    return GeneratedIntColumn(
+      'exercise_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _plannedExerciseIdMeta =
+      const VerificationMeta('plannedExerciseId');
+  GeneratedIntColumn _plannedExerciseId;
+  @override
+  GeneratedIntColumn get plannedExerciseId =>
+      _plannedExerciseId ??= _constructPlannedExerciseId();
+  GeneratedIntColumn _constructPlannedExerciseId() {
+    return GeneratedIntColumn(
+      'planned_exercise_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _completedDateMeta =
+      const VerificationMeta('completedDate');
+  GeneratedTextColumn _completedDate;
+  @override
+  GeneratedTextColumn get completedDate =>
+      _completedDate ??= _constructCompletedDate();
+  GeneratedTextColumn _constructCompletedDate() {
+    return GeneratedTextColumn('completed_date', $tableName, false,
+        maxTextLength: 24);
+  }
+
+  @override
+  List<GeneratedColumn> get $columns =>
+      [sessionId, userId, exerciseId, plannedExerciseId, completedDate];
+  @override
+  $LocalCompletedSessionsTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'local_completed_sessions';
+  @override
+  final String actualTableName = 'local_completed_sessions';
+  @override
+  VerificationContext validateIntegrity(LocalCompletedSessionsCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.sessionId.present) {
+      context.handle(_sessionIdMeta,
+          sessionId.isAcceptableValue(d.sessionId.value, _sessionIdMeta));
+    } else if (sessionId.isRequired && isInserting) {
+      context.missing(_sessionIdMeta);
+    }
+    if (d.userId.present) {
+      context.handle(
+          _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
+    } else if (userId.isRequired && isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (d.exerciseId.present) {
+      context.handle(_exerciseIdMeta,
+          exerciseId.isAcceptableValue(d.exerciseId.value, _exerciseIdMeta));
+    } else if (exerciseId.isRequired && isInserting) {
+      context.missing(_exerciseIdMeta);
+    }
+    if (d.plannedExerciseId.present) {
+      context.handle(
+          _plannedExerciseIdMeta,
+          plannedExerciseId.isAcceptableValue(
+              d.plannedExerciseId.value, _plannedExerciseIdMeta));
+    } else if (plannedExerciseId.isRequired && isInserting) {
+      context.missing(_plannedExerciseIdMeta);
+    }
+    if (d.completedDate.present) {
+      context.handle(
+          _completedDateMeta,
+          completedDate.isAcceptableValue(
+              d.completedDate.value, _completedDateMeta));
+    } else if (completedDate.isRequired && isInserting) {
+      context.missing(_completedDateMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
+  @override
+  LocalCompletedSession map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return LocalCompletedSession.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(LocalCompletedSessionsCompanion d) {
+    final map = <String, Variable>{};
+    if (d.sessionId.present) {
+      map['session_id'] = Variable<int, IntType>(d.sessionId.value);
+    }
+    if (d.userId.present) {
+      map['user_id'] = Variable<int, IntType>(d.userId.value);
+    }
+    if (d.exerciseId.present) {
+      map['exercise_id'] = Variable<int, IntType>(d.exerciseId.value);
+    }
+    if (d.plannedExerciseId.present) {
+      map['planned_exercise_id'] =
+          Variable<int, IntType>(d.plannedExerciseId.value);
+    }
+    if (d.completedDate.present) {
+      map['completed_date'] =
+          Variable<String, StringType>(d.completedDate.value);
+    }
+    return map;
+  }
+
+  @override
+  $LocalCompletedSessionsTable createAlias(String alias) {
+    return $LocalCompletedSessionsTable(_db, alias);
+  }
+}
+
 abstract class _$ExerciseDatabase extends GeneratedDatabase {
   _$ExerciseDatabase(QueryExecutor e)
       : super(const SqlTypeSystem.withDefaults(), e);
@@ -1104,11 +1405,15 @@ abstract class _$ExerciseDatabase extends GeneratedDatabase {
   $LocalPlannedExerciseTable _localPlannedExercise;
   $LocalPlannedExerciseTable get localPlannedExercise =>
       _localPlannedExercise ??= $LocalPlannedExerciseTable(this);
+  $LocalCompletedSessionsTable _localCompletedSessions;
+  $LocalCompletedSessionsTable get localCompletedSessions =>
+      _localCompletedSessions ??= $LocalCompletedSessionsTable(this);
   @override
   List<TableInfo> get allTables => [
         localUsers,
         localSessionMaterials,
         localUserBodyIndex,
-        localPlannedExercise
+        localPlannedExercise,
+        localCompletedSessions
       ];
 }
