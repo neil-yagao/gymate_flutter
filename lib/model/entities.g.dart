@@ -13,7 +13,10 @@ User _$UserFromJson(Map<String, dynamic> json) {
       json['alias'] as String,
       json['token'] as String,
       json['avatar'] as String,
-      json['groupName'] as String);
+      json['groupName'] as String,
+      json['membership'] == null
+          ? null
+          : Membership.fromJson(json['membership'] as Map<String, dynamic>));
 }
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -22,7 +25,8 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'alias': instance.alias,
       'token': instance.token,
       'avatar': instance.avatar,
-      'groupName': instance.groupName
+      'groupName': instance.groupName,
+      'membership': instance.membership
     };
 
 UserBodyIndex _$UserBodyIndexFromJson(Map<String, dynamic> json) {
@@ -30,9 +34,7 @@ UserBodyIndex _$UserBodyIndexFromJson(Map<String, dynamic> json) {
       _$enumDecodeNullable(_$BodyIndexEnumMap, json['bodyIndex']),
       (json['value'] as num)?.toDouble(),
       json['unit'] as String,
-      json['recordTime'] == null
-          ? null
-          : DateTime.parse(json['recordTime']));
+      json['recordTime'] == null ? null : DateTime.parse(json['recordTime']));
 }
 
 Map<String, dynamic> _$UserBodyIndexToJson(UserBodyIndex instance) =>
@@ -75,7 +77,7 @@ const _$BodyIndexEnumMap = <BodyIndex, dynamic>{
   BodyIndex.ABS_RADIUS: 'ABS_RADIUS',
   BodyIndex.GLUTES_RADIUS: 'GLUTES_RADIUS',
   BodyIndex.CHEST_RADIUS: 'CHEST_RADIUS',
-  BodyIndex.AGE:'AGE'
+  BodyIndex.AGE: 'AGE'
 };
 
 SingleMovementSet _$SingleMovementSetFromJson(Map<String, dynamic> json) {
@@ -86,7 +88,8 @@ SingleMovementSet _$SingleMovementSetFromJson(Map<String, dynamic> json) {
           ? null
           : Movement.fromJson(json['movement'] as Map<String, dynamic>),
       json['expectingRepeatsPerSet'] as int,
-      (json['expectingWeight'] as num)?.toDouble(),json['unit'] as String);
+      (json['expectingWeight'] as num)?.toDouble(),
+      json['unit'] as String);
 }
 
 Map<String, dynamic> _$SingleMovementSetToJson(SingleMovementSet instance) =>
@@ -94,7 +97,7 @@ Map<String, dynamic> _$SingleMovementSetToJson(SingleMovementSet instance) =>
       'id': instance.id,
       'sequence': instance.sequence,
       'movement': instance.movement.toJson(),
-      'unit':instance.unit,
+      'unit': instance.unit,
       'expectingRepeatsPerSet': instance.expectingRepeatsPerSet,
       'expectingWeight': instance.expectingWeight
     };
@@ -122,7 +125,8 @@ Map<String, dynamic> _$MovementToJson(Movement instance) => <String, dynamic>{
       'exerciseType': _$ExerciseTypeEnumMap[instance.exerciseType],
       'involvedMuscle': instance.involvedMuscle
           ?.map((e) => _$MuscleGroupEnumMap[e])
-          ?.toList()?.join(","),
+          ?.toList()
+          ?.join(","),
       'recommendRestingTimeBetweenSet': instance.recommendRestingTimeBetweenSet
     };
 
@@ -250,12 +254,13 @@ const _$CardioTypeEnumMap = <CardioType, dynamic>{
 Exercise _$ExerciseFromJson(Map<String, dynamic> json) {
   return Exercise(
       json['id'].toString(),
-      ( (json['muscleTarget'] as String).split(","))
+      ((json['muscleTarget'] as String).split(","))
           ?.map((e) => _$enumDecodeNullable(_$MuscleGroupEnumMap, e))
           ?.toList(),
       json['name'] as String,
       json['description'] as String,
-      json['recommendRestingTimeBetweenMovement'] as int);
+      json['recommendRestingTimeBetweenMovement'] as int,
+      json['exerciseType']);
 }
 
 Map<String, dynamic> _$ExerciseToJson(Exercise instance) => <String, dynamic>{
@@ -265,7 +270,8 @@ Map<String, dynamic> _$ExerciseToJson(Exercise instance) => <String, dynamic>{
       'name': instance.name,
       'description': instance.description,
       'recommendRestingTimeBetweenMovement':
-          instance.recommendRestingTimeBetweenMovement
+          instance.recommendRestingTimeBetweenMovement,
+      'exerciseType': instance.exerciseType
     };
 
 TrainingPlan _$TrainingPlanFromJson(Map<String, dynamic> json) {
@@ -281,8 +287,9 @@ TrainingPlan _$TrainingPlanFromJson(Map<String, dynamic> json) {
           ? null
           : User.fromJson(json['createdBy'] as Map<String, dynamic>))
     ..schedule = (json['schedule'] as List)
-        ?.map((e) =>
-            e == null ? null : ExerciseService.parseExercise(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : ExerciseService.parseExercise(e as Map<String, dynamic>))
         ?.toList();
 }
 
@@ -314,7 +321,7 @@ Map<String, dynamic> _$SessionMaterialToJson(SessionMaterial instance) =>
 
 MovementOneRepMax _$MovementOneRepMaxFromJson(Map<String, dynamic> json) {
   return MovementOneRepMax(
-      json['user'] == null? null: User.fromJson(json['user']).id.toString(),
+      json['user'] == null ? null : User.fromJson(json['user']).id.toString(),
       json['movement'] == null
           ? null
           : Movement.fromJson(json['movement'] as Map<String, dynamic>),
@@ -326,9 +333,7 @@ MovementOneRepMax _$MovementOneRepMaxFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$MovementOneRepMaxToJson(MovementOneRepMax instance) =>
     <String, dynamic>{
-      'user': {
-        'id':instance.userId
-      },
+      'user': {'id': instance.userId},
       'movement': instance.movement,
       'record': instance.oneRepMax,
       'achievedTime': instance.practiseTime?.toIso8601String()

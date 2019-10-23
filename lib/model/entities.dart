@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
+import 'package:workout_helper/model/user_event.dart';
 import 'package:workout_helper/service/exercise_service.dart';
 
 part 'entities.g.dart';
@@ -27,8 +28,9 @@ class User {
   String token;
   String avatar;
   String groupName;
+  Membership membership;
 
-  User(this.id, this.name, this.alias, this.token, this.avatar, this.groupName);
+  User(this.id, this.name, this.alias, this.token, this.avatar, this.groupName,this.membership);
 
   User.empty();
 
@@ -455,8 +457,10 @@ class Exercise {
 
   int recommendRestingTimeBetweenMovement;
 
+  String exerciseType;
+
   Exercise(this.id, this.muscleTarget, this.name, this.description,
-      this.recommendRestingTimeBetweenMovement);
+      this.recommendRestingTimeBetweenMovement,this.exerciseType);
 
   Exercise.empty();
 

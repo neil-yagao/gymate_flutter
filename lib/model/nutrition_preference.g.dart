@@ -86,7 +86,6 @@ NutritionRecord _$NutritionRecordFromJson(Map<String, dynamic> json) {
       json['recordTime'] == null
           ? null
           : DateTime.parse(json['recordTime'] as String));
-
 }
 
 Map<String, dynamic> _$NutritionRecordToJson(NutritionRecord instance) =>
