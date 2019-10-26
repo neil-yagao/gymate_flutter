@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
+import 'package:workout_helper/model/movement.dart';
 import 'package:workout_helper/model/user_event.dart';
 import 'package:workout_helper/service/exercise_service.dart';
 
@@ -241,68 +242,6 @@ abstract class Cloneable<T> {
 }
 
 enum ExerciseType { lifting, hiit, cardio }
-
-///训练动作
-@JsonSerializable()
-class Movement implements Cloneable<Movement> {
-  String id;
-  String name;
-  String description;
-  String picReference;
-  String videoReference;
-
-  ExerciseType exerciseType;
-
-  List<MuscleGroup> involvedMuscle;
-
-  //all time in seconds
-  int recommendRestingTimeBetweenSet;
-
-  Movement(
-      this.id,
-      this.name,
-      this.description,
-      this.picReference,
-      this.videoReference,
-      this.exerciseType,
-      this.involvedMuscle,
-      this.recommendRestingTimeBetweenSet);
-
-  Movement.empty();
-
-  factory Movement.fromJson(Map<String, dynamic> json) =>
-      _$MovementFromJson(json);
-
-  Map<String, dynamic> toJson() => _$MovementToJson(this);
-
-  @override
-  String toString() {
-    return name;
-  }
-
-  @override
-  void clone(Movement movement) {
-    this.id = movement.id;
-    this.name = movement.name;
-    this.description = movement.description;
-    this.picReference = movement.picReference;
-    this.involvedMuscle = movement.involvedMuscle;
-    this.recommendRestingTimeBetweenSet =
-        movement.recommendRestingTimeBetweenSet;
-    this.videoReference = movement.videoReference;
-  }
-
-  int get hashCode {
-    return this.id.hashCode;
-  }
-
-  bool operator ==(Object other) {
-    if (other is Movement) {
-      return this.id == other.id && this.name == other.name;
-    }
-    return false;
-  }
-}
 
 ///递减组
 @JsonSerializable()

@@ -91,7 +91,7 @@ enum UserEventType{
    * target user gain 1 points
    * target gain 2 points
    */
-  Recommanded,
+  Recommended,
 
   /**
    * 10 points for create new template
@@ -104,6 +104,7 @@ enum UserEventType{
    */
   Movement,
 
+  Movement_Material,
   /**
    * 20 points for create new training plan
    */

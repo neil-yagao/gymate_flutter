@@ -102,34 +102,6 @@ Map<String, dynamic> _$SingleMovementSetToJson(SingleMovementSet instance) =>
       'expectingWeight': instance.expectingWeight
     };
 
-Movement _$MovementFromJson(Map<String, dynamic> json) {
-  return Movement(
-      json['id'].toString(),
-      json['name'] as String,
-      json['description'] as String,
-      json['picReference'] as String,
-      json['videoReference'] as String,
-      _$enumDecodeNullable(_$ExerciseTypeEnumMap, json['exerciseType']),
-      (json['involvedMuscle'].toString().split(","))
-          ?.map((e) => _$enumDecodeNullable(_$MuscleGroupEnumMap, e))
-          ?.toList(),
-      json['recommendRestingTimeBetweenSet'] as int);
-}
-
-Map<String, dynamic> _$MovementToJson(Movement instance) => <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'description': instance.description,
-      'picReference': instance.picReference,
-      'videoReference': instance.videoReference,
-      'exerciseType': _$ExerciseTypeEnumMap[instance.exerciseType],
-      'involvedMuscle': instance.involvedMuscle
-          ?.map((e) => _$MuscleGroupEnumMap[e])
-          ?.toList()
-          ?.join(","),
-      'recommendRestingTimeBetweenSet': instance.recommendRestingTimeBetweenSet
-    };
-
 const _$ExerciseTypeEnumMap = <ExerciseType, dynamic>{
   ExerciseType.lifting: 'lifting',
   ExerciseType.hiit: 'hiit',

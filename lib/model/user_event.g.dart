@@ -17,7 +17,8 @@ UserEvent _$UserEventFromJson(Map<String, dynamic> json) {
       (json['extraScore'] as num)?.toDouble(),
       json['happenedAt'] == null
           ? null
-          : DateTime.parse(json['happenedAt'] as String));
+          : DateTime.parse(json['happenedAt'] as String))
+    ..relatedRecord = json['relatedRecord'];
 }
 
 Map<String, dynamic> _$UserEventToJson(UserEvent instance) => <String, dynamic>{
@@ -26,7 +27,8 @@ Map<String, dynamic> _$UserEventToJson(UserEvent instance) => <String, dynamic>{
       'relatedRecordId': instance.relatedRecordId,
       'type': _$UserEventTypeEnumMap[instance.type],
       'extraScore': instance.extraScore,
-      'happenedAt': instance.happenedAt?.toIso8601String()
+      'happenedAt': instance.happenedAt?.toIso8601String(),
+      'relatedRecord': instance.relatedRecord
     };
 
 T _$enumDecode<T>(Map<T, dynamic> enumValues, dynamic source) {
@@ -58,7 +60,7 @@ const _$UserEventTypeEnumMap = <UserEventType, dynamic>{
   UserEventType.Question: 'Question',
   UserEventType.QuestionReply: 'QuestionReply',
   UserEventType.QuestionApplyAccepted: 'QuestionApplyAccepted',
-  UserEventType.Recommanded: 'Recommanded',
+  UserEventType.Recommended: 'Recommanded',
   UserEventType.Exercise: 'Exercise',
   UserEventType.Movement: 'Movement',
   UserEventType.TrainingPlan: 'TrainingPlan'
