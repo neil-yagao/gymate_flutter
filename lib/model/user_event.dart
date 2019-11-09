@@ -93,6 +93,7 @@ enum UserEventType{
    */
   Recommended,
 
+  BeRecommended,
   /**
    * 10 points for create new template
    */
