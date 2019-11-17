@@ -19,10 +19,11 @@ MovementMaterial _$MovementMaterialFromJson(Map<String, dynamic> json) {
       (json['weeklyScore'] as num)?.toDouble(),
       json['totalRecommendation'] as int,
       (json['rate'] as num)?.toDouble(),
-      (json['rawVideoPlace'] as String),
-      json['frontPagePic'] as String
-      ,
-      DateTime.parse(json['uploadAt'] as String));
+      json['rawVideoPlace'] as String,
+      json['frontPagePic'] as String,
+      json['uploadAt'] == null
+          ? null
+          : DateTime.parse(json['uploadAt'] as String));
 }
 
 Map<String, dynamic> _$MovementMaterialToJson(MovementMaterial instance) =>
@@ -36,7 +37,7 @@ Map<String, dynamic> _$MovementMaterialToJson(MovementMaterial instance) =>
       'rate': instance.rate,
       'rawVideoPlace': instance.rawVideoPlace,
       'frontPagePic': instance.frontPagePic,
-      'uploadAt':instance.uploadAt
+      'uploadAt': instance.uploadAt?.toIso8601String()
     };
 
 Movement _$MovementFromJson(Map<String, dynamic> json) {
@@ -72,10 +73,7 @@ T _$enumDecode<T>(Map<T, dynamic> enumValues, dynamic source) {
         '${enumValues.values.join(', ')}');
   }
   return enumValues.entries
-      .singleWhere(
-          (e) =>
-              e.value == source ||
-              e.value == T.runtimeType.toString() + '.' + source,
+      .singleWhere((e) => e.value == source,
           orElse: () => throw ArgumentError(
               '`$source` is not one of the supported values: '
               '${enumValues.values.join(', ')}'))
@@ -112,4 +110,35 @@ const _$MuscleGroupEnumMap = <MuscleGroup, dynamic>{
   MuscleGroup.GLUTES: 'GLUTES',
   MuscleGroup.HAMSTRING: 'HAMSTRING',
   MuscleGroup.CALVES: 'CALVES'
+};
+
+UserMovementMaterial _$UserMovementMaterialFromJson(Map<String, dynamic> json) {
+  return UserMovementMaterial(
+      json['id'] as int,
+      json['storeLocation'] as String,
+      json['isVideo'] as bool,
+      json['sessionId'] as String,
+      json['matchingMovement'] == null
+          ? null
+          : Movement.fromJson(json['matchingMovement'] as Map<String, dynamic>),
+      json['processedUrl'] as String,
+      _$enumDecodeNullable(_$ProcessStatusEnumMap, json['status']));
+}
+
+Map<String, dynamic> _$UserMovementMaterialToJson(
+        UserMovementMaterial instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'storeLocation': instance.storeLocation,
+      'isVideo': instance.isVideo,
+      'sessionId': instance.sessionId,
+      'matchingMovement': instance.matchingMovement,
+      'processedUrl': instance.processedUrl,
+      'status': _$ProcessStatusEnumMap[instance.status]
+    };
+
+const _$ProcessStatusEnumMap = <ProcessStatus, dynamic>{
+  ProcessStatus.PROCESSING: 'PROCESSING',
+  ProcessStatus.PROCESS_SUCCESS: 'PROCESS_SUCCESS',
+  ProcessStatus.PROCESS_FAILURE: 'PROCESS_FAILURE'
 };

@@ -68,9 +68,7 @@ Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
       'postAt': instance.postAt?.toIso8601String(),
       'recommendedCount': instance.recommendedCount,
       'replies': instance.replies,
-      'belongTo': {
-        'id':instance.belongTo?.id
-      },
+      'belongTo': instance.belongTo,
       'replyTo': instance.replyTo
     };
 

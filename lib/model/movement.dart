@@ -109,3 +109,42 @@ class Movement implements Cloneable<Movement> {
     return false;
   }
 }
+
+
+@JsonSerializable()
+class UserMovementMaterial{
+  int id;
+
+  String storeLocation;
+
+  bool isVideo;
+
+  String sessionId;
+
+  Movement matchingMovement;
+
+  String processedUrl;
+
+  ProcessStatus status;
+
+
+  UserMovementMaterial(this.id, this.storeLocation, this.isVideo,
+      this.sessionId, this.matchingMovement, this.processedUrl, this.status);
+
+  UserMovementMaterial.empty();
+
+  factory UserMovementMaterial.fromJson(Map<String, dynamic> json) =>
+      _$UserMovementMaterialFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserMovementMaterialToJson(this);
+
+}
+
+enum ProcessStatus {
+
+  PROCESSING,
+
+  PROCESS_SUCCESS,
+
+  PROCESS_FAILURE
+}
