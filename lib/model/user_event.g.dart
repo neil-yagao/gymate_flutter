@@ -61,7 +61,7 @@ const _$UserEventTypeEnumMap = <UserEventType, dynamic>{
   UserEventType.QuestionReply: 'QuestionReply',
   UserEventType.QuestionApplyAccepted: 'QuestionApplyAccepted',
   UserEventType.Recommended: 'Recommended',
-  UserEventType.BeRecommended:'BeRecommended',
+  UserEventType.BeRecommended: 'BeRecommended',
   UserEventType.Exercise: 'Exercise',
   UserEventType.Movement: 'Movement',
   UserEventType.Movement_Material: 'Movement_Material',
