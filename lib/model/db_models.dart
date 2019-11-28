@@ -344,8 +344,8 @@ class ExerciseDatabase extends _$ExerciseDatabase {
         exerciseId: int.parse(completed.matchingExercise.id),
         userId: userId,
         completedDate:
-            DateFormat('yyyy-MM-dd').format(completed.accomplishedTime),
-        plannedExerciseId: completed.matchingPlannedExerciseId);
+            DateFormat('yyyy-MM-dd').format(completed.accomplishedTime??DateTime.now()),
+        plannedExerciseId: completed.matchingPlannedExerciseId??-1);
     return into(localCompletedSessions).insert(completedSession);
   }
 

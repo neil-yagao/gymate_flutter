@@ -22,9 +22,10 @@ class NavigationUtil {
         transitionDuration: Duration(milliseconds: 500)));
   }
 
-  static Future showLoading(BuildContext context, {String content}) {
+  static Future showLoading(BuildContext context, {String content,bool dismissible = true}) {
     return showDialog(
       context: context,
+      barrierDismissible: dismissible,
       builder:(context)=> new Dialog(
         child: Padding(
           padding: const EdgeInsets.all(8.0),

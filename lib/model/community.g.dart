@@ -33,10 +33,10 @@ Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'title': instance.title,
       'content': instance.content,
       'postBy': instance.postBy,
-      'postAt': instance.postAt?.toIso8601String(),
+      'postAt': instance.postAt == null?"": instance.postAt.toIso8601String() + "Z",
       'recommendedCount': instance.recommendedCount,
       'replies': instance.replies,
-      'relatedPics': instance.relatedPics,
+      'relatedPics': instance.relatedPics.map((p)=> p.toJson()).toList(),
       'topic': instance.topic
     };
 
@@ -83,7 +83,7 @@ PostMaterial _$PostMaterialFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$PostMaterialToJson(PostMaterial instance) =>
     <String, dynamic>{
       'storedAt': instance.storedAt,
-      'uploadedAt': instance.uploadedAt?.toIso8601String()
+      'uploadedAt': instance.uploadedAt?.toIso8601String() + "Z"
     };
 
 Recommend _$RecommendFromJson(Map<String, dynamic> json) {

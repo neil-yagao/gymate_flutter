@@ -21,7 +21,7 @@ dependencies:
   share: ^0.6.2
   password: ^1.0.0
   camera: ^0.5.2
-  path_provider: ^0.5.0
+  path_provider: ^1.4.4
   auto_orientation: ^0.0.2
   chewie: ^0.9.5
   video_player: ^0.10.0+2
@@ -36,13 +36,24 @@ dependencies:
   shared_preferences: ^0.4.2
   carousel_slider: ^1.3.0
   webview_flutter: ^0.3.14
-  flutter_webview_plugin: ^0.3.0+2
+  web_socket_channel: ^1.1.0
+  flutter_ffmpeg: ^0.2.8
+  zefyr: ^0.8.0
+#  audio_recorder:
+#    git:
+#      url: https://github.com/neil-yagao/audio_recorder.git
 
   flutter:
     sdk: flutter
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
+
+dependency_overrides:
+  video_player:
+    git:
+      url: https://github.com/JONA-Cureambit/plugins.git
+      path: packages/video_player
 
 dev_dependencies:
   flutter_test:
@@ -71,9 +82,12 @@ flutter:
   - assets/logo.png
   - assets/crossfit.jpeg
   - assets/fitness.jpeg
+  - assets/default_header.png
   - assets/powerlifting.jpg
   - assets/quick-session.jpg
   - assets/motto.jpg
+  - assets/community_inactive.png
+  - assets/community_active.png
   fonts:
     - family:  MyFlutterApp
       fonts:

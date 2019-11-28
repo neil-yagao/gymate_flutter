@@ -23,7 +23,12 @@ class MovementMaterial {
   String rawVideoPlace;
 
   String frontPagePic;
+
   DateTime uploadAt;
+
+  double aspectRatio;
+
+  bool landscape;
 
   MovementMaterial(
       this.id,
@@ -35,7 +40,9 @@ class MovementMaterial {
       this.rate,
       this.rawVideoPlace,
       this.frontPagePic,
-      this.uploadAt);
+      this.uploadAt,
+      this.aspectRatio,
+      this.landscape);
 
   MovementMaterial.empty();
 
@@ -110,9 +117,8 @@ class Movement implements Cloneable<Movement> {
   }
 }
 
-
 @JsonSerializable()
-class UserMovementMaterial{
+class UserMovementMaterial {
   int id;
 
   String storeLocation;
@@ -127,9 +133,20 @@ class UserMovementMaterial{
 
   ProcessStatus status;
 
+  double aspectRatio;
 
-  UserMovementMaterial(this.id, this.storeLocation, this.isVideo,
-      this.sessionId, this.matchingMovement, this.processedUrl, this.status);
+  bool landscape;
+
+  UserMovementMaterial(
+      this.id,
+      this.storeLocation,
+      this.isVideo,
+      this.sessionId,
+      this.matchingMovement,
+      this.processedUrl,
+      this.status,
+      this.aspectRatio,
+      this.landscape);
 
   UserMovementMaterial.empty();
 
@@ -137,14 +154,6 @@ class UserMovementMaterial{
       _$UserMovementMaterialFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserMovementMaterialToJson(this);
-
 }
 
-enum ProcessStatus {
-
-  PROCESSING,
-
-  PROCESS_SUCCESS,
-
-  PROCESS_FAILURE
-}
+enum ProcessStatus { PROCESSING, PROCESS_SUCCESS, PROCESS_FAILURE }

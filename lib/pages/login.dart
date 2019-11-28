@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workout_helper/model/entities.dart';
-import 'package:workout_helper/pages/component/logo.dart';
+import 'package:workout_helper/pages/general/logo.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/util/navigation_util.dart';
 
-import 'component/rounded_input.dart';
+import 'package:workout_helper/pages/general/rounded_input.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';

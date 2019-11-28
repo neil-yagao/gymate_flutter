@@ -67,7 +67,7 @@ class NutritionService {
   }
 
   Future<List<NutritionRecord>> getUserNutritionRecord(int userId){
-    return instance.get('/nutrition/records/' + userId.toString()).then((res){
+    return instance.get('/nutrition/' + userId.toString() + '/records/').then((res){
       List<NutritionRecord> records = List();
       if(res.data != null){
         (res.data as List).forEach((val){
@@ -75,6 +75,15 @@ class NutritionService {
         });
       }
       return records;
+    });
+  }
+
+  Future<NutritionRecord> getNutritionRecord(int recordId){
+    return instance.get('/nutrition/record/' + recordId.toString()).then((res){
+      if(res.data != null){
+        return NutritionRecord.fromJson(res.data);
+      }
+      return null;
     });
   }
 }

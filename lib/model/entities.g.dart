@@ -14,6 +14,7 @@ User _$UserFromJson(Map<String, dynamic> json) {
       json['token'] as String,
       json['avatar'] as String,
       json['groupName'] as String,
+      json['customizeMotto'] as String,
       json['membership'] == null
           ? null
           : Membership.fromJson(json['membership'] as Map<String, dynamic>));
@@ -26,6 +27,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'token': instance.token,
       'avatar': instance.avatar,
       'groupName': instance.groupName,
+      'customizeMotto': instance.customizeMotto,
       'membership': instance.membership
     };
 
@@ -169,7 +171,7 @@ GiantSet _$GiantSetFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$GiantSetToJson(GiantSet instance) => <String, dynamic>{
       'id': instance.id,
       'sequence': instance.sequence,
-      'movements': instance.movements?.toList(),
+      'movements': instance.movements?.map((m) => m.toJson())?.toList(),
       'intervalTimeSecond': instance.intervalTimeSecond
     };
 
@@ -279,8 +281,13 @@ Map<String, dynamic> _$TrainingPlanToJson(TrainingPlan instance) =>
     };
 
 SessionMaterial _$SessionMaterialFromJson(Map<String, dynamic> json) {
-  return SessionMaterial(json['id'], json['storeLocation'] as String,
-      json['isVideo'] as bool, json['sessionId'] as String);
+  return SessionMaterial(
+      json['id'],
+      json['storeLocation'] as String,
+      json['isVideo'] as bool,
+      json['sessionId'] as String,
+      (json['aspectRatio'] as num) as double,
+      json['landscape'] as bool);
 }
 
 Map<String, dynamic> _$SessionMaterialToJson(SessionMaterial instance) =>
@@ -288,7 +295,9 @@ Map<String, dynamic> _$SessionMaterialToJson(SessionMaterial instance) =>
       'id': instance.id,
       'storeLocation': instance.storeLocation,
       'isVideo': instance.isVideo,
-      'sessionId': instance.sessionId
+      'sessionId': instance.sessionId,
+      'landscape': instance.landscape,
+      'aspectRatio': instance.aspectRatio
     };
 
 MovementOneRepMax _$MovementOneRepMaxFromJson(Map<String, dynamic> json) {

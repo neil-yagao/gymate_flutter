@@ -85,3 +85,26 @@ Map<String, dynamic> _$MembershipToJson(Membership instance) =>
       'paidUser': instance.paidUser,
       'validateUntil': instance.validateUntil?.toIso8601String()
     };
+
+NotificationMessage _$NotificationMessageFromJson(Map<String, dynamic> json) {
+  return NotificationMessage(
+      json['id'] as int,
+      json['title'] as String,
+      json['content'] as String,
+      json['aimAt'] == null
+          ? null
+          : User.fromJson(json['aimAt'] as Map<String, dynamic>),
+      json['attachmentDescription'] as String,
+      json['hasRead'] as bool);
+}
+
+Map<String, dynamic> _$NotificationMessageToJson(
+        NotificationMessage instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'title': instance.title,
+      'content': instance.content,
+      'aimAt': instance.aimAt,
+      'attachmentDescription': instance.attachmentDescription,
+      'hasRead': instance.hasRead
+    };

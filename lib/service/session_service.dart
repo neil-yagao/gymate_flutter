@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:workout_helper/model/db_models.dart';
 import 'package:workout_helper/model/entities.dart';
+import 'package:workout_helper/model/movement.dart';
 
 import 'basic_dio.dart';
 
@@ -165,7 +166,7 @@ class SessionService {
         data: cesToJson(set));
   }
 
-  Future completedSession(Session currentSession) {
+  Future completedSession(Session currentSession, int userId) {
     Map<String, dynamic> data = {
       'id': currentSession.id,
       'matchingExerciseTemplateId': currentSession.matchingExercise.id,
@@ -180,6 +181,7 @@ class SessionService {
     if (currentSession.matchingPlannedExerciseId != null) {
       db.updateUserPlannedExercise(currentSession.matchingPlannedExerciseId);
     }
+    db.insertSessionCompleted(currentSession, userId);
     return dio.put("/session/" + currentSession.id, data: data);
   }
 
@@ -273,10 +275,9 @@ class SessionService {
     });
   }
 
-  Future<Session> recoverSession(int currentSessionId) {
+  Future<Session> getSessionById(int currentSessionId) {
     return dio.get('/session/' + currentSessionId.toString()).then((r) {
       Session session = extraToSession(r);
-
       return session;
     });
   }
@@ -322,5 +323,16 @@ class SessionService {
     }
     es.id = '';
     return dio.post("/session/cardio/" + userId.toString(), data: es.toJson());
+  }
+
+  Future<Session> getTodayCompletedSession(int userId) async {
+    String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    LocalCompletedSession completedSession = await db.getCompletedInfo(date, userId);
+    if(completedSession == null || completedSession.sessionId == null){
+      return null;
+    }
+    return dio.get('/session/' + completedSession.sessionId.toString()).then((t){
+      return extraToSession(t);
+    });
   }
 }

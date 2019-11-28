@@ -29,9 +29,10 @@ class User {
   String token;
   String avatar;
   String groupName;
+  String customizeMotto;
   Membership membership;
 
-  User(this.id, this.name, this.alias, this.token, this.avatar, this.groupName,this.membership);
+  User(this.id, this.name, this.alias, this.token, this.avatar, this.groupName,this.customizeMotto,this.membership);
 
   User.empty();
 
@@ -190,6 +191,8 @@ abstract class ExerciseSet {
   }
 
   Map<String, dynamic> toJson();
+
+  Movement extractMovementBasicInfo();
 }
 
 ///单个动作作为一组
@@ -234,6 +237,12 @@ class SingleMovementSet extends ExerciseSet {
   @override
   int get hashCode {
     return this.id.hashCode;
+  }
+
+  @override
+  Movement extractMovementBasicInfo() {
+    // TODO: implement extractMovementBasicInfo
+    return movement;
   }
 }
 
@@ -377,6 +386,13 @@ class CardioSet extends ExerciseSet {
       _$CardioSetFromJson(json);
 
   Map<String, dynamic> toJson() => _$CardioSetToJson(this);
+
+  @override
+  Movement extractMovementBasicInfo() {
+    // TODO: implement extractMovementBasicInfo
+    return Movement.empty();
+  }
+
 }
 
 enum CardioType { walking, running, cycle, swimming, rowing }
@@ -527,7 +543,11 @@ class SessionMaterial {
 
   String sessionId;
 
-  SessionMaterial(this.id, this.storeLocation, this.isVideo, this.sessionId);
+  SessionMaterial(this.id, this.storeLocation, this.isVideo, this.sessionId,this.aspectRatio,this.landscape);
+
+  double aspectRatio;
+
+  bool landscape;
 
   SessionMaterial.empty();
 

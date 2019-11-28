@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:workout_helper/model/db_models.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/model/enum_to_string.dart';
 import 'package:workout_helper/service/basic_dio.dart';
@@ -8,6 +9,8 @@ class ExerciseService {
   Dio dio = DioInstance.getInstance(null);
 
   final GlobalKey<ScaffoldState> _scaffoldKey;
+
+  ExerciseDatabase db = ExerciseDatabase();
 
   ExerciseService(this._scaffoldKey);
 
@@ -21,6 +24,15 @@ class ExerciseService {
       });
       return template;
     });
+  }
+
+
+  Future<Exercise> getUserPlannedExercise(userId, date) async{
+      UserPlannedExercise plannedExercise = await db.queryForPlannedExerciseByUserAndDate(userId, date);
+      if(plannedExercise.exercise == null){
+        return null;
+      }
+      return getExercise(plannedExercise.exercise.id);
   }
 
   Future<List<ExerciseSet>> appendToExercise(

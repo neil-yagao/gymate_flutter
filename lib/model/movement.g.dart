@@ -23,7 +23,9 @@ MovementMaterial _$MovementMaterialFromJson(Map<String, dynamic> json) {
       json['frontPagePic'] as String,
       json['uploadAt'] == null
           ? null
-          : DateTime.parse(json['uploadAt'] as String));
+          : DateTime.parse(json['uploadAt'] as String),
+      (json['aspectRatio'] as num) as double,
+      json['landscape'] as bool);
 }
 
 Map<String, dynamic> _$MovementMaterialToJson(MovementMaterial instance) =>
@@ -31,13 +33,16 @@ Map<String, dynamic> _$MovementMaterialToJson(MovementMaterial instance) =>
       'id': instance.id,
       'uploadBy': instance.uploadBy,
       'movement': instance.movement,
+      'movement': instance.movement,
       'analysedMovementPlace': instance.analysedMovementPlace,
       'weeklyScore': instance.weeklyScore,
       'totalRecommendation': instance.totalRecommendation,
       'rate': instance.rate,
       'rawVideoPlace': instance.rawVideoPlace,
       'frontPagePic': instance.frontPagePic,
-      'uploadAt': instance.uploadAt?.toIso8601String()
+      'uploadAt': instance.uploadAt?.toIso8601String(),
+      'landscape': instance.landscape,
+      'aspectRatio': instance.aspectRatio
     };
 
 Movement _$MovementFromJson(Map<String, dynamic> json) {
@@ -63,7 +68,7 @@ Map<String, dynamic> _$MovementToJson(Movement instance) => <String, dynamic>{
       'picReference': instance.picReference,
       'videoReference': instance.videoReference,
       'exerciseType': _$ExerciseTypeEnumMap[instance.exerciseType],
-      'involvedMuscle': instance.involvedMuscle?.join(","),
+      'involvedMuscle': instance.involvedMuscle?.map((m)=> _$MuscleGroupEnumMap[m])?.join(","),
       'recommendRestingTimeBetweenSet': instance.recommendRestingTimeBetweenSet
     };
 
@@ -122,7 +127,9 @@ UserMovementMaterial _$UserMovementMaterialFromJson(Map<String, dynamic> json) {
           ? null
           : Movement.fromJson(json['matchingMovement'] as Map<String, dynamic>),
       json['processedUrl'] as String,
-      _$enumDecodeNullable(_$ProcessStatusEnumMap, json['status']));
+      _$enumDecodeNullable(_$ProcessStatusEnumMap, json['status']),
+      (json['aspectRatio'] as num) as double,
+      json['landscape'] as bool);
 }
 
 Map<String, dynamic> _$UserMovementMaterialToJson(
@@ -134,7 +141,9 @@ Map<String, dynamic> _$UserMovementMaterialToJson(
       'sessionId': instance.sessionId,
       'matchingMovement': instance.matchingMovement,
       'processedUrl': instance.processedUrl,
-      'status': _$ProcessStatusEnumMap[instance.status]
+      'status': _$ProcessStatusEnumMap[instance.status],
+      'landscape': instance.landscape,
+      'aspectRatio': instance.aspectRatio
     };
 
 const _$ProcessStatusEnumMap = <ProcessStatus, dynamic>{

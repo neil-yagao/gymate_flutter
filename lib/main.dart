@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:workout_helper/pages/home_page.dart';
+import 'package:workout_helper/pages/home/home_page.dart';
 import 'package:workout_helper/pages/login.dart';
-import 'package:workout_helper/pages/nutrition_page.dart';
-import 'package:workout_helper/pages/profile_page.dart';
+import 'package:workout_helper/pages/nutrition/nutrition_page.dart';
 import 'package:workout_helper/pages/register_page.dart';
-import 'package:workout_helper/pages/session.dart';
+import 'package:workout_helper/pages/session/session.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 
 import 'model/entities.dart';
@@ -83,7 +82,6 @@ class MyApp extends StatelessWidget {
             '/home': (BuildContext context) => HomePage(),
             '/quickExercise': (BuildContext context) => UserSession("randomId"),
             '/nutrition': (BuildContext context) => NutritionPage(),
-            '/profile': (BuildContext context) => ProfilePage(),
             //'/camera': (context) => CameraExampleHome('none')
           },
           initialRoute: hasLoginIn ? '/home' : '/',

@@ -4,12 +4,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
-import 'package:workout_helper/pages/component/rounded_input.dart';
+import 'package:workout_helper/pages/general/rounded_input.dart';
 import 'package:workout_helper/service/basic_dio.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/util/navigation_util.dart';
 
-import 'component/logo.dart';
+import 'package:workout_helper/pages/general/logo.dart';
+import 'general/default_app_bar.dart';
 import 'login.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -56,17 +57,7 @@ class RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _globalKey,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-              icon: Icon(Icons.chevron_left),
-              color: Theme.of(context).primaryColor,
-              onPressed: () {
-                NavigationUtil.replaceUsingDefaultFadingTransition(
-                    context, LoginPage());
-              }),
-        ),
+        appBar: DefaultAppBar.build(context),
         backgroundColor: Colors.white,
         body: SafeArea(
           child: Center(

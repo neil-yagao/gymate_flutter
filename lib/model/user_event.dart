@@ -162,3 +162,30 @@ class Page<T> {
   Page(this.page, this.size);
 
 }
+
+@JsonSerializable()
+class NotificationMessage {
+
+  int id;
+
+  String title;
+
+  String content;
+
+  User aimAt;
+
+  String attachmentDescription;
+
+  bool hasRead;
+
+  NotificationMessage(this.id, this.title, this.content, this.aimAt,
+      this.attachmentDescription,this.hasRead);
+
+  NotificationMessage.empty();
+
+  factory NotificationMessage.fromJson(Map<String, dynamic> json) =>
+      _$NotificationMessageFromJson(json);
+
+  Map<String, dynamic> toJson() => _$NotificationMessageToJson(this);
+
+}
