@@ -61,7 +61,7 @@ class MovementDetailState extends State<MovementDetail> {
           _currentMovementMaterial = widget.designateMaterial;
         } else {
           _currentMovementMaterial = materials
-              .firstWhere((m) => m.id == widget.movement.defaultMaterialId);
+              .firstWhere((m) => m.id == widget.movement.defaultMaterialId,orElse: ()=> materials.elementAt(0));
         }
         _currentVideoUrl = _currentMovementMaterial.rawVideoPlace;
       });
@@ -216,45 +216,45 @@ class MovementDetailState extends State<MovementDetail> {
           color: Theme.of(context).primaryColor,
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          children: <Widget>[FlatButton(
-            textColor: Theme.of(context).primaryColor,
-            child: Row(
-              children: <Widget>[
-                Icon(Icons.videocam),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text("智能分析"),
-                )
-              ],
-            ),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => VideoRecorder(
-                      currentSessionId: "",
-                      uploadCompleted: (uploadedAt) async {
-                        UserMovementMaterial material =
-                        UserMovementMaterial.empty();
-                        material.isVideo = true;
-                        material.sessionId = "";
-                        material.storeLocation =
-//                                "https://lifting-ren-user.oss-cn-hangzhou.aliyuncs.com/115093490613878784/raw_material/1574040282432918.mp4";
-                        uploadedAt;
-                        material.matchingMovement = widget.movement;
-                        material.aspectRatio =
-                            MediaQuery.of(context).size.width /
-                                MediaQuery.of(context).size.height;
-                        material.landscape =
-                            MediaQuery.of(context).orientation ==
-                                Orientation.landscape;
-                        _videoAnalysisService.processUploadedVideo(
-                            material, _user.id);
-                      })));
-            },
-          )],
-        ),
-      ),
+//      bottomNavigationBar: BottomAppBar(
+//        child: Row(
+//          children: <Widget>[FlatButton(
+//            textColor: Theme.of(context).primaryColor,
+//            child: Row(
+//              children: <Widget>[
+//                Icon(Icons.videocam),
+//                Padding(
+//                  padding: const EdgeInsets.only(left: 8.0),
+//                  child: Text("智能分析"),
+//                )
+//              ],
+//            ),
+//            onPressed: () {
+//              Navigator.of(context).push(MaterialPageRoute(
+//                  builder: (context) => VideoRecorder(
+//                      currentSessionId: "",
+//                      uploadCompleted: (uploadedAt) async {
+//                        UserMovementMaterial material =
+//                        UserMovementMaterial.empty();
+//                        material.isVideo = true;
+//                        material.sessionId = "";
+//                        material.storeLocation =
+////                                "https://lifting-ren-user.oss-cn-hangzhou.aliyuncs.com/115093490613878784/raw_material/1574040282432918.mp4";
+//                        uploadedAt;
+//                        material.matchingMovement = widget.movement;
+//                        material.aspectRatio =
+//                            MediaQuery.of(context).size.width /
+//                                MediaQuery.of(context).size.height;
+//                        material.landscape =
+//                            MediaQuery.of(context).orientation ==
+//                                Orientation.landscape;
+//                        _videoAnalysisService.processUploadedVideo(
+//                            material, _user.id);
+//                      })));
+//            },
+//          )],
+//        ),
+//      ),
     );
   }
 }

@@ -139,6 +139,7 @@ class ViewPageState extends State<ViewPage> {
         title: title,
       ),
       body: ListView(
+        shrinkWrap: true,
         controller: mainScrollController,
         children: <Widget>[
           Padding(
@@ -162,7 +163,7 @@ class ViewPageState extends State<ViewPage> {
           ),
           ZefyrScaffold(
               child: Container(
-            height: calculateHeight(),
+            height: calculateHeight()?? MediaQuery.of(context).size.height * 0.5,
             child: ZefyrEditor(
               mode: ZefyrMode.view,
               padding: EdgeInsets.all(16),

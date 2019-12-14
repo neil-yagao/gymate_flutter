@@ -82,9 +82,7 @@ class _VideoRecorderState extends State<VideoRecorder>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _user = Provider
-        .of<CurrentUserStore>(context)
-        .currentUser;
+    _user = Provider.of<CurrentUserStore>(context).currentUser;
   }
 
   @override
@@ -124,7 +122,7 @@ class _VideoRecorderState extends State<VideoRecorder>
                     color: Colors.black,
                     border: Border.all(
                       color: controller != null &&
-                          controller.value.isRecordingVideo
+                              controller.value.isRecordingVideo
                           ? Colors.redAccent
                           : Colors.grey,
                       width: 3.0,
@@ -136,18 +134,9 @@ class _VideoRecorderState extends State<VideoRecorder>
             ],
           ),
           Positioned(
-            top: MediaQuery
-                .of(context)
-                .size
-                .height * 0.05,
-            left: MediaQuery
-                .of(context)
-                .size
-                .width * 0.04,
-            width: MediaQuery
-                .of(context)
-                .size
-                .width * 0.9,
+            top: MediaQuery.of(context).size.height * 0.05,
+            left: MediaQuery.of(context).size.width * 0.04,
+            width: MediaQuery.of(context).size.width * 0.9,
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.max,
@@ -200,8 +189,8 @@ class _VideoRecorderState extends State<VideoRecorder>
           icon: const Icon(Icons.videocam),
           color: Colors.blue,
           onPressed: controller != null &&
-              controller.value.isInitialized &&
-              !controller.value.isRecordingVideo
+                  controller.value.isInitialized &&
+                  !controller.value.isRecordingVideo
               ? onVideoRecordButtonPressed
               : null,
         ),
@@ -211,32 +200,30 @@ class _VideoRecorderState extends State<VideoRecorder>
               : Icon(Icons.pause),
           color: Colors.blue,
           onPressed: controller != null &&
-              controller.value.isInitialized &&
-              controller.value.isRecordingVideo
+                  controller.value.isInitialized &&
+                  controller.value.isRecordingVideo
               ? (controller != null && controller.value.isRecordingPaused
-              ? onResumeButtonPressed
-              : onPauseButtonPressed)
+                  ? onResumeButtonPressed
+                  : onPauseButtonPressed)
               : null,
         ),
         IconButton(
           icon: const Icon(Icons.stop),
           color: Colors.red,
           onPressed: controller != null &&
-              controller.value.isInitialized &&
-              controller.value.isRecordingVideo
+                  controller.value.isInitialized &&
+                  controller.value.isRecordingVideo
               ? onStopButtonPressed
               : null,
         ),
         IconButton(
             icon: Icon(
               Icons.video_library,
-              color: Theme
-                  .of(context)
-                  .primaryColor,
+              color: Theme.of(context).primaryColor,
             ),
             onPressed: () async {
               File file =
-              await ImagePicker.pickVideo(source: ImageSource.gallery);
+                  await ImagePicker.pickVideo(source: ImageSource.gallery);
               await fixRotationProblem(file);
               this.doUploadFile();
             }),
@@ -253,8 +240,7 @@ class _VideoRecorderState extends State<VideoRecorder>
     String videoPath = file.path;
     final directory = await getTemporaryDirectory();
     String toVideoPath = directory.path +
-        file.path.substring(
-            file.path.lastIndexOf("/"), file.path.length);
+        file.path.substring(file.path.lastIndexOf("/"), file.path.length);
 //              String scale = MediaQuery
 //                  .of(context)
 //                  .size
@@ -268,10 +254,10 @@ class _VideoRecorderState extends State<VideoRecorder>
     final String looselessConversion =
         '-y -i $videoPath -vf scale=1080:1920 $toVideoPath';
     try {
-      NavigationUtil.showLoading(context, content: "正在预处理视频", dismissible: false);
+      NavigationUtil.showLoading(context,
+          content: "正在预处理视频", dismissible: false);
 
-      final int returnCode =
-          await _flutterFFmpeg.execute(looselessConversion);
+      final int returnCode = await _flutterFFmpeg.execute(looselessConversion);
 
       if (returnCode != 0) {
         throw await _flutterFFmpeg.getLastCommandOutput();
@@ -305,11 +291,7 @@ class _VideoRecorderState extends State<VideoRecorder>
     return switchCamera;
   }
 
-  String timestamp() =>
-      DateTime
-          .now()
-          .millisecondsSinceEpoch
-          .toString();
+  String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
 
   void showInSnackBar(String message) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
@@ -321,8 +303,8 @@ class _VideoRecorderState extends State<VideoRecorder>
     }
     controller = CameraController(
       cameraDescription,
-      ResolutionPreset.max,
-      enableAudio: enableAudio,
+      ResolutionPreset.medium,
+      enableAudio: false,
     );
 
     // If the controller is updated then update the UI.
@@ -394,15 +376,18 @@ class _VideoRecorderState extends State<VideoRecorder>
       return null;
     }
 
-    final Directory extDir = await getApplicationDocumentsDirectory();
+    final Directory extDir = await getTemporaryDirectory();
+    print('extDir' + extDir.path);
     final String dirPath = '${extDir.path}/Movies/flutter_test';
     await Directory(dirPath).create(recursive: true);
-    final String filePath = '$dirPath/${timestamp()}.mp4';
 
+    final String filePath =
+        '$dirPath/${timestamp()}.mp4';
     if (controller.value.isRecordingVideo) {
       // A recording is already started, do nothing.
       return null;
     }
+    print('filepath' + filePath);
 
     try {
       videoPath = filePath;
@@ -421,7 +406,7 @@ class _VideoRecorderState extends State<VideoRecorder>
 
     try {
       await controller.stopVideoRecording();
-    } on CameraException catch (e) {
+    } catch (e) {
       _showCameraException(e);
       return null;
     }
@@ -457,7 +442,7 @@ class _VideoRecorderState extends State<VideoRecorder>
 
   Future<void> _startVideoPlayer() async {
     final VideoPlayerController vcontroller =
-    VideoPlayerController.file(File(videoPath));
+        VideoPlayerController.file(File(videoPath));
     videoPlayerListener = () {
       if (videoController != null && videoController.value.size != null) {
         // Refreshing the state to update video player with the correct ratio.
@@ -520,9 +505,7 @@ class VideoPreview extends StatelessWidget {
               FlatButton(
                 child: Text(
                   "上传",
-                  style: TextStyle(color: Theme
-                      .of(context)
-                      .primaryColor),
+                  style: TextStyle(color: Theme.of(context).primaryColor),
                 ),
                 onPressed: () async {
                   _chewieController.dispose();

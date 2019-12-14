@@ -11,7 +11,6 @@ import 'package:workout_helper/pages/general/avatar_crop.dart';
 import 'package:workout_helper/pages/general/navigate_app_bar.dart';
 import 'package:workout_helper/pages/home/user_event_list.dart';
 import 'package:workout_helper/pages/session/session.dart';
-import 'package:workout_helper/pages/session/session_report_webview.dart';
 import 'package:workout_helper/service/current_user_store.dart';
 import 'package:workout_helper/service/exercise_service.dart';
 import 'package:workout_helper/service/notification_service.dart';
@@ -126,7 +125,7 @@ class HomePageNoPlanState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
           child: Icon(
-            CustomIcon.directions_run,
+            CustomIcon.hand_peace_o,
             color: Theme.of(context).primaryColor,
           ),
           tooltip: "快速开始一次训练",
@@ -165,17 +164,22 @@ class HomePageNoPlanState extends State<HomePage> {
                         context, TrainingPlanSelection());
                   },
                 )
-              : IconButton(
-                  icon: Icon(Icons.list),
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return ExercisePreview(
-                            exercise: todayPlannedExercise,
-                          );
-                        });
-                  }),
+              : _todayCompletedSession == null
+                  ? IconButton(
+                      icon: Icon(Icons.list),
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return ExercisePreview(
+                                exercise: todayPlannedExercise,
+                              );
+                            });
+                      })
+                  : Icon(
+                      Icons.check,
+                      color: Colors.greenAccent,
+                    ),
         ),
       ),
 //        bottomNavigationBar: BottomNaviBar(
@@ -184,46 +188,19 @@ class HomePageNoPlanState extends State<HomePage> {
     );
   }
 
-  Widget buildTodayPart() {
-    if (!userHaventJoinedPlan()) {
-      return ListTile(
-        leading: Text(""),
-        title: Text(todayPlannedExercise.name,
-            style: Typography.dense2018.subtitle),
-        subtitle: Text(todayPlannedExercise.description),
-        trailing: _todayCompletedSession == null ||
-                _todayCompletedSession.accomplishedTime == null
-            ? IconButton(
-                onPressed: () {
-                  goToTodaySession(context);
-                },
-                icon: Icon(Icons.chevron_right),
-              )
-            : Icon(
-                Icons.check,
-                color: Colors.greenAccent,
-              ),
-        onTap: _todayCompletedSession == null ||
-                _todayCompletedSession.accomplishedTime == null
-            ? () {
-                goToTodaySession(context);
-              }
-            : () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => SessionReportWebView(
-                          completedSession: _todayCompletedSession,
-                          canGoBack: true,
-                        )));
-              },
-      );
-    } else {
-      return Container();
-    }
-  }
-
   void goToTodaySession(BuildContext context) {
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (BuildContext context) => UserSession("today")));
+    if (_todayCompletedSession == null) {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (BuildContext context) => UserSession("today")));
+    }else{
+      showDialog(
+          context: context,
+          builder: (context) {
+            return ExercisePreview(
+              exercise: todayPlannedExercise,
+            );
+          });
+    }
   }
 
   bool userHaventJoinedPlan() =>

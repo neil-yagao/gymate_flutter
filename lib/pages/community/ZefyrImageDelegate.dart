@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:workout_helper/general/alicloud_oss.dart';
 import 'package:workout_helper/model/community.dart';
@@ -38,7 +39,18 @@ class MyAppZefyrImageDelegate implements ZefyrImageDelegate<ImageSource> {
 
   @override
   Widget buildImage(BuildContext context, String key) {
-    return Image.network(key); // TODO: implement buildImage
+    return Image.network(key,
+               loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
+                 if (loadingProgress == null)
+                   return child;
+                 return Center(
+                   child: CircularProgressIndicator(
+                     value: loadingProgress.expectedTotalBytes != null
+                         ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                         : null,
+                   ),
+                 );
+               },); // TODO: implement buildImage
   }
 
   // TODO: implement cameraSource

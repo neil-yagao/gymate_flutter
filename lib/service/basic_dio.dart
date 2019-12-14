@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-//const String BASE_URL = "http://192.168.3.197:9090";
-const String BASE_URL = "http://192.168.10.144:9090";
+const String BASE_URL = "http://192.168.3.235:9090";
+//const String BASE_URL = "http://192.168.10.144:9090";
 BaseOptions _options = new BaseOptions(
   baseUrl: BASE_URL + "/api",
 //  baseUrl: 'https://www.lifting.ren/api',

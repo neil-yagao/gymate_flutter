@@ -15,6 +15,8 @@ class ChewieNetworkItem extends StatefulWidget {
   State<StatefulWidget> createState() {
     return ChewieNetworkItemState();
   }
+
+
 }
 
 class ChewieNetworkItemState extends State<ChewieNetworkItem> {
@@ -25,19 +27,17 @@ class ChewieNetworkItemState extends State<ChewieNetworkItem> {
   double aspectRatio;
 
   @override
-  void initState() {
-    super.initState();
-    aspectRatio = widget.aspectRatio == null
-        ? _videoPlayerController.value.aspectRatio
-        : widget.aspectRatio;
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
     initClips();
+
   }
 
   void initClips() {
     _videoPlayerController = VideoPlayerController.network(widget.url);
-
     if (widget.aspectRatio != null && widget.landscape) {
-      aspectRatio = 1 / aspectRatio;
+      aspectRatio = 1 / widget.aspectRatio;
     }
     debugPrint(aspectRatio.toString());
     debugPrint(_videoPlayerController.value.aspectRatio.toString());
@@ -57,6 +57,18 @@ class ChewieNetworkItemState extends State<ChewieNetworkItem> {
         );
       },
     );
+    aspectRatio = widget.aspectRatio == null
+        ? _videoPlayerController.value.aspectRatio
+        : widget.aspectRatio;
+  }
+
+  @override
+  void didUpdateWidget(ChewieNetworkItem oldWidget) {
+    // TODO: implement didUpdateWidget
+    if(oldWidget.url != widget.url){
+      initClips();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
