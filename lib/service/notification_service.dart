@@ -11,14 +11,14 @@ class NotificationService {
     dio = DioInstance.getInstance(_scaffoldKey);
   }
 
-  Future<Pagable<NotificationMessage>> getMyMessage(
+  Future<PageOf<NotificationMessage>> getMyMessage(
       int currentUserId, int currentPage) {
     return dio.get('/notifications/user/' + currentUserId.toString(),
         queryParameters: {
           'currentPage': currentPage,
           'pageSize': DioInstance.DEFAULT_PAGE_SIZE
         }).then((r) {
-      var events = Pagable<NotificationMessage>.empty();
+      var events = PageOf<NotificationMessage>.empty();
       List<NotificationMessage> userNotifications = List();
       if (r.data != null && r.data['content'] != null) {
         (r.data['content'] as List).forEach(

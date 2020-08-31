@@ -143,7 +143,7 @@ String userEventToChinese(UserEventType userEventType) {
   }
 }
 
-class Pagable<T> {
+class PageOf<T> {
   List<T> data;
 
   int page;
@@ -152,14 +152,14 @@ class Pagable<T> {
 
   int totalPage;
 
-  Pagable.empty(){
+  PageOf.empty(){
     data = [];
     page = 0;
     size = 0;
     totalPage = 0;
   }
 
-  Pagable(this.page, this.size);
+  PageOf(this.page, this.size);
 
 }
 

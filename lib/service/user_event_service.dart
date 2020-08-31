@@ -13,17 +13,17 @@ class UserEventService {
     dio = DioInstance.getInstance(_scaffoldKey);
   }
 
-  Future<Pagable<UserEvent>> getUserReadableEvent(
+  Future<PageOf<UserEvent>> getUserReadableEvent(
       List<int> userId, int page) async {
     if(userId.isEmpty){
-      return Pagable.empty();
+      return PageOf.empty();
     }
     return dio.get('/user_event', queryParameters: {
       'users': userId.join(","),
       'pageSize': DioInstance.DEFAULT_PAGE_SIZE,
       'currentPage': page
     }).then((r) {
-      var events = Pagable<UserEvent>.empty();
+      var events = PageOf<UserEvent>.empty();
       List<UserEvent> userEvents = List();
       if (r.data != null && r.data['content'] != null) {
         (r.data['content'] as List)
