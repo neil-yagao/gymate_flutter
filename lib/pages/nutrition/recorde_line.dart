@@ -1,5 +1,7 @@
+import 'package:audio_recorder/audio_recorder.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_helper/model/entities.dart';
 import 'package:workout_helper/model/nutrition_preference.dart';
@@ -69,64 +71,69 @@ class RecordLineState extends State<RecordLine> {
                     })));
           },
         ),
-//        FlatButton(
-//          child: Row(
-//            mainAxisSize: MainAxisSize.min,
-//            children: <Widget>[
-//              Icon(
-//                Icons.record_voice_over,
-//                color: Theme.of(context).primaryColor,
-//              ),
-//              Padding(
-//                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-//                  child: Text("说出你吃了什么"))
-//            ],
-//          ),
-//          onPressed: () async {
-//            bool hasPermissions = await AudioRecorder.hasPermissions;
-//            // Get the state of the recorder
-//            bool isRecording = await AudioRecorder.isRecording;
-//            // Start recording
-//            debugPrint('hasPermissions' + hasPermissions.toString());
-//            debugPrint('isRecording' + isRecording.toString());
-//
-//            if(hasPermissions && !isRecording) {
-//              await AudioRecorder.start(
-//                path: '/' +
-//                    DateTime
-//                        .now()
-//                        .millisecondsSinceEpoch
-//                        .toString(),
-//                audioOutputFormat: AudioOutputFormat.WAV,
-//              );
-//              debugPrint('start recordting');
-//              showDialog(context: context,builder: (context){
-//                return Center(
-//                  child: Container(
-//                    child:Column(
-//                      children: <Widget>[
-//                        CircularProgressIndicator(),
-//                        Divider(),
-//                        FlatButton(
-//                          child: Text("完成"),
-//                          onPressed: () async {
-//                            _aiService.connectToRemoteAudioRecognizer((data){
-//                              debugPrint(data);
-//                            });
-//                            Recording recording = await AudioRecorder.stop();
-//                            _aiService.sendToRemoteAudioRecognizer(recording.path);
-//                            Navigator.pop(context);
-//                          },
-//                        ),
-//                      ],
-//                    )
-//
-//                  ),
-//                );
-//              });
-//            }
-//          },
-//        )
+        FlatButton(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                Icons.record_voice_over,
+                color: Theme.of(context).primaryColor,
+              ),
+              Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text("说出你吃了什么"))
+            ],
+          ),
+          onPressed: () async {
+            bool hasPermissions = await AudioRecorder.hasPermissions;
+            // Get the state of the recorder
+            bool isRecording = await AudioRecorder.isRecording;
+            // Start recording
+            debugPrint('hasPermissions' + hasPermissions.toString());
+            debugPrint('isRecording' + isRecording.toString());
+            final directory = await getApplicationDocumentsDirectory();
+
+
+            if(hasPermissions && !isRecording) {
+              await AudioRecorder.start(
+                path: directory.path + '/' +
+                    DateTime
+                        .now()
+                        .millisecondsSinceEpoch
+                        .toString(),
+                audioOutputFormat: AudioOutputFormat.WAV,
+              );
+              debugPrint('start recordting');
+              showDialog(context: context,builder: (context){
+                return Center(
+                  child: Card(
+                    child:Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        CircularProgressIndicator(),
+                        Divider(),
+                        FlatButton(
+                          child: Text("完成"),
+                          onPressed: () async {
+                            _aiService.connectToRemoteAudioRecognizer((data){
+                              debugPrint('data' + data);
+                            });
+                            Recording recording = await AudioRecorder.stop();
+                            _aiService.sendToRemoteAudioRecognizer(recording.path);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    )
+
+                  ),
+                );
+              }).then((_){
+                AudioRecorder.stop();
+              });
+            }
+          },
+        )
       ],
     );
   }

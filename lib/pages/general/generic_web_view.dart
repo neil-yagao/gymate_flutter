@@ -65,7 +65,7 @@ class _GenericWebViewState extends State<GenericWebView> {
             return NavigationDecision.navigate;
           },
           onPageFinished: (String url) {
-            print('Page finished loading: $url');
+            print('Pagable finished loading: $url');
           },
         );
       }),
